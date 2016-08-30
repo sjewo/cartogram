@@ -3,7 +3,7 @@
 #' Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
 #'
 #' @param shp SpatialPolygonDataFrame
-#' @param weight Vector with values or name of the weighting variable in shp
+#' @param weight Name of the weighting variable in shp
 #' @param itermax Maximum iterations for the cartogram transformation, if maxSizeError ist not reached
 #' @param maxSizeError Stop if meanSizeError is smaller than maxSizeError
 #' @return SpatialPolygonDataFrame with distorted polygon boundaries
@@ -15,13 +15,14 @@
 #' 
 #' library(maptools)
 #' library(cartogram)
+#' library(rgdal)
 #' data(wrld_simpl)
 #' 
 #' afr <- spTransform(wrld_simpl[wrld_simpl$REGION==2 & wrld_simpl$POP2005 > 0,], 
 #'                     CRS("+init=epsg:3395"))
 #' par(mfcol=c(1,2))
 #' plot(afr)
-#' plot(cartogram(afr, "POP2005", 5))
+#' plot(cartogram(afr, "POP2005", 3))
 #' 
 #' @references Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.
 cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001) {

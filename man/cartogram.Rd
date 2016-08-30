@@ -9,7 +9,7 @@ cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001)
 \arguments{
 \item{shp}{SpatialPolygonDataFrame}
 
-\item{weight}{Vector with values or name of the weighting variable in shp}
+\item{weight}{Name of the weighting variable in shp}
 
 \item{itermax}{Maximum iterations for the cartogram transformation, if maxSizeError ist not reached}
 
@@ -25,6 +25,7 @@ Construct a continuous area cartogram by a rubber sheet distortion algorithm (Do
 
 library(maptools)
 library(cartogram)
+library(rgdal)
 data(wrld_simpl)
 
 afr <- spTransform(wrld_simpl[wrld_simpl$REGION==2 & wrld_simpl$POP2005 > 0,], 

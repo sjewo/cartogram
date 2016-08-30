@@ -1,0 +1,11 @@
+Package: cartogram
+Title: Create Cartograms with R
+Version: 0.0.1
+Authors@R: person("Sebastian", "Jeworutzki", email = "Sebastian.Jeworutzki@ruhr-uni-bochum.de", role = c("aut", "cre"))
+Description: Construct a continuous area cartogram by a rubber sheet distortion algorithm
+Depends:
+    R (>= 3.3.1)
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 5.0.1

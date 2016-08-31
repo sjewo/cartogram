@@ -16,7 +16,7 @@ afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # keep only countries with population > 0
 # automatic data cleaning is planend for next release
-# one needs to do this manual at the moment
+# one needs to do this manually at the moment
 afr <- afr[afr$POP2005>0,]
 
 # construct cartogram

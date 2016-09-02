@@ -6,7 +6,7 @@ Description: Construct a continuous area cartogram by a rubber sheet distortion 
 URL: https://github.com/sjewo/cartogram
 BugReports: https://github.com/sjewo/cartogram/issues
 Imports: maptools, rgeos, sp, foreach
-Suggests: rgdal, testthat, doMC, doSNOW, parallel, iterators
+Suggests: rgdal, testthat, doMC, doParallel, parallel, iterators
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

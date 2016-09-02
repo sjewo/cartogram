@@ -28,6 +28,21 @@ globalVariables(c('i','k'))
 #' plot(afr)
 #' plot(cartogram(afr, "POP2005", 3))
 #' 
+#' \dontrun{
+#' # do it parallel
+#' library(doParallel)
+#' 
+#' #change to your number of CPU cores
+#' cl<-makeCluster(3)
+#' registerDoParallel(cl)
+#' 
+# cartogram will use all 3 cores
+#' afrc_parallelDoParallel <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
+#' 
+#' all.equal(rgeos::gArea(afrc, byid=T), rgeos::gArea(afrc_parallelDoParallel, byid=T))
+#' 
+#' stopCluster(cl)
+#' }
 #' @references Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.
 cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001) {
 

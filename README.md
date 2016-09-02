@@ -33,16 +33,16 @@ afrc <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
 tm_shape(afrc) + tm_fill("POP2005", style="jenks") + tm_borders() + tm_layout(frame=F)
 
 # do it parallel
-library(doSNOW)
+library(doParallel)
 
 #change to your number of CPU cores
 cl<-makeCluster(3)
-registerDoSNOW(cl)
+registerDoParallel(cl)
 
 # cartogram will use all 3 cores
-afrc_parallelDoSnow <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
+afrc_parallelDoParallel <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
 
-all.equal(rgeos::gArea(afrc, byid=T), rgeos::gArea(afrc_parallelDoSnow, byid=T))
+all.equal(rgeos::gArea(afrc, byid=T), rgeos::gArea(afrc_parallelDoParallel, byid=T))
 
 stopCluster(cl)
 

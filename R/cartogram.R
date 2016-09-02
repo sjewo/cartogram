@@ -12,14 +12,15 @@ globalVariables(c('i','k'))
 #' @param prepare Weighting values are adjusted to reach convergence much earlier. Possible methods are 
 #' "adjust", adjust values to restrict the mass vector to the quantiles defined by threshold and 1-threshold (default),
 #' "remove", remove features with values lower than quantile at threshold,
-#' NULL, don't adjust weighting values.
+#' "none", don't adjust weighting values.
 #' @param threshold Define threshold for data preperation. 
 #' @return SpatialPolygonDataFrame with distorted polygon boundaries.
 #' @export
 #' @import sp foreach
 #' @importFrom maptools checkPolygonsHoles
 #' @importFrom rgeos gArea gCentroid
-#' @importFrom utils globalVariables
+#' @importFrom utils globalVariables 
+#' @importFrom stats quantile
 #' @examples
 #' 
 #' library(maptools)
@@ -69,10 +70,12 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001,
            if(any(is.na(value)))
              stop("NA not allowed in weight vector")
            
+           valueTotal <- sum(value, na.rm=T)
+           
            # area for polygons and total area
            area <- gArea(shp, byid=T)
            area[area <0 ] <- 0
-           areaTotal <- gArea(shp.iter)
+           areaTotal <- gArea(shp)
            
            # prepare force field calculations
            desired <- areaTotal*value/valueTotal
@@ -82,7 +85,8 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001,
            
            value[ratio > maxRatio] <- (maxRatio * area[ratio > maxRatio] * valueTotal)/areaTotal
            value[ratio < minRatio] <- (minRatio * area[ratio < minRatio] * valueTotal)/areaTotal
-         })
+         },
+         "none"={})
   
 
   

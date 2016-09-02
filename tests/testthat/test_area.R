@@ -1,6 +1,7 @@
 library(cartogram)
 library(maptools)
 library(rgeos)
+library(foreach)
 
 context("Testing algorithms")
 
@@ -15,7 +16,7 @@ names(area) <- c( "DZA", "AGO", "BEN", "COG", "COD", "BDI", "CMR", "TCD", "COM",
 
 test_that("Check area against reference", {
             registerDoSEQ()
-            afrc_seriell <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
+            afrc_seriell <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5, prepare="none")
             expect_true(all.equal(area, rgeos::gArea(afrc_seriell, byid=T)))
 })
 
@@ -27,7 +28,7 @@ test_that("Check area against reference (doParallel backend)", {
             cl<-makeCluster(3)
             registerDoParallel(cl)
 
-            afrc_parallelDoParallel <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
+            afrc_parallelDoParallel <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5, prepare="none")
             stopCluster(cl)
 
             expect_true(all.equal(area, rgeos::gArea(afrc_parallelDoParallel, byid=T)))
@@ -44,7 +45,7 @@ test_that("Check area against reference (doMC backend)", {
             # Linux and Mac
             library(doMC)
             registerDoMC(3)
-            afrc_parallelDoMC <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
+            afrc_parallelDoMC <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5, prepare="none")
 
             expect_true(all.equal(area, rgeos::gArea(afrc_parallelDoMC, byid=T)))
             detach("package:doMC", unload=TRUE)

@@ -1,10 +1,11 @@
 # cartogram
+[![Build Status](https://travis-ci.org/sjewo/cartogram.svg?branch=master)](https://travis-ci.org/sjewo/cartogram)
+[![CRAN Downloads](http://cranlogs.r-pkg.org/badges/cartogram)](https://cran.r-project.org/package=cartogram)
+
 ## Create Cartograms with R
 
 Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985).
 
-[![Build Status](https://travis-ci.org/sjewo/cartogram.svg?branch=master)](https://travis-ci.org/sjewo/cartogram)
-[![CRAN Downloads](http://cranlogs.r-pkg.org/badges/cartogram)](https://cran.r-project.org/package=cartogram)
 
 ## Example
 ```

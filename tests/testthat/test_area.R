@@ -21,6 +21,7 @@ test_that("Check area against reference", {
 
 test_that("Check area against reference (doParallel backend)", {
             skip_on_cran()
+            skip_on_travis()
             # Windows
             library(doParallel)
             cl<-makeCluster(3)
@@ -37,6 +38,7 @@ test_that("Check area against reference (doParallel backend)", {
 
 test_that("Check area against reference (doMC backend)", {
             skip_on_cran()
+            skip_on_travis()
             skip_on_os("windows")
 
             # Linux and Mac

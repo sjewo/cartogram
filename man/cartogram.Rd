@@ -4,19 +4,27 @@
 \alias{cartogram}
 \title{Calculate cartogram boundaries}
 \usage{
-cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001)
+cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001,
+  prepare = "adjust", threshold = 0.05)
 }
 \arguments{
-\item{shp}{SpatialPolygonDataFrame}
+\item{shp}{SpatialPolygonDataFrame.}
 
-\item{weight}{Name of the weighting variable in shp}
+\item{weight}{Name of the weighting variable in shp.}
 
-\item{itermax}{Maximum iterations for the cartogram transformation, if maxSizeError ist not reached}
+\item{itermax}{Maximum iterations for the cartogram transformation, if maxSizeError ist not reached.}
 
-\item{maxSizeError}{Stop if meanSizeError is smaller than maxSizeError}
+\item{maxSizeError}{Stop if meanSizeError is smaller than maxSizeError.}
+
+\item{prepare}{Weighting values are adjusted to reach convergence much earlier. Possible methods are 
+"adjust", adjust values to restrict the mass vector to the quantiles defined by threshold and 1-threshold (default),
+"remove", remove features with values lower than quantile at threshold,
+NULL, don't adjust weighting values.}
+
+\item{threshold}{Define threshold for data preperation.}
 }
 \value{
-SpatialPolygonDataFrame with distorted polygon boundaries
+SpatialPolygonDataFrame with distorted polygon boundaries.
 }
 \description{
 Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)

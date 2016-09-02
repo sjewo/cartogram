@@ -21,11 +21,6 @@ data(wrld_simpl)
 afr <- wrld_simpl[wrld_simpl$REGION==2,]
 afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
-# keep only countries with population > 0
-# automatic data cleaning is planend for next release
-# one needs to do this manually at the moment
-afr <- afr[afr$POP2005>0,]
-
 # construct cartogram
 afrc <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
 
@@ -45,8 +40,6 @@ afrc_parallelDoParallel <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
 all.equal(rgeos::gArea(afrc, byid=T), rgeos::gArea(afrc_parallelDoParallel, byid=T))
 
 stopCluster(cl)
-
-
 ```
 
 ![Cartogram](http://www.methoden.ruhr-uni-bochum.de/files/cartogram.jpg)

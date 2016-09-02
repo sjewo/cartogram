@@ -5,11 +5,16 @@ globalVariables(c('i','k'))
 #'
 #' Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
 #'
-#' @param shp SpatialPolygonDataFrame
-#' @param weight Name of the weighting variable in shp
-#' @param itermax Maximum iterations for the cartogram transformation, if maxSizeError ist not reached
-#' @param maxSizeError Stop if meanSizeError is smaller than maxSizeError
-#' @return SpatialPolygonDataFrame with distorted polygon boundaries
+#' @param shp SpatialPolygonDataFrame.
+#' @param weight Name of the weighting variable in shp.
+#' @param itermax Maximum iterations for the cartogram transformation, if maxSizeError ist not reached.
+#' @param maxSizeError Stop if meanSizeError is smaller than maxSizeError.
+#' @param prepare Weighting values are adjusted to reach convergence much earlier. Possible methods are 
+#' "adjust", adjust values to restrict the mass vector to the quantiles defined by threshold and 1-threshold (default),
+#' "remove", remove features with values lower than quantile at threshold,
+#' NULL, don't adjust weighting values.
+#' @param threshold Define threshold for data preperation. 
+#' @return SpatialPolygonDataFrame with distorted polygon boundaries.
 #' @export
 #' @import sp foreach
 #' @importFrom maptools checkPolygonsHoles
@@ -44,8 +49,45 @@ globalVariables(c('i','k'))
 #' stopCluster(cl)
 #' }
 #' @references Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.
-cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001) {
+cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001, 
+                      prepare="adjust", threshold=0.05) {
 
+  # sum up total value
+  value <- shp@data[,weight]
+  
+  # prepare data
+  switch(prepare, 
+         # remove missing and values below threshold
+         "remove"={
+           #maxValue <- quantile(value, probs=(1-threshold), na.rm=T)
+           minValue <- quantile(value, probs=threshold, na.rm=T)
+           shp <- shp[value > minValue | is.na(value),]
+           value <- value[value > minValue | is.na(value)]
+         },
+         # Adjust ratio
+         "adjust"={
+           if(any(is.na(value)))
+             stop("NA not allowed in weight vector")
+           
+           # area for polygons and total area
+           area <- gArea(shp, byid=T)
+           area[area <0 ] <- 0
+           areaTotal <- gArea(shp.iter)
+           
+           # prepare force field calculations
+           desired <- areaTotal*value/valueTotal
+           ratio <- desired/area
+           maxRatio <- quantile(ratio, probs=(1-threshold))
+           minRatio <- quantile(ratio, probs=threshold)
+           
+           value[ratio > maxRatio] <- (maxRatio * area[ratio > maxRatio] * valueTotal)/areaTotal
+           value[ratio < minRatio] <- (minRatio * area[ratio < minRatio] * valueTotal)/areaTotal
+         })
+  
+
+  
+  valueTotal <- sum(value, na.rm=T)
+  
   # keep row names
   rown <- rownames(shp@data)
   # identify multi polygons
@@ -53,15 +95,7 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001) {
   ## save boundaries in lists  
   tmpcoords <- lapply(seq_len(nrow(shp)), function(i) lapply(seq_len(multipol[i]), function(j) shp@polygons[[i]]@Polygons[[j]]@coords))
 
-  # sum up total value
-  value <- shp@data[,weight]
-  
-  if(any(is.na(value)))
-     stop("NA not allowed in weight vector")
-
-  valueTotal <- sum(value, na.rm=T)
-
-  # set meanSizeError
+  # set intial value for meanSizeError
   meanSizeError <- 100
 
   shp.iter <- shp
@@ -84,6 +118,7 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001) {
     desired[desired==0] <- 0.01 # set minimum size to prevent inf values size Error
     radius <- sqrt(area/pi)
     mass <- sqrt(desired/pi) - sqrt(area/pi)
+    
     sizeError <- apply(cbind(area,desired), 1, max)/apply(cbind(area,desired), 1, min)
     meanSizeError <- mean(sizeError, na.rm=T)
     forceReductionFactor <- 1/(1+meanSizeError)

@@ -1,10 +1,14 @@
 # cartogram
+[![Build Status](https://travis-ci.org/sjewo/cartogram.svg?branch=master)](https://travis-ci.org/sjewo/cartogram)
+[![CRAN Downloads](http://cranlogs.r-pkg.org/badges/cartogram)](https://cran.r-project.org/package=cartogram)
+
 ## Create Cartograms with R
 
 Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985).
 
-[![Build Status](https://travis-ci.org/sjewo/cartogram.svg?branch=master)](https://travis-ci.org/sjewo/cartogram)
-[![CRAN Downloads](http://cranlogs.r-pkg.org/badges/cartogram)](https://cran.r-project.org/package=cartogram)
+## News
+* [0.0.2] parallelization of cartogram algorithm
+
 
 ## Example
 ```
@@ -27,6 +31,22 @@ afrc <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
 
 # plot it
 tm_shape(afrc) + tm_fill("POP2005", style="jenks") + tm_borders() + tm_layout(frame=F)
+
+# do it parallel
+library(doSNOW)
+
+#change to your number of CPU cores
+cl<-makeCluster(3)
+registerDoSNOW(cl)
+
+# cartogram will use all 3 cores
+afrc_parallelDoSnow <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
+
+all.equal(rgeos::gArea(afrc, byid=T), rgeos::gArea(afrc_parallelDoSnow, byid=T))
+
+stopCluster(cl)
+
+
 ```
 
 ![Cartogram](http://www.methoden.ruhr-uni-bochum.de/files/cartogram.jpg)

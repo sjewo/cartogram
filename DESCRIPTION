@@ -1,6 +1,6 @@
 Package: cartogram
 Title: Create Cartograms with R
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: person("Sebastian", "Jeworutzki", email = "sebastian.jeworutzki@ruhr-uni-bochum.de", role = c("aut", "cre"))
 Description: Construct a continuous area cartogram by a rubber sheet distortion algorithm.
 URL: https://github.com/sjewo/cartogram

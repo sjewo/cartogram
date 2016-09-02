@@ -8,7 +8,17 @@ r:
   - devel
 sudo: false
 cache: packages
-
+addons:
+  apt:
+    packages:
+      - libgdal-dev
+      - libgdal1-dev 
+      - libgeos-dev 
+      - libgeos++-dev 
+      - libgsl0-dev 
+      - libproj-dev 
+      - libspatialite-dev 
+      - netcdf-bin
 notifications:
 email:
 on_success: change

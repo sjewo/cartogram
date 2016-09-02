@@ -32,7 +32,7 @@ afr <- spTransform(wrld_simpl[wrld_simpl$REGION==2 & wrld_simpl$POP2005 > 0,],
                     CRS("+init=epsg:3395"))
 par(mfcol=c(1,2))
 plot(afr)
-plot(cartogram(afr, "POP2005", 5))
+plot(cartogram(afr, "POP2005", 3))
 
 }
 \references{

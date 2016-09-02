@@ -8,7 +8,7 @@
 #' @param maxSizeError Stop if meanSizeError is smaller than maxSizeError
 #' @return SpatialPolygonDataFrame with distorted polygon boundaries
 #' @export
-#' @import sp
+#' @import sp foreach
 #' @importFrom maptools checkPolygonsHoles
 #' @importFrom rgeos gArea gCentroid
 #' @examples
@@ -72,32 +72,31 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001) {
     message(paste0("Mean size error for iteration ", z ,": ", meanSizeError))
 
 
+    tmpcoords <- foreach(i=seq_along(shp.iter)) %:%
+      foreach(k=seq_len(multipol[i])) %dopar% {
 
-    for(i in seq_along(shp.iter)) {
-      for(k in seq_len(multipol[i])) {
-      newpts <- shp.iter@polygons[[i]]@Polygons[[k]]@coords
+        newpts <- shp.iter@polygons[[i]]@Polygons[[k]]@coords
 
-      #distance 
-      for(j in  seq_len(nrow(centroids))) {
-        
-        # distance to centroid j        
-        distance <- spDistsN1(newpts, centroids[j,])
+        #distance 
+        for(j in  seq_len(nrow(centroids))) {
 
-        # calculate force vector        
-        Fij <- mass[j] * radius[j] / distance
-        Fbij <- mass[j] * (distance/radius[j])^2 * (4 - 3*(distance/radius[j]))
-        Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
-        Fij <- Fij * forceReductionFactor / distance
+          # distance to centroid j        
+          distance <- spDistsN1(newpts, centroids[j,])
 
-        # calculate new border coordinates
-        #newpts <- newpts + cbind(Fij,Fij) * t(apply(newpts, 1, function(x) { x - centroids[j,]}))
-        newpts <- newpts + cbind(Fij,Fij) * (newpts - centroids[rep(j,nrow(newpts)),])    
+          # calculate force vector        
+          Fij <- mass[j] * radius[j] / distance
+          Fbij <- mass[j] * (distance/radius[j])^2 * (4 - 3*(distance/radius[j]))
+          Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
+          Fij <- Fij * forceReductionFactor / distance
+
+          # calculate new border coordinates
+          #newpts <- newpts + cbind(Fij,Fij) * t(apply(newpts, 1, function(x) { x - centroids[j,]}))
+          newpts <- newpts + cbind(Fij,Fij) * (newpts - centroids[rep(j,nrow(newpts)),])    
+        }
+
+        # save final coordinates from this iteration to coordinate list
+        tmpcoords[[i]][[k]] <- newpts
       }
-
-      # save final coordinates from this iteration to coordinate list
-      tmpcoords[[i]][[k]] <- newpts
-     }
-    }
     
     # construct sp-object for area and centroid calculation
     shp.iter <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) checkPolygonsHoles(Polygons(lapply(tmpcoords[[x]], Polygon), rown[x]))),  proj4string = CRS(proj4string(shp)))

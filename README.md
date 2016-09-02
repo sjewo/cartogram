@@ -6,8 +6,16 @@
 
 Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985).
 
+## Installation
+To install the current development release from github you need the plattform specific build tools. On Windows a current installation of Rtools is necessary, while OS X users need to install Xcode. 
+```
+# install.packages("devtools")
+devtools::install_github("sjewo/cartogram", ref="dataprep")
+```
+
 ## News
 * [0.0.2] parallelization of cartogram algorithm
+* [0.0.2] automatic data preparation for faster convergence
 
 
 ## Example
@@ -19,10 +27,12 @@ library(maptools)
 data(wrld_simpl)
 
 afr <- wrld_simpl[wrld_simpl$REGION==2,]
+
+# Transfor to Mercator projection
 afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
-afrc <- cartogram(afr[afr$POP2005>0,], "POP2005", itermax=5)
+afrc <- cartogram(afr, "POP2005", itermax=5)
 
 # plot it
 tm_shape(afrc) + tm_fill("POP2005", style="jenks") + tm_borders() + tm_layout(frame=F)

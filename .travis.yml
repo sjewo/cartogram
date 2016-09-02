@@ -1,13 +1,18 @@
 # .travis.yml for cartogram.
-#
-# https://github.com/craigcitro/r-travis/wiki/Porting-to-native-R-support-in-Travis
 language: r
+
 r:
   - oldrel
   - release
   - devel
-sudo: false
+
+sudo: required
+
 cache: packages
+
+apt_packages:
+  - r-cran-rgdal
+  - libproj-dev
 
 notifications:
 email:

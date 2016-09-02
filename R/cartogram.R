@@ -1,3 +1,6 @@
+# make i and k global variables so cran-check will not warn about no visible bindings
+globalVariables(c('i','k'))
+
 #' Calculate cartogram boundaries
 #'
 #' Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
@@ -11,6 +14,7 @@
 #' @import sp foreach
 #' @importFrom maptools checkPolygonsHoles
 #' @importFrom rgeos gArea gCentroid
+#' @importFrom utils globalVariables
 #' @examples
 #' 
 #' library(maptools)
@@ -71,7 +75,6 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001) {
 
     message(paste0("Mean size error for iteration ", z ,": ", meanSizeError))
 
-
     tmpcoords <- foreach(i=seq_along(shp.iter)) %:%
       foreach(k=seq_len(multipol[i])) %dopar% {
 
@@ -95,7 +98,7 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001) {
         }
 
         # save final coordinates from this iteration to coordinate list
-        tmpcoords[[i]][[k]] <- newpts
+        newpts
       }
     
     # construct sp-object for area and centroid calculation

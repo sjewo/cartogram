@@ -1,11 +1,15 @@
 Package: cartogram
 Title: Create Cartograms with R
-Version: 0.0.1
-Authors@R: person("Sebastian", "Jeworutzki", email = "sebastian.jeworutzki@ruhr-uni-bochum.de", role = c("aut", "cre"))
+Version: 0.0.2
+Authors@R: c(
+  person("Sebastian", "Jeworutzki", email = "sebastian.jeworutzki@ruhr-uni-bochum.de", role = c("aut", "cre")),
+  person("Timothee", "Giraud", email = "timothee.giraud@ums-riate.fr", role = "ctb"),
+  person("Nicolas", "Lambert", email = "nicolas.lambert@ums-riate.fr", role = "ctb"))
 Description: Construct a continuous area cartogram by a rubber sheet distortion algorithm.
 URL: https://github.com/sjewo/cartogram
 BugReports: https://github.com/sjewo/cartogram/issues
-Imports: maptools, rgeos, sp
+Depends: maptools
+Imports: rgeos, sp
 Suggests: rgdal
 License: GPL-3
 Encoding: UTF-8

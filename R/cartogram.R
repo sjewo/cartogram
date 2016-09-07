@@ -9,8 +9,8 @@
 #' @return SpatialPolygonDataFrame with distorted polygon boundaries
 #' @export
 #' @import sp
+#' @import rgeos
 #' @importFrom maptools checkPolygonsHoles
-#' @importFrom rgeos gArea gCentroid
 #' @examples
 #' 
 #' library(maptools)
@@ -53,12 +53,12 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001) {
     if(meanSizeError < maxSizeError) break
 
     # polygon centroids (centroids for multipart polygons)
-    centroids <- coordinates(gCentroid(shp.iter, byid=T))
+    centroids <- coordinates(rgeos::gCentroid(shp.iter, byid=T))
 
     # area for polygons and total area
-    area <- gArea(shp.iter, byid=T)
+    area <- rgeos::gArea(shp.iter, byid=T)
     area[area <0 ] <- 0
-    areaTotal <- gArea(shp.iter)
+    areaTotal <- rgeos::gArea(shp.iter)
 
     # prepare force field calculations
     desired <- areaTotal*value/valueTotal
@@ -100,12 +100,12 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001) {
     }
     
     # construct sp-object for area and centroid calculation
-    shp.iter <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) checkPolygonsHoles(Polygons(lapply(tmpcoords[[x]], Polygon), rown[x]))),  proj4string = CRS(proj4string(shp)))
+    shp.iter <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) maptools::checkPolygonsHoles(Polygons(lapply(tmpcoords[[x]], Polygon), rown[x]))),  proj4string = CRS(proj4string(shp)))
 
   }
 
   # construct final shape  
-  shp.carto <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) checkPolygonsHoles(Polygons(lapply(tmpcoords[[x]], Polygon),rown[x]))), proj4string = CRS(proj4string(shp)))
+  shp.carto <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) maptools::checkPolygonsHoles(Polygons(lapply(tmpcoords[[x]], Polygon),rown[x]))), proj4string = CRS(proj4string(shp)))
 
   # add data
   shp.cartodf <- SpatialPolygonsDataFrame(shp.carto, shp@data)

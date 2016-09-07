@@ -2,7 +2,6 @@
 
 export(cartogram)
 export(nc_cartogram)
+import(rgeos)
 import(sp)
 importFrom(maptools,checkPolygonsHoles)
-importFrom(rgeos,gArea)
-importFrom(rgeos,gCentroid)

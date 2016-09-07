@@ -31,6 +31,13 @@ tm_shape(afrc) + tm_fill("POP2005", style="jenks") + tm_borders() + tm_layout(fr
 ```
 
 ![Cartogram](http://www.methoden.ruhr-uni-bochum.de/files/cartogram.jpg)
+```
+# Olsen cartogram (thanks to @rCarto and @neocarto)
+plot(afr)
+plot(nc_cartogram(afr, "POP2005"), add = TRUE, col = 'red')
+```
+
+
 
 ## References
 * Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.

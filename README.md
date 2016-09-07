@@ -32,11 +32,13 @@ tm_shape(afrc) + tm_fill("POP2005", style="jenks") + tm_borders() + tm_layout(fr
 
 ![Cartogram](http://www.methoden.ruhr-uni-bochum.de/files/cartogram.jpg)
 ```
-# Olsen cartogram (thanks to @rCarto and @neocarto)
-plot(afr)
-plot(nc_cartogram(afr, "POP2005"), add = TRUE, col = 'red')
-```
+# Olson cartogram (thanks to @rCarto and @neocarto)
+afrnc <- nc_cartogram(afr, "POP2005")
 
+tm_shape(afr) + tm_borders() + 
+  tm_shape(afrnc) + tm_fill("POP2005", style="jenks") + tm_borders() + tm_layout(frame=F)
+```
+![Cartogram Olson](http://www.methoden.ruhr-uni-bochum.de/files/cartogram_nc.png)
 
 
 ## References

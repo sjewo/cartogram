@@ -34,7 +34,7 @@ nc_cartogram <- function(shp, weight, k = 1, inplace = T){
   n <- nrow(spdf)
   for(i in 1:n){
     x <- rescalePoly(spdf[i, ], inplace = inplace, r = spdf[i,]$r)
-    spdf@polygons[[i]] <- x@polygons[[1]]
+    spdf@polygons[[i]] <- checkPolygonsHoles(x@polygons[[1]])
   } 
   spdf@data <- spdf@data[, 1:(ncol(spdf)-1)]
   rp <- rank(-v, ties.method = "random")

@@ -1,3 +1,19 @@
+# Copyright (C) 2016 Sebastian Jeworutzki
+# Copyright (C) of 'checkPolygonsGEOS' from package maptools Roger Bivand and Edzer Pebesma
+
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 3 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program. If not, see <http://www.gnu.org/licenses/>.
+
 # make i and k global variables so cran-check will not warn about no visible bindings
 globalVariables(c('i','k'))
 
@@ -16,8 +32,7 @@ globalVariables(c('i','k'))
 #' @param threshold Define threshold for data preperation. 
 #' @return SpatialPolygonDataFrame with distorted polygon boundaries.
 #' @export
-#' @import sp rgeos foreach
-#' @importFrom maptools checkPolygonsHoles
+#' @import sp rgeos maptools foreach 
 #' @importFrom utils globalVariables 
 #' @importFrom stats quantile
 #' @examples
@@ -155,15 +170,115 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001,
       }
     
     # construct sp-object for area and centroid calculation
-    shp.iter <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) maptools::checkPolygonsHoles(Polygons(lapply(tmpcoords[[x]], Polygon), rown[x]))),  proj4string = CRS(proj4string(shp)))
+    shp.iter <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) (Polygons(lapply(tmpcoords[[x]], Polygon), rown[x]))),  proj4string = CRS(proj4string(shp)))
 
   }
 
   # construct final shape  
-  shp.carto <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) maptools::checkPolygonsHoles(Polygons(lapply(tmpcoords[[x]], Polygon),rown[x]))), proj4string = CRS(proj4string(shp)))
+  shp.carto <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) (Polygons(lapply(tmpcoords[[x]], Polygon),rown[x]))), proj4string = CRS(proj4string(shp)))
 
   # add data
   shp.cartodf <- SpatialPolygonsDataFrame(shp.carto, shp@data)
   return(shp.cartodf)
 }
+
+
+# Code from maptools 0.8-39
+# Copyright: Roger Bivand and Edzer Pebesma
+checkPolygonsGEOS <- function(obj, properly=TRUE, force=TRUE, useSTRtree=FALSE) {
+    if (!is(obj, "Polygons")) 
+        stop("not a Polygons object")
+    if (!requireNamespace("rgeos", quietly = TRUE))
+		stop("package rgeos required for checkPolygonsGEOS")
+    comm <- try(rgeos::createPolygonsComment(obj), silent=TRUE)
+    if (class(comm) != "try-error" && !force) {
+        comment(obj) <- comm
+        return(obj)
+    }
+    pls <- slot(obj, "Polygons")
+    IDs <- slot(obj, "ID")
+    n <- length(pls)
+    if (n < 1) stop("Polygon list of zero length")
+    uniqs <- rep(TRUE, n)
+    if (n > 1) {
+      if (useSTRtree) tree1 <- rgeos::gUnarySTRtreeQuery(obj)
+      SP <- SpatialPolygons(lapply(1:n, function(i) 
+        Polygons(list(pls[[i]]), ID=i)))
+      for (i in 1:(n-1)) {
+        if (useSTRtree) {
+            if (!is.null(tree1[[i]])) {
+                res <- try(rgeos::gEquals(SP[i,], SP[tree1[[i]],], byid=TRUE),
+                    silent=TRUE)
+                if (class(res) == "try-error") {
+                    warning("Polygons object ", IDs, ", Polygon ",
+                        i, ": ", res)
+                    next
+                }
+                if (any(res)) {
+                    uniqs[as.integer(rownames(res)[res])] <- FALSE
+                }
+            }
+        } else {
+            res <- try(rgeos::gEquals(SP[i,], SP[uniqs,], byid=TRUE), silent=TRUE)
+            if (class(res) == "try-error") {
+                warning("Polygons object ", IDs, ", Polygon ",
+                    i, ": ", res)
+                next
+            }
+            res[i] <- FALSE
+            if (any(res)) {
+                wres <- which(res)
+                uniqs[wres[wres > i]] <- FALSE
+            }
+        }
+      }
+    }
+    if (any(!uniqs)) warning(paste("Duplicate Polygon objects dropped:",
+        paste(wres, collapse=" ")))
+    pls <- pls[uniqs]
+#    IDs <- IDs[uniqs]
+    n <- length(pls)
+    if (n < 1) stop("Polygon list of zero length")
+    if (n == 1) {
+        oobj <- Polygons(pls, ID=IDs)
+        comment(oobj) <- rgeos::createPolygonsComment(oobj)
+        return(oobj)
+    }
+    areas <- sapply(pls, slot, "area")
+    pls <- pls[order(areas, decreasing=TRUE)]
+    oholes <- sapply(pls, function(x) slot(x, "hole"))
+    holes <- rep(FALSE, n)
+    SP <- SpatialPolygons(lapply(1:n, function(i) 
+        Polygons(list(pls[[i]]), ID=i)))
+    if (useSTRtree) tree2 <- rgeos::gUnarySTRtreeQuery(SP)
+    for (i in 1:(n-1)) {
+        if (useSTRtree) {
+            if (!is.null(tree2[[i]])) {
+                if (properly) res <- rgeos::gContainsProperly(SP[i,], SP[tree2[[i]],],
+                    byid=TRUE)
+                else res <- rgeos::gContains(SP[i,], SP[tree2[[i]],], byid=TRUE)
+            } else {
+                res <- FALSE
+            }
+        } else {
+            if (properly) res <- rgeos::gContainsProperly(SP[i,], SP[-(1:i),],
+                byid=TRUE)
+            else res <- rgeos::gContains(SP[i,], SP[-(1:i),], byid=TRUE)
+        }
+        wres <- which(res)
+        if (length(wres) > 0L) {
+            nres <- as.integer(rownames(res))
+            holes[nres[wres]] <- ! holes[nres[wres]]
+        }
+    }
+    for (i in 1:n) {
+        if (oholes[i] != holes[i])
+        pls[[i]] <- Polygon(slot(pls[[i]], "coords"), hole=holes[i])
+    }
+    oobj <- Polygons(pls, ID=IDs)
+    comment(oobj) <- rgeos::createPolygonsComment(oobj)
+    oobj    
+}
+# Code from maptools 0.8-39
+
 

@@ -17,7 +17,6 @@ devtools::install_github("sjewo/cartogram", ref="dataprep")
 * [0.0.2] parallelization of cartogram algorithm
 * [0.0.2] automatic data preparation for faster convergence
 
-
 ## Example
 ```
 library(cartogram)
@@ -53,7 +52,16 @@ stopCluster(cl)
 ```
 
 ![Cartogram](http://www.methoden.ruhr-uni-bochum.de/files/cartogram.jpg)
+```
+# Olson cartogram (thanks to @rCarto and @neocarto)
+afrnc <- nc_cartogram(afr, "POP2005")
+
+tm_shape(afr) + tm_borders() + 
+  tm_shape(afrnc) + tm_fill("POP2005", style="jenks") + tm_borders() + tm_layout(frame=F)
+```
+![Cartogram Olson](http://www.methoden.ruhr-uni-bochum.de/files/cartogram_nc.png)
+
 
 ## References
 * Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.
-
+* Olson, J. M. (1976), Noncontigous Area Cartograms. The Professional Geographer, 28: 371–380. doi:10.1111/j.0033-0124.1976.00371.x

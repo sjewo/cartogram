@@ -1,3 +1,20 @@
+# Copyright (C) 2016 Sebastian Jeworutzki
+# Copyright (C) of 'nc_cartogram' Timothee Giraud and Nicolas Lambert
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 3 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+# more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program. If not, see <http://www.gnu.org/licenses/>.
+
+
 #' @title Calculate Non-Contiguous Cartogram Boundaries
 #' @description Construct a non-continuous area cartogram (Olson 1976)
 #'
@@ -10,7 +27,7 @@
 #' @export
 #' @import sp
 #' @import rgeos
-#' @importFrom maptools checkPolygonsHoles
+#' @importFrom methods is slot
 #' @examples
 #' library(maptools)
 #' library(cartogram)
@@ -36,7 +53,7 @@ nc_cartogram <- function(shp, weight, k = 1, inplace = T){
   n <- nrow(spdf)
   for(i in 1:n){
     x <- rescalePoly(spdf[i, ], inplace = inplace, r = spdf[i,]$r)
-    spdf@polygons[[i]] <- maptools::checkPolygonsHoles(x@polygons[[1]])
+    spdf@polygons[[i]] <- checkPolygonsGEOS(x@polygons[[1]])
   } 
   spdf@data <- spdf@data[, 1:(ncol(spdf)-1)]
   rp <- rank(-v, ties.method = "random")

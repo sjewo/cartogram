@@ -4,13 +4,14 @@ Version: 0.0.2
 Authors@R: c(
   person("Sebastian", "Jeworutzki", email = "sebastian.jeworutzki@ruhr-uni-bochum.de", role = c("aut", "cre")),
   person("Timothee", "Giraud", email = "timothee.giraud@ums-riate.fr", role = "ctb"),
-  person("Nicolas", "Lambert", email = "nicolas.lambert@ums-riate.fr", role = "ctb"))
+  person("Nicolas", "Lambert", email = "nicolas.lambert@ums-riate.fr", role = "ctb"),
+  person("Roger", "Bivand", role = c("cph"), email = "Roger.Bivand@nhh.no"),
+  person("Edzer", "Pebesma", role = "cph"))
 Description: Construct a continuous area cartogram by a rubber sheet distortion algorithm.
 URL: https://github.com/sjewo/cartogram
 BugReports: https://github.com/sjewo/cartogram/issues
-Depends: maptools
-Imports: rgeos, sp
-Suggests: rgdal
+Imports: rgeos, sp, methods
+Suggests: rgdal, maptools
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

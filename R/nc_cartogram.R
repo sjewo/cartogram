@@ -16,7 +16,7 @@
 
 
 #' @title Calculate Non-Contiguous Cartogram Boundaries
-#' @description Construct a non-continuous area cartogram (Olson 1976)
+#' @description Construct a non-contiguous area cartogram (Olson 1976).
 #'
 #' @param shp SpatialPolygonDataFrame
 #' @param weight Name of the weighting variable in shp
@@ -37,7 +37,7 @@
 #'                    CRS("+init=epsg:3395"))
 #' plot(afr)
 #' plot(nc_cartogram(afr, "POP2005"), add = TRUE, col = 'red')
-#' @references Olson, J. M. (1976), Noncontigous Area Cartograms. The Professional Geographer, 28: 371–380. doi:10.1111/j.0033-0124.1976.00371.x
+#' @references Olson, J. M. (1976), Noncontiguous Area Cartograms. The Professional Geographer, 28: 371–380. doi:10.1111/j.0033-0124.1976.00371.x
 nc_cartogram <- function(shp, weight, k = 1, inplace = T){
 
   var <- weight

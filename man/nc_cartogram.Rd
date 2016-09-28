@@ -20,7 +20,7 @@ if FALSE multi-polygons are centered on their initial centroid.}
 SpatialPolygonDataFrame with resized polygon boundaries
 }
 \description{
-Construct a non-continuous area cartogram (Olson 1976)
+Construct a non-contiguous area cartogram (Olson 1976).
 }
 \examples{
 library(maptools)
@@ -33,6 +33,6 @@ plot(afr)
 plot(nc_cartogram(afr, "POP2005"), add = TRUE, col = 'red')
 }
 \references{
-Olson, J. M. (1976), Noncontigous Area Cartograms. The Professional Geographer, 28: 371–380. doi:10.1111/j.0033-0124.1976.00371.x
+Olson, J. M. (1976), Noncontiguous Area Cartograms. The Professional Geographer, 28: 371–380. doi:10.1111/j.0033-0124.1976.00371.x
 }
 

@@ -3,8 +3,8 @@ Title: Create Cartograms with R
 Version: 0.0.2
 Authors@R: c(
   person("Sebastian", "Jeworutzki", email = "sebastian.jeworutzki@ruhr-uni-bochum.de", role = c("aut", "cre")),
-  person("Timothee", "Giraud", email = "timothee.giraud@ums-riate.fr", role = "ctb"),
-  person("Nicolas", "Lambert", email = "nicolas.lambert@ums-riate.fr", role = "ctb"),
+  person("Timothee", "Giraud", role = "ctb"),
+  person("Nicolas", "Lambert", role = "ctb"),
   person("Roger", "Bivand", role = c("cph"), email = "Roger.Bivand@nhh.no"),
   person("Edzer", "Pebesma", role = "cph"))
 Description: Construct a continuous area cartogram by a rubber sheet distortion algorithm.

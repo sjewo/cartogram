@@ -4,7 +4,8 @@
 \alias{cartogram}
 \title{Calculate cartogram boundaries}
 \usage{
-cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001)
+cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001,
+  prepare = "adjust", threshold = 0.05)
 }
 \arguments{
 \item{shp}{SpatialPolygonDataFrame}
@@ -14,6 +15,13 @@ cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001)
 \item{itermax}{Maximum iterations for the cartogram transformation, if maxSizeError ist not reached}
 
 \item{maxSizeError}{Stop if meanSizeError is smaller than maxSizeError}
+
+\item{prepare}{Weighting values are adjusted to reach convergence much earlier. Possible methods are 
+"adjust", adjust values to restrict the mass vector to the quantiles defined by threshold and 1-threshold (default),
+"remove", remove features with values lower than quantile at threshold,
+"none", don't adjust weighting values.}
+
+\item{threshold}{Define threshold for data preperation.}
 }
 \value{
 SpatialPolygonDataFrame with distorted polygon boundaries

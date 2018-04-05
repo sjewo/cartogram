@@ -47,7 +47,13 @@
 #' plot(cartogram(afr, "POP2005", 3))
 #' 
 #' @references Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.
-cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001,
+cartogram <- function(shp, ...) {
+    UseMethod("cartogram")
+}
+
+#' @rdname cartogram
+#' @export
+cartogram.SpatialPolygonsDataFrame <- function(shp, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
 
   # prepare data
@@ -166,6 +172,118 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001,
   shp.cartodf <- SpatialPolygonsDataFrame(shp.carto, shp@data)
   return(shp.cartodf)
 }
+
+#' @rdname cartogram
+#' @export
+cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
+                      prepare="adjust", threshold=0.05) {
+
+  # prepare data
+  value <- shp[[weight]]
+
+  switch(prepare, 
+         # remove missing and values below threshold
+         "remove"={
+           #maxValue <- quantile(value, probs=(1-threshold), na.rm=T)
+           minValue <- quantile(value, probs=threshold, na.rm=T)
+           shp <- shp[value > minValue | !is.na(value),]
+           value <- value[value > minValue | !is.na(value)]
+         },
+         # Adjust ratio
+         "adjust"={
+           if(any(is.na(value))) {
+             warning("NA not allowed in weight vector. Features will be removed from Shape.")
+             shp <- shp[!is.na(value),]
+             value <- value[!is.na(value)]
+           }
+
+           valueTotal <- sum(value, na.rm=T)
+
+           # area for polygons and total area
+           area <- as.numeric(st_area(shp))
+           area[area <0 ] <- 0
+           areaTotal <- as.numeric(sum(st_area(shp)))
+
+           # prepare force field calculations
+           desired <- areaTotal*value/valueTotal
+           ratio <- desired/area
+           maxRatio <- quantile(ratio, probs=(1-threshold))
+           minRatio <- quantile(ratio, probs=threshold)
+
+           # adjust values 
+           value[ratio > maxRatio] <- (maxRatio * area[ratio > maxRatio] * valueTotal)/areaTotal
+           value[ratio < minRatio] <- (minRatio * area[ratio < minRatio] * valueTotal)/areaTotal
+         },
+         "none"={})
+
+  # sum up total value
+  valueTotal <- sum(value, na.rm=T)
+
+  # set meanSizeError
+  meanSizeError <- 100
+
+  shp.iter <- shp
+
+  # iterate until itermax is reached
+  for(z in 1:itermax) {
+    # break if mean Sizer Error is less than maxSizeError
+    if(meanSizeError < maxSizeError) break
+
+    # polygon centroids (centroids for multipart polygons)
+    centroids <- do.call(rbind, st_geometry(st_centroid(shp.iter)))
+
+    # area for polygons and total area
+    area <- as.numeric(st_area(shp.iter))
+    area[area <0 ] <- 0
+    areaTotal <- as.numeric(sum(st_area(shp.iter)))
+
+    # prepare force field calculations
+    desired <- areaTotal*value/valueTotal
+    desired[desired==0] <- 0.01 # set minimum size to prevent inf values size Error
+    radius <- sqrt(area/pi)
+    mass <- sqrt(desired/pi) - sqrt(area/pi)
+
+    sizeError <- apply(cbind(area,desired), 1, max)/apply(cbind(area,desired), 1, min)
+    meanSizeError <- mean(sizeError, na.rm=T)
+    forceReductionFactor <- 1/(1+meanSizeError)
+
+    message(paste0("Mean size error for iteration ", z ,": ", meanSizeError))
+
+    for(i in seq_len(nrow(shp.iter))) {
+      st_cast(shp.iter[i,], "POLYGON")
+      pts <- st_coordinates(st_geometry(shp.iter)[[i]])
+      idx <- unique(pts[, c("L1", "L2", "L3")])
+
+      for(k in seq_len(nrow(idx))) {
+
+        newpts <- pts[pts[,"L1"]==idx[k, "L1"] & pts[, "L2"]==idx[k, "L2"], c("X","Y")]
+        
+        #distance 
+        for(j in  seq_len(nrow(centroids))) {
+
+          # distance to centroid j        # TODO: fix this code - it's slow!
+          distance <- st_distance(st_as_sf(data.frame(newpts), coords=c("X","Y")), st_point(centroids[j,]), by_element=T)
+
+          # calculate force vector        
+          Fij <- mass[j] * radius[j] / distance
+          Fbij <- mass[j] * (distance/radius[j])^2 * (4 - 3*(distance/radius[j]))
+          Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
+          Fij <- Fij * forceReductionFactor / distance
+
+          # calculate new border coordinates
+          newpts <- newpts + cbind(X1=Fij, X2=Fij) * (newpts - centroids[rep(j,nrow(newpts)),])    
+        }
+
+        # save final coordinates from this iteration to coordinate list
+        st_geometry(shp.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
+      }
+    }
+  }
+
+  # 
+  return(shp.iter)
+}
+
 
 #' Check polygons
 #' 

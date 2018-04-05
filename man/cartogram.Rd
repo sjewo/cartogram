@@ -2,9 +2,16 @@
 % Please edit documentation in R/cartogram.R
 \name{cartogram}
 \alias{cartogram}
+\alias{cartogram.SpatialPolygonsDataFrame}
+\alias{cartogram.sf}
 \title{Calculate cartogram boundaries}
 \usage{
-cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001,
+cartogram(shp, ...)
+
+\method{cartogram}{SpatialPolygonsDataFrame}(shp, weight, itermax = 15,
+  maxSizeError = 1.0001, prepare = "adjust", threshold = 0.05)
+
+\method{cartogram}{sf}(shp, weight, itermax = 15, maxSizeError = 1.0001,
   prepare = "adjust", threshold = 0.05)
 }
 \arguments{
@@ -46,4 +53,3 @@ plot(cartogram(afr, "POP2005", 3))
 \references{
 Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.
 }
-

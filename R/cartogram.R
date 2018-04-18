@@ -262,12 +262,13 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
       for(k in seq_len(nrow(idx))) {
 
         newpts <- pts[pts[,"L1"]==idx[k, "L1"] & pts[, "L2"]==idx[k, "L2"], c("X","Y")]
+        newpts_sf <- st_as_sf(data.frame(newpts), coords=c("X","Y"))
 
         #distance 
         for(j in  seq_len(nrow(centroids))) {
 
           # distance to centroid j 
-          distance <- st_distance(st_as_sf(data.frame(newpts), coords=c("X","Y")), st_point(centroids[j,]), by_element=FALSE)
+          distance <- st_distance(newpts_sf, st_point(centroids[j,]), by_element=FALSE)
           distance <- as.vector(distance)
 
           # calculate force vector        

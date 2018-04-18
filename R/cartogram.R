@@ -250,14 +250,13 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
     message(paste0("Mean size error for iteration ", z ,": ", meanSizeError))
 
     for(i in seq_len(nrow(shp.iter))) {
-      st_cast(shp.iter[i,], "POLYGON")
       pts <- st_coordinates(st_geometry(shp.iter)[[i]])
       idx <- unique(pts[, c("L1", "L2", "L3")])
 
       for(k in seq_len(nrow(idx))) {
 
         newpts <- pts[pts[,"L1"]==idx[k, "L1"] & pts[, "L2"]==idx[k, "L2"], c("X","Y")]
-        
+
         #distance 
         for(j in  seq_len(nrow(centroids))) {
 

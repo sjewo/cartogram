@@ -236,7 +236,9 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
     if(meanSizeError < maxSizeError) break
 
     # polygon centroids (centroids for multipart polygons)
-    centroids <- do.call(rbind, st_geometry(st_centroid(shp.iter)))
+    centroids_sf <- st_geometry(st_centroid(shp.iter))
+    st_crs(centroids_sf) <- st_crs(NULL)
+    centroids <- do.call(rbind, centroids_sf)
 
     # area for polygons and total area
     area <- as.numeric(st_area(shp.iter))
@@ -263,14 +265,13 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
 
         newpts <- pts[pts[,"L1"]==idx[k, "L1"] & pts[, "L2"]==idx[k, "L2"], c("X","Y")]
         newpts_sf <- st_as_sf(data.frame(newpts), coords=c("X","Y"))
+        distances <- st_distance(newpts_sf, centroids_sf, by_element=FALSE)
 
         #distance 
         for(j in  seq_len(nrow(centroids))) {
 
-          # distance to centroid j 
-          distance <- st_distance(newpts_sf, st_point(centroids[j,]), by_element=FALSE)
-          distance <- as.vector(distance)
-
+          distance <- distances[, j]
+          
           # calculate force vector        
           Fij <- mass[j] * radius[j] / distance
           Fbij <- mass[j] * (distance/radius[j])^2 * (4 - 3*(distance/radius[j]))

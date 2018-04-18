@@ -261,7 +261,8 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
         for(j in  seq_len(nrow(centroids))) {
 
           # distance to centroid j        # TODO: fix this code - it's slow!
-          distance <- st_distance(st_as_sf(data.frame(newpts), coords=c("X","Y")), st_point(centroids[j,]), by_element=T)
+          distance <- st_distance(st_as_sf(data.frame(newpts), coords=c("X","Y")), st_point(centroids[j,]), by_element=FALSE)
+          distance <- as.vector(distance)
 
           # calculate force vector        
           Fij <- mass[j] * radius[j] / distance

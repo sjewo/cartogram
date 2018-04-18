@@ -16,7 +16,7 @@ cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001,
   prepare = "adjust", threshold = 0.05)
 }
 \arguments{
-\item{shp}{SpatialPolygonDataFrame}
+\item{shp}{SpatialPolygonDataFrame or an sf object}
 
 \item{weight}{Name of the weighting variable in shp}
 
@@ -32,7 +32,7 @@ cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001,
 \item{threshold}{Define threshold for data preperation.}
 }
 \value{
-SpatialPolygonDataFrame with distorted polygon boundaries
+An object of the same class as shp
 }
 \description{
 Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)

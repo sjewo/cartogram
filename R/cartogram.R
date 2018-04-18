@@ -18,7 +18,7 @@
 #'
 #' Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
 #'
-#' @param shp SpatialPolygonDataFrame
+#' @param shp SpatialPolygonDataFrame or an sf object
 #' @param weight Name of the weighting variable in shp
 #' @param itermax Maximum iterations for the cartogram transformation, if maxSizeError ist not reached
 #' @param maxSizeError Stop if meanSizeError is smaller than maxSizeError
@@ -27,13 +27,13 @@
 #' "remove", remove features with values lower than quantile at threshold,
 #' "none", don't adjust weighting values.
 #' @param threshold Define threshold for data preperation. 
-#' @return SpatialPolygonDataFrame with distorted polygon boundaries
+#' @return An object of the same class as shp
 #' @export
 #' @import sp
 #' @import rgeos 
 #' @importFrom methods is slot
 #' @importFrom stats quantile
-#' @importFrom sf st_area st_as_sf st_centroid st_coordinates st_distance st_geometry st_geometry<- st_point
+#' @importFrom sf st_area st_as_sf st_centroid st_coordinates st_distance st_geometry st_geometry<- st_point st_crs st_crs<-
 #' @examples
 #' 
 #' library(maptools)

@@ -33,6 +33,7 @@
 #' @import rgeos 
 #' @importFrom methods is slot
 #' @importFrom stats quantile
+#' @importFrom sf st_area st_as_sf st_centroid st_coordinates st_distance st_geometry st_geometry<- st_point
 #' @examples
 #' 
 #' library(maptools)
@@ -46,8 +47,13 @@
 #' plot(afr)
 #' plot(cartogram(afr, "POP2005", 3))
 #' 
+#' library(sf)
+#' afr_sf = st_as_sf(afr)
+#' plot(cartogram(afr_sf, "POP2005", 3))
+#' 
 #' @references Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.
-cartogram <- function(shp, ...) {
+cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001,
+                      prepare="adjust", threshold=0.05) {
     UseMethod("cartogram")
 }
 
@@ -260,7 +266,7 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
         #distance 
         for(j in  seq_len(nrow(centroids))) {
 
-          # distance to centroid j        # TODO: fix this code - it's slow!
+          # distance to centroid j 
           distance <- st_distance(st_as_sf(data.frame(newpts), coords=c("X","Y")), st_point(centroids[j,]), by_element=FALSE)
           distance <- as.vector(distance)
 

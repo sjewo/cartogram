@@ -6,7 +6,8 @@
 \alias{cartogram.sf}
 \title{Calculate cartogram boundaries}
 \usage{
-cartogram(shp, ...)
+cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001,
+  prepare = "adjust", threshold = 0.05)
 
 \method{cartogram}{SpatialPolygonsDataFrame}(shp, weight, itermax = 15,
   maxSizeError = 1.0001, prepare = "adjust", threshold = 0.05)
@@ -48,6 +49,10 @@ afr <- spTransform(wrld_simpl[wrld_simpl$REGION==2 & wrld_simpl$POP2005 > 0,],
 par(mfcol=c(1,2))
 plot(afr)
 plot(cartogram(afr, "POP2005", 3))
+
+library(sf)
+afr_sf = st_as_sf(afr)
+plot(cartogram(afr_sf, "POP2005", 3))
 
 }
 \references{

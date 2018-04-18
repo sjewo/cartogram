@@ -207,8 +207,8 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
 
            # area for polygons and total area
            area <- as.numeric(st_area(shp))
+           areaTotal <- sum(area)
            area[area <0 ] <- 0
-           areaTotal <- as.numeric(sum(st_area(shp)))
 
            # prepare force field calculations
            desired <- areaTotal*value/valueTotal

@@ -2,13 +2,21 @@
 % Please edit documentation in R/cartogram.R
 \name{cartogram}
 \alias{cartogram}
+\alias{cartogram.SpatialPolygonsDataFrame}
+\alias{cartogram.sf}
 \title{Calculate cartogram boundaries}
 \usage{
 cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001,
   prepare = "adjust", threshold = 0.05)
+
+\method{cartogram}{SpatialPolygonsDataFrame}(shp, weight, itermax = 15,
+  maxSizeError = 1.0001, prepare = "adjust", threshold = 0.05)
+
+\method{cartogram}{sf}(shp, weight, itermax = 15, maxSizeError = 1.0001,
+  prepare = "adjust", threshold = 0.05)
 }
 \arguments{
-\item{shp}{SpatialPolygonDataFrame}
+\item{shp}{SpatialPolygonDataFrame or an sf object}
 
 \item{weight}{Name of the weighting variable in shp}
 
@@ -24,7 +32,7 @@ cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001,
 \item{threshold}{Define threshold for data preperation.}
 }
 \value{
-SpatialPolygonDataFrame with distorted polygon boundaries
+An object of the same class as shp
 }
 \description{
 Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
@@ -42,8 +50,11 @@ par(mfcol=c(1,2))
 plot(afr)
 plot(cartogram(afr, "POP2005", 3))
 
+library(sf)
+afr_sf = st_as_sf(afr)
+plot(cartogram(afr_sf, "POP2005", 3))
+
 }
 \references{
 Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.
 }
-

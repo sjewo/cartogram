@@ -35,4 +35,3 @@ plot(nc_cartogram(afr, "POP2005"), add = TRUE, col = 'red')
 \references{
 Olson, J. M. (1976), Noncontiguous Area Cartograms. The Professional Geographer, 28: 371–380. doi:10.1111/j.0033-0124.1976.00371.x
 }
-

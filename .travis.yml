@@ -11,8 +11,14 @@ sudo: required
 cache: packages
 
 apt_packages:
-  - r-cran-rgdal
+  - libgdal-dev
   - libproj-dev
+
+before_install:
+  - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
+  - sudo apt-get --yes --force-yes update -qq
+  # sf dependencies:
+  - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
 
 notifications:
 email:

@@ -18,7 +18,7 @@
 #'
 #' Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
 #'
-#' @param shp SpatialPolygonDataFrame
+#' @param shp SpatialPolygonDataFrame or an sf object
 #' @param weight Name of the weighting variable in shp
 #' @param itermax Maximum iterations for the cartogram transformation, if maxSizeError ist not reached
 #' @param maxSizeError Stop if meanSizeError is smaller than maxSizeError
@@ -27,12 +27,13 @@
 #' "remove", remove features with values lower than quantile at threshold,
 #' "none", don't adjust weighting values.
 #' @param threshold Define threshold for data preperation. 
-#' @return SpatialPolygonDataFrame with distorted polygon boundaries
+#' @return An object of the same class as shp
 #' @export
 #' @import sp
 #' @import rgeos 
 #' @importFrom methods is slot
 #' @importFrom stats quantile
+#' @importFrom sf st_area st_as_sf st_centroid st_coordinates st_distance st_geometry st_geometry<- st_point st_crs st_crs<-
 #' @examples
 #' 
 #' library(maptools)
@@ -46,8 +47,19 @@
 #' plot(afr)
 #' plot(cartogram(afr, "POP2005", 3))
 #' 
+#' library(sf)
+#' afr_sf = st_as_sf(afr)
+#' plot(cartogram(afr_sf, "POP2005", 3))
+#' 
 #' @references Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.
 cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001,
+                      prepare="adjust", threshold=0.05) {
+    UseMethod("cartogram")
+}
+
+#' @rdname cartogram
+#' @export
+cartogram.SpatialPolygonsDataFrame <- function(shp, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
 
   # prepare data
@@ -166,6 +178,120 @@ cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001,
   shp.cartodf <- SpatialPolygonsDataFrame(shp.carto, shp@data)
   return(shp.cartodf)
 }
+
+#' @rdname cartogram
+#' @export
+cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
+                      prepare="adjust", threshold=0.05) {
+
+  # prepare data
+  value <- shp[[weight]]
+
+  switch(prepare, 
+         # remove missing and values below threshold
+         "remove"={
+           #maxValue <- quantile(value, probs=(1-threshold), na.rm=T)
+           minValue <- quantile(value, probs=threshold, na.rm=T)
+           shp <- shp[value > minValue | !is.na(value),]
+           value <- value[value > minValue | !is.na(value)]
+         },
+         # Adjust ratio
+         "adjust"={
+           if(any(is.na(value))) {
+             warning("NA not allowed in weight vector. Features will be removed from Shape.")
+             shp <- shp[!is.na(value),]
+             value <- value[!is.na(value)]
+           }
+
+           valueTotal <- sum(value, na.rm=T)
+
+           # area for polygons and total area
+           area <- as.numeric(st_area(shp))
+           areaTotal <- sum(area)
+           area[area <0 ] <- 0
+
+           # prepare force field calculations
+           desired <- areaTotal*value/valueTotal
+           ratio <- desired/area
+           maxRatio <- quantile(ratio, probs=(1-threshold))
+           minRatio <- quantile(ratio, probs=threshold)
+
+           # adjust values 
+           value[ratio > maxRatio] <- (maxRatio * area[ratio > maxRatio] * valueTotal)/areaTotal
+           value[ratio < minRatio] <- (minRatio * area[ratio < minRatio] * valueTotal)/areaTotal
+         },
+         "none"={})
+
+  # sum up total value
+  valueTotal <- sum(value, na.rm=T)
+
+  # set meanSizeError
+  meanSizeError <- 100
+
+  shp.iter <- shp
+
+  # iterate until itermax is reached
+  for(z in 1:itermax) {
+    # break if mean Sizer Error is less than maxSizeError
+    if(meanSizeError < maxSizeError) break
+
+    # polygon centroids (centroids for multipart polygons)
+    centroids_sf <- st_geometry(st_centroid(shp.iter))
+    st_crs(centroids_sf) <- st_crs(NULL)
+    centroids <- do.call(rbind, centroids_sf)
+
+    # area for polygons and total area
+    area <- as.numeric(st_area(shp.iter))
+    area[area <0 ] <- 0
+    areaTotal <- as.numeric(sum(st_area(shp.iter)))
+
+    # prepare force field calculations
+    desired <- areaTotal*value/valueTotal
+    desired[desired==0] <- 0.01 # set minimum size to prevent inf values size Error
+    radius <- sqrt(area/pi)
+    mass <- sqrt(desired/pi) - sqrt(area/pi)
+
+    sizeError <- apply(cbind(area,desired), 1, max)/apply(cbind(area,desired), 1, min)
+    meanSizeError <- mean(sizeError, na.rm=T)
+    forceReductionFactor <- 1/(1+meanSizeError)
+
+    message(paste0("Mean size error for iteration ", z ,": ", meanSizeError))
+
+    for(i in seq_len(nrow(shp.iter))) {
+      pts <- st_coordinates(st_geometry(shp.iter)[[i]])
+      idx <- unique(pts[, c("L1", "L2", "L3")])
+
+      for(k in seq_len(nrow(idx))) {
+
+        newpts <- pts[pts[,"L1"]==idx[k, "L1"] & pts[, "L2"]==idx[k, "L2"], c("X","Y")]
+        newpts_sf <- st_as_sf(data.frame(newpts), coords=c("X","Y"))
+        distances <- st_distance(newpts_sf, centroids_sf, by_element=FALSE)
+
+        #distance 
+        for(j in  seq_len(nrow(centroids))) {
+
+          distance <- distances[, j]
+          
+          # calculate force vector        
+          Fij <- mass[j] * radius[j] / distance
+          Fbij <- mass[j] * (distance/radius[j])^2 * (4 - 3*(distance/radius[j]))
+          Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
+          Fij <- Fij * forceReductionFactor / distance
+
+          # calculate new border coordinates
+          newpts <- newpts + cbind(X1=Fij, X2=Fij) * (newpts - centroids[rep(j,nrow(newpts)),])    
+        }
+
+        # save final coordinates from this iteration to coordinate list
+        st_geometry(shp.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
+      }
+    }
+  }
+
+  # 
+  return(shp.iter)
+}
+
 
 #' Check polygons
 #' 

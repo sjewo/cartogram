@@ -11,7 +11,7 @@ sudo: required
 cache: packages
 
 apt_packages:
-  - r-cran-rgdal
+  - libgdal-dev
   - libproj-dev
 
 before_install:

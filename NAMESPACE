@@ -2,6 +2,8 @@
 
 S3method(cartogram,SpatialPolygonsDataFrame)
 S3method(cartogram,sf)
+S3method(nc_cartogram,SpatialPolygonsDataFrame)
+S3method(nc_cartogram,sf)
 export(cartogram)
 export(nc_cartogram)
 import(rgeos)

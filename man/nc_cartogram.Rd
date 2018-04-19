@@ -2,9 +2,16 @@
 % Please edit documentation in R/nc_cartogram.R
 \name{nc_cartogram}
 \alias{nc_cartogram}
+\alias{nc_cartogram.SpatialPolygonsDataFrame}
+\alias{nc_cartogram.sf}
 \title{Calculate Non-Contiguous Cartogram Boundaries}
 \usage{
 nc_cartogram(shp, weight, k = 1, inplace = T)
+
+\method{nc_cartogram}{SpatialPolygonsDataFrame}(shp, weight, k = 1,
+  inplace = T)
+
+\method{nc_cartogram}{sf}(shp, weight, k = 1, inplace = T)
 }
 \arguments{
 \item{shp}{SpatialPolygonDataFrame}

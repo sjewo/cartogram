@@ -14,17 +14,17 @@ nc_cartogram(shp, weight, k = 1, inplace = T)
 \method{nc_cartogram}{sf}(shp, weight, k = 1, inplace = T)
 }
 \arguments{
-\item{shp}{SpatialPolygonDataFrame}
+\item{shp}{SpatialPolygonDataFrame or an sf object}
 
 \item{weight}{Name of the weighting variable in shp}
 
 \item{k}{Factor expansion for the unit with the greater value}
 
 \item{inplace}{If TRUE, each polygon is modified in its original place, 
-if FALSE multi-polygons are centered on their initial centroid.}
+if FALSE multi-polygons are centered on their initial centroid}
 }
 \value{
-SpatialPolygonDataFrame with resized polygon boundaries
+An object of the same class as shp with resized polygon boundaries
 }
 \description{
 Construct a non-contiguous area cartogram (Olson 1976).

@@ -25,8 +25,8 @@
 #' @param prepare Weighting values are adjusted to reach convergence much earlier. Possible methods are 
 #' "adjust", adjust values to restrict the mass vector to the quantiles defined by threshold and 1-threshold (default),
 #' "remove", remove features with values lower than quantile at threshold,
-#' "none", don't adjust weighting values.
-#' @param threshold Define threshold for data preperation. 
+#' "none", don't adjust weighting values
+#' @param threshold Define threshold for data preparation
 #' @return An object of the same class as shp
 #' @export
 #' @import sp

@@ -27,9 +27,9 @@ cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001,
 \item{prepare}{Weighting values are adjusted to reach convergence much earlier. Possible methods are 
 "adjust", adjust values to restrict the mass vector to the quantiles defined by threshold and 1-threshold (default),
 "remove", remove features with values lower than quantile at threshold,
-"none", don't adjust weighting values.}
+"none", don't adjust weighting values}
 
-\item{threshold}{Define threshold for data preperation.}
+\item{threshold}{Define threshold for data preparation}
 }
 \value{
 An object of the same class as shp

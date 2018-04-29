@@ -18,16 +18,16 @@
 #' @title Calculate Non-Contiguous Cartogram Boundaries
 #' @description Construct a non-contiguous area cartogram (Olson 1976).
 #'
-#' @param shp SpatialPolygonDataFrame
+#' @param shp SpatialPolygonDataFrame or an sf object
 #' @param weight Name of the weighting variable in shp
 #' @param k Factor expansion for the unit with the greater value
 #' @param inplace If TRUE, each polygon is modified in its original place, 
-#' if FALSE multi-polygons are centered on their initial centroid. 
-#' @return SpatialPolygonDataFrame with resized polygon boundaries
+#' if FALSE multi-polygons are centered on their initial centroid
+#' @return An object of the same class as shp with resized polygon boundaries
 #' @export
 #' @import sp
 #' @import rgeos
-#' @importFrom methods is slot
+#' @importFrom methods is slot as
 #' @examples
 #' library(maptools)
 #' library(cartogram)

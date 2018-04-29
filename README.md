@@ -7,9 +7,10 @@
 Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985) or non-contiguous Area Cartograms (Olson 1976) in R.
 
 ## Changes
+* [0.0.3] **sf** support added
 * [0.0.2] Non-contiguous Area Cartogram
 * [0.0.2] Prepare data with missing or extreme values before cartogram calculation for faster convergence
-* [0.0.1] Intial Release
+* [0.0.1] Initial Release
 
 ## Example Continuous Area Cartogram 
 ```

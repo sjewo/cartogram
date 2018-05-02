@@ -7,7 +7,8 @@ Authors@R: c(
   person("Nicolas", "Lambert", role = "ctb"),
   person("Roger", "Bivand", role = c("cph"), email = "Roger.Bivand@nhh.no"),
   person("Edzer", "Pebesma", role = "cph"),
-  person("Nowosad", "Jakub", role = "ctb"))
+  person("Jakub", "Nowosad", email = "nowosad.jakub@gmail.com", role = "ctb", comment = c(ORCID = "0000-0002-1057-3721"))
+  )
 Description: Construct continuous and non-contiguous area cartograms.
 URL: https://github.com/sjewo/cartogram
 BugReports: https://github.com/sjewo/cartogram/issues

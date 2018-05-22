@@ -13,7 +13,7 @@ Construct a continuous area cartogram by a rubber sheet distortion algorithm (Do
 * [0.0.2] Prepare data with missing or extreme values before cartogram calculation for faster convergence
 * [0.0.1] Initial Release
 
-## Example Continuous Area Cartogram 
+## Example Continuous Area Cartogram
 
 ```R
 library(cartogram)
@@ -58,6 +58,31 @@ tm_shape(afr) + tm_borders() +
 ```
 ![Cartogram Olson](http://www.methoden.ruhr-uni-bochum.de/files/cartogram_nc.png)
 
+## sf support
+
+Thanks to @Nowosad for speeding things up!
+
+```R
+library(sf)
+library(cartogram)
+library(maptools)
+
+data(wrld_simpl)
+
+afr <- wrld_simpl[wrld_simpl$REGION==2,]
+afr <- spTransform(afr, CRS("+init=epsg:3395"))
+
+afr_sf = st_as_sf(afr)
+
+# Continuous Area Cartogram
+afr_sf_carto <- cartogram(afr_sf, "POP2005", 3)
+plot(st_geometry(afr_sf_carto))
+
+# Plot Non-contiguous Area Cartogram
+afr_sf_nc <- nc_cartogram(afr_sf, "POP2005")
+plot(st_geometry(afr_sf))
+plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
+```
 
 ## References
 * Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.

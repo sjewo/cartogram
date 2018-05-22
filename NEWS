@@ -1,0 +1,4 @@
+[0.0.3] sf support added
+[0.0.2] Non-contiguous Area Cartogram
+[0.0.2] Prepare data with missing or extreme values before cartogram calculation for faster convergence
+[0.0.1] Initial Release

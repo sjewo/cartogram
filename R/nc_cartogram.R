@@ -33,10 +33,28 @@
 #' library(cartogram)
 #' library(rgdal)
 #' data(wrld_simpl)
+#' 
+#' # Remove uninhabited regions
 #' afr <- spTransform(wrld_simpl[wrld_simpl$REGION==2 & wrld_simpl$POP2005 > 0,],
 #'                    CRS("+init=epsg:3395"))
+#'
+#' # Create cartogram
+#' afr_nc <- nc_cartogram(afr, "POP2005")
+#'
+#' # Plot
 #' plot(afr)
-#' plot(nc_cartogram(afr, "POP2005"), add = TRUE, col = 'red')
+#' plot(afr_nc, add = TRUE, col = 'red')
+#'
+#' # Same with sf objects
+#' library(sf)
+#'
+#' afr_sf = st_as_sf(afr)
+#'
+#' afr_sf_nc <- nc_cartogram(afr_sf, "POP2005")
+#'
+#' plot(st_geometry(afr_sf))
+#' plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
+#'
 #' @references Olson, J. M. (1976), Noncontiguous Area Cartograms. The Professional Geographer, 28: 371–380. doi:10.1111/j.0033-0124.1976.00371.x
 nc_cartogram <- function(shp, weight, k = 1, inplace = T){
   UseMethod("nc_cartogram")

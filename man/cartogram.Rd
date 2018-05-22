@@ -44,15 +44,30 @@ library(cartogram)
 library(rgdal)
 data(wrld_simpl)
 
+# Remove uninhabited regions
 afr <- spTransform(wrld_simpl[wrld_simpl$REGION==2 & wrld_simpl$POP2005 > 0,], 
                     CRS("+init=epsg:3395"))
-par(mfcol=c(1,2))
-plot(afr)
-plot(cartogram(afr, "POP2005", 3))
 
+# Create cartogram
+afr_carto <- cartogram(afr, "POP2005", 3)
+
+# Plot 
+par(mfcol=c(1,2))
+plot(afr, main="original")
+plot(afr_carto, main="distorted (sp)")
+
+# Same with sf objects
 library(sf)
+
 afr_sf = st_as_sf(afr)
-plot(cartogram(afr_sf, "POP2005", 3))
+
+afr_sf_carto <- cartogram(afr_sf, "POP2005", 3)
+
+# Plot 
+par(mfcol=c(1,3))
+plot(afr, main="original")
+plot(afr_carto, main="distorted (sp)")
+plot(st_geometry(afr_sf_carto), main="distorted (sf)")
 
 }
 \references{

@@ -2,37 +2,61 @@
 % Please edit documentation in R/nc_cartogram.R
 \name{nc_cartogram}
 \alias{nc_cartogram}
+\alias{nc_cartogram.SpatialPolygonsDataFrame}
+\alias{nc_cartogram.sf}
 \title{Calculate Non-Contiguous Cartogram Boundaries}
 \usage{
 nc_cartogram(shp, weight, k = 1, inplace = T)
+
+\method{nc_cartogram}{SpatialPolygonsDataFrame}(shp, weight, k = 1,
+  inplace = T)
+
+\method{nc_cartogram}{sf}(shp, weight, k = 1, inplace = T)
 }
 \arguments{
-\item{shp}{SpatialPolygonDataFrame}
+\item{shp}{SpatialPolygonDataFrame or an sf object}
 
 \item{weight}{Name of the weighting variable in shp}
 
 \item{k}{Factor expansion for the unit with the greater value}
 
 \item{inplace}{If TRUE, each polygon is modified in its original place, 
-if FALSE multi-polygons are centered on their initial centroid.}
+if FALSE multi-polygons are centered on their initial centroid}
 }
 \value{
-SpatialPolygonDataFrame with resized polygon boundaries
+An object of the same class as shp with resized polygon boundaries
 }
 \description{
-Construct a non-continuous area cartogram (Olson 1976)
+Construct a non-contiguous area cartogram (Olson 1976).
 }
 \examples{
 library(maptools)
 library(cartogram)
 library(rgdal)
 data(wrld_simpl)
+
+# Remove uninhabited regions
 afr <- spTransform(wrld_simpl[wrld_simpl$REGION==2 & wrld_simpl$POP2005 > 0,],
                    CRS("+init=epsg:3395"))
+
+# Create cartogram
+afr_nc <- nc_cartogram(afr, "POP2005")
+
+# Plot
 plot(afr)
-plot(nc_cartogram(afr, "POP2005"), add = TRUE, col = 'red')
+plot(afr_nc, add = TRUE, col = 'red')
+
+# Same with sf objects
+library(sf)
+
+afr_sf = st_as_sf(afr)
+
+afr_sf_nc <- nc_cartogram(afr_sf, "POP2005")
+
+plot(st_geometry(afr_sf))
+plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
+
 }
 \references{
-Olson, J. M. (1976), Noncontigous Area Cartograms. The Professional Geographer, 28: 371–380. doi:10.1111/j.0033-0124.1976.00371.x
+Olson, J. M. (1976), Noncontiguous Area Cartograms. The Professional Geographer, 28: 371–380. doi:10.1111/j.0033-0124.1976.00371.x
 }
-

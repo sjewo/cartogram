@@ -1,5 +1,6 @@
-#' @title Calculate Dorling Cartogram Boundaries
-#' @description Construct a dorling cartogram.
+#' @title Calculate non-overlapping circles Cartogram
+#' @description Construct a cartogram which represents each geographic region 
+#' as non-overlapping circles (Dorling 1996).
 #' @name d_cartogram
 #' @param x SpatialPolygonDataFrame or an sf object
 #' @param var Name of the weighting variable in shp
@@ -14,6 +15,7 @@
 #' @return An object of the same class as shp with non overlaping proportional 
 #' circles. 
 #' @export
+#' @references Daniel, D. (1996). Area Cartograms: Their Use and Creation. In Concepts and Techniques in Modern Geography (CATMOG), 59.
 #' @examples
 #' library(maptools)
 #' library(cartogram)

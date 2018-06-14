@@ -55,7 +55,7 @@
 #' plot(st_geometry(afr_sf))
 #' plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
 #'
-#' @references Olson, J. M. (1976), Noncontiguous Area Cartograms. The Professional Geographer, 28: 371–380. doi:10.1111/j.0033-0124.1976.00371.x
+#' @references Olson, J. M. (1976). Noncontiguous area cartograms. In The Professional Geographer, 28(4), 371-380.
 nc_cartogram <- function(shp, weight, k = 1, inplace = T){
   UseMethod("nc_cartogram")
 }

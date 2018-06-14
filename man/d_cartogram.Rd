@@ -2,7 +2,7 @@
 % Please edit documentation in R/d_cartogram.R
 \name{d_cartogram}
 \alias{d_cartogram}
-\title{Calculate Dorling Cartogram Boundaries}
+\title{Calculate non-overlapping circles Cartogram}
 \usage{
 d_cartogram(x, var, k = 5, weights = 1, itermax = 1000)
 }
@@ -27,7 +27,8 @@ An object of the same class as shp with non overlaping proportional
 circles.
 }
 \description{
-Construct a dorling cartogram.
+Construct a cartogram which represents each geographic region 
+as non-overlapping circles (Dorling 1996).
 }
 \examples{
 library(maptools)
@@ -61,4 +62,7 @@ par(mfcol=c(1,3))
 plot(afr, main="original")
 plot(afr_carto, main="distorted (sp)")
 plot(st_geometry(afr_sf_carto), main="distorted (sf)")
+}
+\references{
+Daniel, D. (1996). Area Cartograms: Their Use and Creation. In Concepts and Techniques in Modern Geography (CATMOG), 59.
 }

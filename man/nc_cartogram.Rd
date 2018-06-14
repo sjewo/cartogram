@@ -58,5 +58,5 @@ plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
 
 }
 \references{
-Olson, J. M. (1976). Noncontiguous area cartograms. In The Professional Geographer, 28(4), 371-380.
+Olson, J. M. (1976). Noncontiguous Area Cartograms. In The Professional Geographer, 28(4), 371-380.
 }

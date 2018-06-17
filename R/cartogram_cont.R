@@ -14,10 +14,10 @@
 # You should have received a copy of the GNU General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#' Calculate Contiguous Cartogram Boundaries
+#' @title Calculate Contiguous Cartogram Boundaries
+#' @description Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
 #'
-#' Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
-#'
+#' @name cartogram_cont
 #' @param shp SpatialPolygonDataFrame or an sf object
 #' @param weight Name of the weighting variable in shp
 #' @param itermax Maximum iterations for the cartogram transformation, if maxSizeError ist not reached
@@ -46,7 +46,7 @@
 #'                     CRS("+init=epsg:3395"))
 #'
 #' # Create cartogram
-#' afr_carto <- cartogram(afr, "POP2005", 3)
+#' afr_carto <- cartogram_cont(afr, "POP2005", 3)
 #'
 #' # Plot 
 #' par(mfcol=c(1,2))
@@ -58,7 +58,7 @@
 #'
 #' afr_sf = st_as_sf(afr)
 #'
-#' afr_sf_carto <- cartogram(afr_sf, "POP2005", 3)
+#' afr_sf_carto <- cartogram_cont(afr_sf, "POP2005", 3)
 #'
 #' # Plot 
 #' par(mfcol=c(1,3))
@@ -67,14 +67,27 @@
 #' plot(st_geometry(afr_sf_carto), main="distorted (sf)")
 #' 
 #' @references Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
-cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001,
+cartogram_cont <- function(shp, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
-    UseMethod("cartogram")
+
+  if (as.character(match.call()[[1]]) == "cartogram") {
+    message("Please use cartogram_cont() instead of cartogram().\n")
+  }
+
+  UseMethod("cartogram_cont")
 }
 
-#' @rdname cartogram
+#' @title Calculate Contiguous Cartogram Boundaries
+#' @description This function has been renamed: Please use cartogram_cont() instead of cartogram().
+#'
 #' @export
-cartogram.SpatialPolygonsDataFrame <- function(shp, weight, itermax=15, maxSizeError=1.0001,
+#' @inheritParams cartogram_cont
+#' @keywords internal
+cartogram <- cartogram_cont
+
+#' @rdname cartogram_cont
+#' @export
+cartogram_cont.SpatialPolygonsDataFrame <- function(shp, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
 
   # prepare data
@@ -194,9 +207,9 @@ cartogram.SpatialPolygonsDataFrame <- function(shp, weight, itermax=15, maxSizeE
   return(shp.cartodf)
 }
 
-#' @rdname cartogram
+#' @rdname cartogram_cont
 #' @export
-cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
+cartogram_cont.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
 
   # prepare data
@@ -317,6 +330,7 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
 #' @param properly use \code{\link[rgeos]{gContainsProperly}} rather than \code{\link[rgeos]{gContains}}
 #' @param useSTRtree use \pkg{rgeos} STRtree in checking holes, which is much faster, but uses a lot of memory and does not release it on completion
 #' @param force ignore errors from \code{\link[rgeos]{createPolygonsComment}}
+#' @keywords internal
 #' @import rgeos 
 checkPolygonsGEOS <- function(obj, properly=TRUE, force=TRUE, useSTRtree=FALSE) {
   if (!is(obj, "Polygons")) 

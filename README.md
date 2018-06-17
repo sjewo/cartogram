@@ -42,6 +42,8 @@ devtools::install_github("sjewo/cartogram")
 library(cartogram)
 library(tmap)
 library(maptools)
+#> Loading required package: sp
+#> Checking rgeos availability: TRUE
 
 data(wrld_simpl)
 
@@ -49,7 +51,7 @@ afr <- wrld_simpl[wrld_simpl$REGION==2,]
 afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
-afrc <- cartogram(afr, "POP2005", itermax=5)
+afrc <- cartogram_cont(afr, "POP2005", itermax=5)
 #> Mean size error for iteration 1: 5.79457153280442
 #> Mean size error for iteration 2: 4.99349670513046
 #> Mean size error for iteration 3: 4.39148731971216
@@ -78,7 +80,7 @@ afr <- wrld_simpl[wrld_simpl$REGION==2,]
 afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
-afrnc <- nc_cartogram(afr, "POP2005")
+afrnc <- cartogram_ncont(afr, "POP2005")
 
 # plot it
 tm_shape(afr) + tm_borders() + 
@@ -103,7 +105,7 @@ afr <- wrld_simpl[wrld_simpl$REGION==2,]
 afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
-afrnoc <- noc_cartogram(afr, "POP2005")
+afrnoc <- cartogram_noc(afr, "POP2005")
 
 # plot it
 tm_shape(afr) + tm_borders() + 
@@ -119,6 +121,7 @@ Thanks to @Nowosad for speeding things up\!
 
 ``` r
 library(sf)
+#> Linking to GEOS 3.6.2, GDAL 2.3.0, proj.4 5.0.1
 library(cartogram)
 library(maptools)
 
@@ -133,14 +136,14 @@ afr_sf = st_as_sf(afr)
 par(mfrow=c(1,2), mai=c(0,0,0,0))
 
 # Continuous Area Cartogram
-afr_sf_carto <- cartogram(afr_sf, "POP2005", 3)
+afr_sf_carto <- cartogram_cont(afr_sf, "POP2005", 3)
 #> Mean size error for iteration 1: 5.79457153280442
 #> Mean size error for iteration 2: 4.94825547349441
 #> Mean size error for iteration 3: 4.32626995057148
 plot(st_geometry(afr_sf_carto))
 
 # Plot Non-contiguous Area Cartogram
-afr_sf_nc <- nc_cartogram(afr_sf, "POP2005")
+afr_sf_nc <- cartogram_ncont(afr_sf, "POP2005")
 plot(st_geometry(afr_sf))
 plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
 ```

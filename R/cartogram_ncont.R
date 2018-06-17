@@ -18,6 +18,7 @@
 #' @title Calculate Non-Contiguous Cartogram Boundaries
 #' @description Construct a non-contiguous area cartogram (Olson 1976).
 #'
+#' @name cartogram_ncont
 #' @param shp SpatialPolygonDataFrame or an sf object
 #' @param weight Name of the weighting variable in shp
 #' @param k Factor expansion for the unit with the greater value
@@ -39,7 +40,7 @@
 #'                    CRS("+init=epsg:3395"))
 #'
 #' # Create cartogram
-#' afr_nc <- nc_cartogram(afr, "POP2005")
+#' afr_nc <- cartogram_ncont(afr, "POP2005")
 #'
 #' # Plot
 #' plot(afr)
@@ -50,19 +51,32 @@
 #'
 #' afr_sf = st_as_sf(afr)
 #'
-#' afr_sf_nc <- nc_cartogram(afr_sf, "POP2005")
+#' afr_sf_nc <- cartogram_ncont(afr_sf, "POP2005")
 #'
 #' plot(st_geometry(afr_sf))
 #' plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
 #'
 #' @references Olson, J. M. (1976). Noncontiguous Area Cartograms. In The Professional Geographer, 28(4), 371-380.
-nc_cartogram <- function(shp, weight, k = 1, inplace = T){
-  UseMethod("nc_cartogram")
+cartogram_ncont <- function(shp, weight, k = 1, inplace = T){
+
+  if (as.character(match.call()[[1]]) == "cartogram") {
+    message("Please use cartogram_ncont() instead of nc_cartogram().\n")
+  }
+
+  UseMethod("cartogram_ncont")
 }
 
-#' @rdname nc_cartogram
+#' @title Calculate Non-Contiguous Cartogram Boundaries
+#' @description This function has been renamed: Please use cartogram_ncont() instead of nc_cartogram().
+#'
 #' @export
-nc_cartogram.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace = T){
+#' @inheritParams cartogram_ncont
+#' @keywords internal
+nc_cartogram <- cartogram_ncont
+
+#' @rdname cartogram_ncont
+#' @export
+cartogram_ncont.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace = T){
 
   var <- weight
   spdf <- shp[!is.na(shp@data[,var]),]
@@ -90,10 +104,10 @@ nc_cartogram.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace = 
   return(spdf)
 }
 
-#' @rdname nc_cartogram
+#' @rdname cartogram_ncont
 #' @export
-nc_cartogram.sf <- function(shp, weight, k = 1, inplace = T){
-  st_as_sf(nc_cartogram.SpatialPolygonsDataFrame(as(shp, "Spatial"),
+cartogram_ncont.sf <- function(shp, weight, k = 1, inplace = T){
+  st_as_sf(cartogram_ncont.SpatialPolygonsDataFrame(as(shp, "Spatial"),
                                         weight=weight, k=k, inplace=T))
 }
 

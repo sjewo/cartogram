@@ -1,7 +1,7 @@
 #' @title Calculate Non-Overlapping Circles Cartogram
 #' @description Construct a cartogram which represents each geographic region 
 #' as non-overlapping circles (Dorling 1996).
-#' @name noc_cartogram
+#' @name cartogram_noc
 #' @param shp SpatialPolygonsDataFrame, SpatialPointsDataFrame or an sf object
 #' @param weight Name of the weighting variable in shp
 #' @param k Share of the shp bounding box filled by the larger circle
@@ -27,7 +27,7 @@
 #'                    CRS("+init=epsg:3395"))
 #' 
 #' # Create cartogram
-#' afr_carto <- noc_cartogram(afr, "POP2005")
+#' afr_carto <- cartogram_noc(afr, "POP2005")
 #' 
 #' # Plot 
 #' par(mfcol=c(1,2))
@@ -41,14 +41,14 @@
 #' 
 #' afr_sf = st_as_sf(afr)
 #' 
-#' afr_sf_carto <- noc_cartogram(afr_sf, "POP2005")
+#' afr_sf_carto <- cartogram_noc(afr_sf, "POP2005")
 #' 
 #' # Plot 
 #' par(mfcol=c(1,3))
 #' plot(afr, main="original")
 #' plot(afr_carto, main="distorted (sp)")
 #' plot(st_geometry(afr_sf_carto), main="distorted (sf)")
-noc_cartogram <- function(shp, weight, k = 5, m_weight = 1, itermax= 1000){
+cartogram_noc <- function(shp, weight, k = 5, m_weight = 1, itermax= 1000){
   # sf or sp
   sp <- FALSE
   if(methods::is(shp, "Spatial")){

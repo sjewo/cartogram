@@ -48,16 +48,16 @@
 #' plot(afr, main="original")
 #' plot(afr_carto, main="distorted (sp)")
 #' plot(st_geometry(afr_sf_carto), main="distorted (sf)")
-cartogram_noc <- function(shp, weight, k = 5, m_weight = 1, itermax= 1000){
-  # sf or sp
-  sp <- FALSE
-  if(methods::is(shp, "Spatial")){
-    shp <- sf::st_as_sf(shp)
-    sp <- TRUE
-  }
+cartogram_noc <- function(shp, weight, k = 5, m_weight = 1, itermax= 1000) {
+  UseMethod("cartogram_noc")
+}
+
+#' @rdname cartogram_noc
+#' @export
+cartogram_noc.sf <- function(shp, weight, k = 5, m_weight = 1, itermax= 1000){
   # proj or unproj
   if (sf::st_is_longlat(shp)) {
-    warning("Using an unprojected map. Converting to equal area is recommended", call. = F)
+    warning("Using an unprojected map. Converting to equal area is recommended", call. = FALSE)
   }
   # no 0 values
   shp <- shp[shp[[weight]]>0,]
@@ -72,13 +72,15 @@ cartogram_noc <- function(shp, weight, k = 5, m_weight = 1, itermax= 1000){
                                         maxiter = itermax, weights = m_weight)
   # sf object creation
   . <- sf::st_buffer(sf::st_as_sf(res$layout,
-                          coords =c('x', 'y'),
-                          crs = sf::st_crs(shp)),
-                 dist = res$layout$radius)
+                                  coords =c('x', 'y'),
+                                  crs = sf::st_crs(shp)),
+                     dist = res$layout$radius)
   sf::st_geometry(shp) <- sf::st_geometry(.)
-  # sp management
-  if(sp){
-    shp <- methods::as(shp, "Spatial")
-  }
   return(shp) 
+}
+
+#' @rdname cartogram_noc
+#' @export
+cartogram_noc.SpatialPolygonsDataFrame <- function(shp, weight, k = 5, m_weight = 1, itermax = 1000){
+  as(cartogram_noc.sf(st_as_sf(shp), weight = weight, k = k, m_weight = m_weight, itermax = itermax), "Spatial")
 }

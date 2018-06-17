@@ -57,7 +57,7 @@
 #' plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
 #'
 #' @references Olson, J. M. (1976). Noncontiguous Area Cartograms. In The Professional Geographer, 28(4), 371-380.
-cartogram_ncont <- function(shp, weight, k = 1, inplace = T){
+cartogram_ncont <- function(shp, weight, k = 1, inplace = TRUE){
 
   if (as.character(match.call()[[1]]) == "cartogram") {
     message("Please use cartogram_ncont() instead of nc_cartogram().\n")
@@ -76,13 +76,13 @@ nc_cartogram <- cartogram_ncont
 
 #' @rdname cartogram_ncont
 #' @export
-cartogram_ncont.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace = T){
+cartogram_ncont.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace = TRUE){
 
   var <- weight
-  spdf <- shp[!is.na(shp@data[,var]),]
+  spdf <- shp[!is.na(shp@data[, var]),]
   
   # size
-  surf <- rgeos::gArea(spgeom = spdf, byid = T)
+  surf <- rgeos::gArea(spgeom = spdf, byid = TRUE)
   v <- spdf@data[, var] 
   mv <- max(v)
   ms <- surf[v==mv]
@@ -106,9 +106,9 @@ cartogram_ncont.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace
 
 #' @rdname cartogram_ncont
 #' @export
-cartogram_ncont.sf <- function(shp, weight, k = 1, inplace = T){
+cartogram_ncont.sf <- function(shp, weight, k = 1, inplace = TRUE){
   st_as_sf(cartogram_ncont.SpatialPolygonsDataFrame(as(shp, "Spatial"),
-                                        weight=weight, k=k, inplace=T))
+                                        weight=weight, k=k, inplace=TRUE))
 }
 
 rescalePoly <- function(spdf, inplace = TRUE, r = 1){
@@ -143,7 +143,3 @@ rescale <- function(vertices, center, r){
   p2[,2] <- (1 - r) * center[2] + r * p[,2] 
   p2
 }
-
-
-
-

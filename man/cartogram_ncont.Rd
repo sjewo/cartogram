@@ -6,12 +6,12 @@
 \alias{cartogram_ncont.sf}
 \title{Calculate Non-Contiguous Cartogram Boundaries}
 \usage{
-cartogram_ncont(shp, weight, k = 1, inplace = T)
+cartogram_ncont(shp, weight, k = 1, inplace = TRUE)
 
 \method{cartogram_ncont}{SpatialPolygonsDataFrame}(shp, weight, k = 1,
-  inplace = T)
+  inplace = TRUE)
 
-\method{cartogram_ncont}{sf}(shp, weight, k = 1, inplace = T)
+\method{cartogram_ncont}{sf}(shp, weight, k = 1, inplace = TRUE)
 }
 \arguments{
 \item{shp}{SpatialPolygonDataFrame or an sf object}

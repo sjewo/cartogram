@@ -2,9 +2,17 @@
 % Please edit documentation in R/cartogram_noc.R
 \name{cartogram_noc}
 \alias{cartogram_noc}
+\alias{cartogram_noc.sf}
+\alias{cartogram_noc.SpatialPolygonsDataFrame}
 \title{Calculate Non-Overlapping Circles Cartogram}
 \usage{
 cartogram_noc(shp, weight, k = 5, m_weight = 1, itermax = 1000)
+
+\method{cartogram_noc}{sf}(shp, weight, k = 5, m_weight = 1,
+  itermax = 1000)
+
+\method{cartogram_noc}{SpatialPolygonsDataFrame}(shp, weight, k = 5,
+  m_weight = 1, itermax = 1000)
 }
 \arguments{
 \item{shp}{SpatialPolygonsDataFrame, SpatialPointsDataFrame or an sf object}

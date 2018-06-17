@@ -96,7 +96,7 @@ tm_shape(afr) + tm_borders() +
 
 Thanks to @Nowosad for speeding things up!
 
-```{r sfsupport, fig.width=7}
+```{r sfsupport, fig.width=9, fig.height=3}
 library(sf)
 # Create an sf object
 afr_sf = st_as_sf(afr)
@@ -114,16 +114,20 @@ afr_sf_nc <- nc_cartogram(afr_sf, "POP2005")
 afr_sf_noc <- noc_cartogram(afr_sf, "POP2005")
 
 # Plots
-m1 = tm_shape(afr_sf_carto) + tm_polygons("POP2005", style = "jenks") +
+m1 = tm_shape(afr_sf_carto) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
   tm_layout(frame = FALSE)
 
-m2 = tm_shape(afr_sf_nc) + tm_polygons("POP2005", style = "jenks") +
+m2 = tm_shape(afr_sf_nc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
   tm_layout(frame = FALSE)
 
-m3 = tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks") +
-  tm_layout(frame = FALSE)
+m3 = tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+  tm_layout(frame = FALSE, legend.outside=T)
 
-tmap_arrange(m1, m2, m3, nrow = 1)
+ml <- tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks") +
+  tm_layout(frame = FALSE, legend.only=T, legend.position=c("center","center"))
+
+
+tmap_arrange(m1, m2, m3, ml, nrow = 1)
 ```
 
 ## References

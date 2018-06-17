@@ -44,8 +44,6 @@ devtools::install_github("sjewo/cartogram")
 library(cartogram)
 library(tmap)
 library(maptools)
-#> Loading required package: sp
-#> Checking rgeos availability: TRUE
 
 data(wrld_simpl)
 
@@ -54,6 +52,7 @@ afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
 afrc <- cartogram(afr, "POP2005", itermax = 5)
+#> Please use cartogram_cont() instead of cartogram().
 #> Mean size error for iteration 1: 5.79457153280442
 #> Mean size error for iteration 2: 4.99349670513046
 #> Mean size error for iteration 3: 4.39148731971216
@@ -105,7 +104,6 @@ Thanks to @Nowosad for speeding things up\!
 
 ``` r
 library(sf)
-#> Linking to GEOS 3.6.1, GDAL 2.2.4, proj.4 4.9.3
 # Create an sf object
 afr_sf = st_as_sf(afr)
 
@@ -114,6 +112,7 @@ par(mfrow = c(1, 2), mai = c(0, 0, 0, 0))
 
 # Continuous Area Cartogram
 afr_sf_carto <- cartogram(afr_sf, "POP2005", 3)
+#> Please use cartogram_cont() instead of cartogram().
 #> Mean size error for iteration 1: 5.79457153280442
 #> Mean size error for iteration 2: 4.94825547349441
 #> Mean size error for iteration 3: 4.32626995057148
@@ -125,16 +124,20 @@ afr_sf_nc <- nc_cartogram(afr_sf, "POP2005")
 afr_sf_noc <- noc_cartogram(afr_sf, "POP2005")
 
 # Plots
-m1 = tm_shape(afr_sf_carto) + tm_polygons("POP2005", style = "jenks") +
+m1 = tm_shape(afr_sf_carto) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
   tm_layout(frame = FALSE)
 
-m2 = tm_shape(afr_sf_nc) + tm_polygons("POP2005", style = "jenks") +
+m2 = tm_shape(afr_sf_nc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
   tm_layout(frame = FALSE)
 
-m3 = tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks") +
-  tm_layout(frame = FALSE)
+m3 = tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+  tm_layout(frame = FALSE, legend.outside=T)
 
-tmap_arrange(m1, m2, m3, nrow = 1)
+ml <- tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks") +
+  tm_layout(frame = FALSE, legend.only=T, legend.position=c("center","center"))
+
+
+tmap_arrange(m1, m2, m3, ml, nrow = 1)
 ```
 
 ![](man/figures/README-sfsupport-1.png)<!-- -->

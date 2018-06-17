@@ -56,19 +56,19 @@
 #' plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
 #'
 #' @references Olson, J. M. (1976). Noncontiguous Area Cartograms. In The Professional Geographer, 28(4), 371-380.
-nc_cartogram <- function(shp, weight, k = 1, inplace = T){
+nc_cartogram <- function(shp, weight, k = 1, inplace = TRUE){
   UseMethod("nc_cartogram")
 }
 
 #' @rdname nc_cartogram
 #' @export
-nc_cartogram.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace = T){
+nc_cartogram.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace = TRUE){
 
   var <- weight
-  spdf <- shp[!is.na(shp@data[,var]),]
+  spdf <- shp[!is.na(shp@data[, var]),]
   
   # size
-  surf <- rgeos::gArea(spgeom = spdf, byid = T)
+  surf <- rgeos::gArea(spgeom = spdf, byid = TRUE)
   v <- spdf@data[, var] 
   mv <- max(v)
   ms <- surf[v==mv]
@@ -92,9 +92,9 @@ nc_cartogram.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace = 
 
 #' @rdname nc_cartogram
 #' @export
-nc_cartogram.sf <- function(shp, weight, k = 1, inplace = T){
+nc_cartogram.sf <- function(shp, weight, k = 1, inplace = TRUE){
   st_as_sf(nc_cartogram.SpatialPolygonsDataFrame(as(shp, "Spatial"),
-                                        weight=weight, k=k, inplace=T))
+                                        weight=weight, k=k, inplace=TRUE))
 }
 
 rescalePoly <- function(spdf, inplace = TRUE, r = 1){
@@ -129,7 +129,3 @@ rescale <- function(vertices, center, r){
   p2[,2] <- (1 - r) * center[2] + r * p[,2] 
   p2
 }
-
-
-
-

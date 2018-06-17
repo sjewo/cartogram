@@ -15,7 +15,7 @@
 #' @param itermax Maximum iterations for the cartogram transformation. 
 #' @return Non overlaping proportional circles of the same class as shp.
 #' @export
-#' @references Daniel, D. (1996). Area Cartograms: Their Use and Creation. In Concepts and Techniques in Modern Geography (CATMOG), 59.
+#' @references Dorling, D. (1996). Area Cartograms: Their Use and Creation. In Concepts and Techniques in Modern Geography (CATMOG), 59.
 #' @examples
 #' library(maptools)
 #' library(cartogram)

@@ -1,6 +1,13 @@
 # .travis.yml for cartogram.
 language: r
 
+matrix:
+  include:
+    - dist: trusty
+    - os: osx
+      osx_image: xcode9.2
+      disable_homebrew: true    
+
 r:
   - oldrel
   - release

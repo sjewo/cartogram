@@ -13,11 +13,11 @@ output:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "tools/readme/README-"
+  fig.path = "man/figures/README-"
 )
 ```
 
-Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985) or non-contiguous Area Cartograms (Olson 1976) in R.
+Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985), non-contiguous Area Cartograms (Olson 1976), and non-overlapping Circles Cartogram (Dorling el al. 1996) in R.
 
 ## Installation
 
@@ -52,62 +52,44 @@ library(maptools)
 
 data(wrld_simpl)
 
-afr <- wrld_simpl[wrld_simpl$REGION==2,]
+afr <- wrld_simpl[wrld_simpl$REGION == 2, ]
 afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
-afrc <- cartogram(afr, "POP2005", itermax=5)
+afrc <- cartogram(afr, "POP2005", itermax = 5)
 
 # plot it
-tm_shape(afrc) + tm_fill("POP2005", style="jenks") + 
-  tm_borders() + tm_layout(frame=F)
+tm_shape(afrc) + tm_fill("POP2005", style = "jenks") +
+  tm_borders() + tm_layout(frame = FALSE)
 ```
 
-
 ### Non-contiguous Area Cartogram
+
 Many thanks to @rCarto and @neocarto for contributing the code!
 
 ```{r nc}
-library(cartogram)
-library(tmap)
-library(maptools)
-
-data(wrld_simpl)
-
-afr <- wrld_simpl[wrld_simpl$REGION==2,]
-afr <- spTransform(afr, CRS("+init=epsg:3395"))
-
 # construct cartogram
 afrnc <- nc_cartogram(afr, "POP2005")
 
 # plot it
-tm_shape(afr) + tm_borders() + 
-  tm_shape(afrnc) + tm_fill("POP2005", style="jenks") + 
-  tm_borders() + tm_layout(frame=F)
+tm_shape(afr) + tm_borders() +
+  tm_shape(afrnc) + tm_fill("POP2005", style = "jenks") +
+  tm_borders() + tm_layout(frame = FALSE)
 ```
 
 ### Non-Overlapping Circles Cartogram
+
 Many thanks to @rCarto for contributing the code!
 
 ```{r noc}
-library(cartogram)
-library(tmap)
-library(maptools)
-
-data(wrld_simpl)
-
-afr <- wrld_simpl[wrld_simpl$REGION==2,]
-afr <- spTransform(afr, CRS("+init=epsg:3395"))
-
 # construct cartogram
 afrnoc <- noc_cartogram(afr, "POP2005")
 
 # plot it
-tm_shape(afr) + tm_borders() + 
-  tm_shape(afrnoc) + tm_fill("POP2005", style="jenks") + 
-  tm_borders() + tm_layout(frame=F)
+tm_shape(afr) + tm_borders() +
+  tm_shape(afrnoc) + tm_fill("POP2005", style = "jenks") +
+  tm_borders() + tm_layout(frame = FALSE)
 ```
-
 
 ## sf support
 
@@ -115,18 +97,11 @@ Thanks to @Nowosad for speeding things up!
 
 ```{r sfsupport, fig.width=7}
 library(sf)
-library(cartogram)
-library(maptools)
-
-data(wrld_simpl)
-
-afr <- wrld_simpl[wrld_simpl$REGION==2,]
-afr <- spTransform(afr, CRS("+init=epsg:3395"))
-
+# Create an sf object
 afr_sf = st_as_sf(afr)
 
 # Display plots in two columns
-par(mfrow=c(1,2), mai=c(0,0,0,0))
+par(mfrow = c(1, 2), mai = c(0, 0, 0, 0))
 
 # Continuous Area Cartogram
 afr_sf_carto <- cartogram(afr_sf, "POP2005", 3)
@@ -137,8 +112,6 @@ afr_sf_nc <- nc_cartogram(afr_sf, "POP2005")
 plot(st_geometry(afr_sf))
 plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
 ```
-
-
 
 ## References
 

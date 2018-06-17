@@ -2,9 +2,17 @@
 % Please edit documentation in R/noc_cartogram.R
 \name{noc_cartogram}
 \alias{noc_cartogram}
+\alias{noc_cartogram.sf}
+\alias{noc_cartogram.SpatialPolygonsDataFrame}
 \title{Calculate Non-Overlapping Circles Cartogram}
 \usage{
 noc_cartogram(shp, weight, k = 5, m_weight = 1, itermax = 1000)
+
+\method{noc_cartogram}{sf}(shp, weight, k = 5, m_weight = 1,
+  itermax = 1000)
+
+\method{noc_cartogram}{SpatialPolygonsDataFrame}(shp, weight, k = 5,
+  m_weight = 1, itermax = 1000)
 }
 \arguments{
 \item{shp}{SpatialPolygonsDataFrame, SpatialPointsDataFrame or an sf object}
@@ -64,5 +72,5 @@ plot(afr_carto, main="distorted (sp)")
 plot(st_geometry(afr_sf_carto), main="distorted (sf)")
 }
 \references{
-Daniel, D. (1996). Area Cartograms: Their Use and Creation. In Concepts and Techniques in Modern Geography (CATMOG), 59.
+Dorling, D. (1996). Area Cartograms: Their Use and Creation. In Concepts and Techniques in Modern Geography (CATMOG), 59.
 }

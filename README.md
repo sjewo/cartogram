@@ -22,13 +22,13 @@ To upgrade to the latest development version of `cartogram`, install the
 package `devtools` and run the following command:
 
 ``` r
-devtools::install_github("rstudio/sparklyr")
+devtools::install_github("sjewo/cartogram")
 ```
 
 ## NEWS
 
   - \[0.1.0\] Non-Overlapping Circles Cartogram (sf and sp)
-  - \[0.0.3\] **sf** support added
+  - \[0.0.3\] sf support added
   - \[0.0.2\] Non-contiguous Area Cartogram
   - \[0.0.2\] Prepare data with missing or extreme values before
     cartogram calculation for faster convergence
@@ -42,8 +42,6 @@ devtools::install_github("rstudio/sparklyr")
 library(cartogram)
 library(tmap)
 library(maptools)
-#> Loading required package: sp
-#> Checking rgeos availability: TRUE
 
 data(wrld_simpl)
 
@@ -121,7 +119,6 @@ Thanks to @Nowosad for speeding things up\!
 
 ``` r
 library(sf)
-#> Linking to GEOS 3.6.2, GDAL 2.3.0, proj.4 5.0.1
 library(cartogram)
 library(maptools)
 

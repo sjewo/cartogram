@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#' Calculate cartogram boundaries
+#' Calculate Contiguous Cartogram Boundaries
 #'
 #' Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
 #'
@@ -66,7 +66,7 @@
 #' plot(afr_carto, main="distorted (sp)")
 #' plot(st_geometry(afr_sf_carto), main="distorted (sf)")
 #' 
-#' @references Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.
+#' @references Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
 cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
     UseMethod("cartogram")

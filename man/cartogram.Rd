@@ -4,7 +4,7 @@
 \alias{cartogram}
 \alias{cartogram.SpatialPolygonsDataFrame}
 \alias{cartogram.sf}
-\title{Calculate cartogram boundaries}
+\title{Calculate Contiguous Cartogram Boundaries}
 \usage{
 cartogram(shp, weight, itermax = 15, maxSizeError = 1.0001,
   prepare = "adjust", threshold = 0.05)
@@ -71,5 +71,5 @@ plot(st_geometry(afr_sf_carto), main="distorted (sf)")
 
 }
 \references{
-Dougenik, Chrisman, Niemeyer (1985): An Algorithm To Construct Continuous Area Cartograms. In: Professional Geographer, 37(1), 75-81.
+Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
 }

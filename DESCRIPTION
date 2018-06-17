@@ -12,7 +12,7 @@ Authors@R: c(
 Description: Construct continuous and non-contiguous area cartograms.
 URL: https://github.com/sjewo/cartogram
 BugReports: https://github.com/sjewo/cartogram/issues
-Imports: rgeos, sp, methods, sf
+Imports: rgeos, sp, methods, sf, packcircles
 Suggests: rgdal, maptools
 License: GPL-3
 Encoding: UTF-8

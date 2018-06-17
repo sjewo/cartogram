@@ -4,12 +4,13 @@ language: r
 matrix:
   include:
     - dist: trusty
+      r: oldrel
     - os: osx
       osx_image: xcode9.2
-      disable_homebrew: true    
+      disable_homebrew: true
+      r: 
 
 r:
-  - oldrel
   - release
   - devel
 

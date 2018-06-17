@@ -117,7 +117,8 @@ afr_sf_noc <- noc_cartogram(afr_sf, "POP2005")
 m1 = tm_shape(afr_sf_carto) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
   tm_layout(frame = FALSE)
 
-m2 = tm_shape(afr_sf_nc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+m2 = tm_shape(afr_sf) + tm_borders() + 
+  tm_shape(afr_sf_nc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
   tm_layout(frame = FALSE)
 
 m3 = tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +

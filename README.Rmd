@@ -6,6 +6,7 @@ output:
     fig_height: 5
 ---
 
+[![CRAN status](http://www.r-pkg.org/badges/version/cartogram)](https://cran.r-project.org/package=cartogram)
 [![Build Status](https://travis-ci.org/sjewo/cartogram.svg?branch=master)](https://travis-ci.org/sjewo/cartogram)
 [![CRAN Downloads](http://cranlogs.r-pkg.org/badges/cartogram)](https://cran.r-project.org/package=cartogram)
 
@@ -59,8 +60,8 @@ afr <- spTransform(afr, CRS("+init=epsg:3395"))
 afrc <- cartogram_cont(afr, "POP2005", itermax=5)
 
 # plot it
-tm_shape(afrc) + tm_fill("POP2005", style = "jenks") +
-  tm_borders() + tm_layout(frame = FALSE)
+tm_shape(afrc) + tm_polygons("POP2005", style = "jenks") +
+  tm_layout(frame = FALSE)
 ```
 
 ### Non-contiguous Area Cartogram
@@ -73,8 +74,8 @@ afrnc <- cartogram_ncont(afr, "POP2005")
 
 # plot it
 tm_shape(afr) + tm_borders() +
-  tm_shape(afrnc) + tm_fill("POP2005", style = "jenks") +
-  tm_borders() + tm_layout(frame = FALSE)
+  tm_shape(afrnc) + tm_polygons("POP2005", style = "jenks") +
+  tm_layout(frame = FALSE)
 ```
 
 ### Non-Overlapping Circles Cartogram
@@ -87,16 +88,17 @@ afrnoc <- cartogram_noc(afr, "POP2005")
 
 # plot it
 tm_shape(afr) + tm_borders() +
-  tm_shape(afrnoc) + tm_fill("POP2005", style = "jenks") +
-  tm_borders() + tm_layout(frame = FALSE)
+  tm_shape(afrnoc) + tm_polygons("POP2005", style = "jenks") +
+  tm_layout(frame = FALSE)
 ```
 
 ## sf support
 
 Thanks to @Nowosad for speeding things up!
 
-```{r sfsupport, fig.width=7}
+```{r sfsupport, fig.width=9, fig.height=3}
 library(sf)
+
 # Create an sf object
 afr_sf = st_as_sf(afr)
 
@@ -105,12 +107,29 @@ par(mfrow = c(1, 2), mai = c(0, 0, 0, 0))
 
 # Continuous Area Cartogram
 afr_sf_carto <- cartogram_cont(afr_sf, "POP2005", 3)
-plot(st_geometry(afr_sf_carto))
 
-# Plot Non-contiguous Area Cartogram
+# Non-contiguous Area Cartogram
 afr_sf_nc <- cartogram_ncont(afr_sf, "POP2005")
-plot(st_geometry(afr_sf))
-plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
+
+# Non-overlapping Circles Cartogram
+afr_sf_noc <- cartogram_noc(afr_sf, "POP2005")
+
+# Plots
+m1 = tm_shape(afr_sf_carto) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+  tm_layout(frame = FALSE)
+
+m2 = tm_shape(afr_sf) + tm_borders() + 
+  tm_shape(afr_sf_nc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+  tm_layout(frame = FALSE)
+
+m3 = tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+  tm_layout(frame = FALSE, legend.outside=T)
+
+ml <- tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks") +
+  tm_layout(frame = FALSE, legend.only=T, legend.position=c("center","center"))
+
+
+tmap_arrange(m1, m2, m3, ml, nrow = 1)
 ```
 
 ## References

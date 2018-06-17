@@ -1,6 +1,8 @@
 cartogram: Create Cartograms with R
 ================
 
+[![CRAN
+status](http://www.r-pkg.org/badges/version/cartogram)](https://cran.r-project.org/package=cartogram)
 [![Build
 Status](https://travis-ci.org/sjewo/cartogram.svg?branch=master)](https://travis-ci.org/sjewo/cartogram)
 [![CRAN
@@ -59,8 +61,8 @@ afrc <- cartogram_cont(afr, "POP2005", itermax=5)
 #> Mean size error for iteration 5: 3.56785782735669
 
 # plot it
-tm_shape(afrc) + tm_fill("POP2005", style = "jenks") +
-  tm_borders() + tm_layout(frame = FALSE)
+tm_shape(afrc) + tm_polygons("POP2005", style = "jenks") +
+  tm_layout(frame = FALSE)
 ```
 
 ![](man/figures/README-carto-1.png)<!-- -->
@@ -75,8 +77,8 @@ afrnc <- cartogram_ncont(afr, "POP2005")
 
 # plot it
 tm_shape(afr) + tm_borders() +
-  tm_shape(afrnc) + tm_fill("POP2005", style = "jenks") +
-  tm_borders() + tm_layout(frame = FALSE)
+  tm_shape(afrnc) + tm_polygons("POP2005", style = "jenks") +
+  tm_layout(frame = FALSE)
 ```
 
 ![](man/figures/README-nc-1.png)<!-- -->
@@ -91,8 +93,8 @@ afrnoc <- cartogram_noc(afr, "POP2005")
 
 # plot it
 tm_shape(afr) + tm_borders() +
-  tm_shape(afrnoc) + tm_fill("POP2005", style = "jenks") +
-  tm_borders() + tm_layout(frame = FALSE)
+  tm_shape(afrnoc) + tm_polygons("POP2005", style = "jenks") +
+  tm_layout(frame = FALSE)
 ```
 
 ![](man/figures/README-noc-1.png)<!-- -->
@@ -104,6 +106,7 @@ Thanks to @Nowosad for speeding things up\!
 ``` r
 library(sf)
 #> Linking to GEOS 3.6.2, GDAL 2.3.0, proj.4 5.0.1
+
 # Create an sf object
 afr_sf = st_as_sf(afr)
 
@@ -115,12 +118,29 @@ afr_sf_carto <- cartogram_cont(afr_sf, "POP2005", 3)
 #> Mean size error for iteration 1: 5.79457153280442
 #> Mean size error for iteration 2: 4.94825547349441
 #> Mean size error for iteration 3: 4.32626995057148
-plot(st_geometry(afr_sf_carto))
 
-# Plot Non-contiguous Area Cartogram
+# Non-contiguous Area Cartogram
 afr_sf_nc <- cartogram_ncont(afr_sf, "POP2005")
-plot(st_geometry(afr_sf))
-plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
+
+# Non-overlapping Circles Cartogram
+afr_sf_noc <- cartogram_noc(afr_sf, "POP2005")
+
+# Plots
+m1 = tm_shape(afr_sf_carto) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+  tm_layout(frame = FALSE)
+
+m2 = tm_shape(afr_sf) + tm_borders() + 
+  tm_shape(afr_sf_nc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+  tm_layout(frame = FALSE)
+
+m3 = tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+  tm_layout(frame = FALSE, legend.outside=T)
+
+ml <- tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks") +
+  tm_layout(frame = FALSE, legend.only=T, legend.position=c("center","center"))
+
+
+tmap_arrange(m1, m2, m3, ml, nrow = 1)
 ```
 
 ![](man/figures/README-sfsupport-1.png)<!-- -->

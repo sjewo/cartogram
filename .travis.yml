@@ -9,8 +9,7 @@ matrix:
         - sudo apt-get --yes --force-yes update -qq
         # sf dependencies:
         - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
-      r: oldrel
-      sudo: required
+      r: oldrel      
     - os: osx
       osx_image: xcode9.2
       disable_homebrew: true
@@ -21,6 +20,7 @@ r:
   - devel
 
 cache: packages
+sudo: required
 
 apt_packages:
   - libgdal-dev

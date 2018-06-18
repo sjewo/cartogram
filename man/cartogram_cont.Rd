@@ -6,19 +6,19 @@
 \alias{cartogram_cont.sf}
 \title{Calculate Contiguous Cartogram Boundaries}
 \usage{
-cartogram_cont(shp, weight, itermax = 15, maxSizeError = 1.0001,
+cartogram_cont(x, weight, itermax = 15, maxSizeError = 1.0001,
   prepare = "adjust", threshold = 0.05)
 
-\method{cartogram_cont}{SpatialPolygonsDataFrame}(shp, weight, itermax = 15,
+\method{cartogram_cont}{SpatialPolygonsDataFrame}(x, weight, itermax = 15,
   maxSizeError = 1.0001, prepare = "adjust", threshold = 0.05)
 
-\method{cartogram_cont}{sf}(shp, weight, itermax = 15,
-  maxSizeError = 1.0001, prepare = "adjust", threshold = 0.05)
+\method{cartogram_cont}{sf}(x, weight, itermax = 15, maxSizeError = 1.0001,
+  prepare = "adjust", threshold = 0.05)
 }
 \arguments{
-\item{shp}{SpatialPolygonDataFrame or an sf object}
+\item{x}{SpatialPolygonDataFrame or an sf object}
 
-\item{weight}{Name of the weighting variable in shp}
+\item{weight}{Name of the weighting variable in x}
 
 \item{itermax}{Maximum iterations for the cartogram transformation, if maxSizeError ist not reached}
 
@@ -32,7 +32,7 @@ cartogram_cont(shp, weight, itermax = 15, maxSizeError = 1.0001,
 \item{threshold}{Define threshold for data preparation}
 }
 \value{
-An object of the same class as shp
+An object of the same class as x
 }
 \description{
 Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)

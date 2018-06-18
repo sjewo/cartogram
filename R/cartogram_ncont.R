@@ -19,12 +19,12 @@
 #' @description Construct a non-contiguous area cartogram (Olson 1976).
 #'
 #' @name cartogram_ncont
-#' @param shp SpatialPolygonDataFrame or an sf object
-#' @param weight Name of the weighting variable in shp
+#' @param x SpatialPolygonDataFrame or an sf object
+#' @param weight Name of the weighting variable in x
 #' @param k Factor expansion for the unit with the greater value
 #' @param inplace If TRUE, each polygon is modified in its original place, 
 #' if FALSE multi-polygons are centered on their initial centroid
-#' @return An object of the same class as shp with resized polygon boundaries
+#' @return An object of the same class as x with resized polygon boundaries
 #' @export
 #' @import sp
 #' @import rgeos
@@ -57,12 +57,7 @@
 #' plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
 #'
 #' @references Olson, J. M. (1976). Noncontiguous Area Cartograms. In The Professional Geographer, 28(4), 371-380.
-cartogram_ncont <- function(shp, weight, k = 1, inplace = TRUE){
-
-  if (as.character(match.call()[[1]]) == "cartogram") {
-    message("Please use cartogram_ncont() instead of nc_cartogram().\n")
-  }
-
+cartogram_ncont <- function(x, weight, k = 1, inplace = TRUE){
   UseMethod("cartogram_ncont")
 }
 
@@ -70,16 +65,20 @@ cartogram_ncont <- function(shp, weight, k = 1, inplace = TRUE){
 #' @description This function has been renamed: Please use cartogram_ncont() instead of nc_cartogram().
 #'
 #' @export
-#' @inheritParams cartogram_ncont
+#' @param shp SpatialPolygonDataFrame or an sf object
+#' @inheritDotParams cartogram_ncont -x
 #' @keywords internal
-nc_cartogram <- cartogram_ncont
+nc_cartogram <- function(shp, ...) {
+  message("\nPlease use cartogram_ncont() instead of nc_cartogram().\n")
+  cartogram_ncont(x=shp, ...)
+}
 
 #' @rdname cartogram_ncont
 #' @export
-cartogram_ncont.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace = TRUE){
+cartogram_ncont.SpatialPolygonsDataFrame <- function(x, weight, k = 1, inplace = TRUE){
 
   var <- weight
-  spdf <- shp[!is.na(shp@data[, var]),]
+  spdf <- x[!is.na(x@data[, var]),]
   
   # size
   surf <- rgeos::gArea(spgeom = spdf, byid = TRUE)
@@ -106,8 +105,8 @@ cartogram_ncont.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace
 
 #' @rdname cartogram_ncont
 #' @export
-cartogram_ncont.sf <- function(shp, weight, k = 1, inplace = TRUE){
-  st_as_sf(cartogram_ncont.SpatialPolygonsDataFrame(as(shp, "Spatial"),
+cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
+  st_as_sf(cartogram_ncont.SpatialPolygonsDataFrame(as(x, "Spatial"),
                                         weight=weight, k=k, inplace=TRUE))
 }
 

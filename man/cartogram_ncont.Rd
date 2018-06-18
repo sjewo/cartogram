@@ -6,17 +6,17 @@
 \alias{cartogram_ncont.sf}
 \title{Calculate Non-Contiguous Cartogram Boundaries}
 \usage{
-cartogram_ncont(shp, weight, k = 1, inplace = TRUE)
+cartogram_ncont(x, weight, k = 1, inplace = TRUE)
 
-\method{cartogram_ncont}{SpatialPolygonsDataFrame}(shp, weight, k = 1,
+\method{cartogram_ncont}{SpatialPolygonsDataFrame}(x, weight, k = 1,
   inplace = TRUE)
 
-\method{cartogram_ncont}{sf}(shp, weight, k = 1, inplace = TRUE)
+\method{cartogram_ncont}{sf}(x, weight, k = 1, inplace = TRUE)
 }
 \arguments{
-\item{shp}{SpatialPolygonDataFrame or an sf object}
+\item{x}{SpatialPolygonDataFrame or an sf object}
 
-\item{weight}{Name of the weighting variable in shp}
+\item{weight}{Name of the weighting variable in x}
 
 \item{k}{Factor expansion for the unit with the greater value}
 
@@ -24,7 +24,7 @@ cartogram_ncont(shp, weight, k = 1, inplace = TRUE)
 if FALSE multi-polygons are centered on their initial centroid}
 }
 \value{
-An object of the same class as shp with resized polygon boundaries
+An object of the same class as x with resized polygon boundaries
 }
 \description{
 Construct a non-contiguous area cartogram (Olson 1976).

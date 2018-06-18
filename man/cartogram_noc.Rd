@@ -6,20 +6,19 @@
 \alias{cartogram_noc.SpatialPolygonsDataFrame}
 \title{Calculate Non-Overlapping Circles Cartogram}
 \usage{
-cartogram_noc(shp, weight, k = 5, m_weight = 1, itermax = 1000)
+cartogram_noc(x, weight, k = 5, m_weight = 1, itermax = 1000)
 
-\method{cartogram_noc}{sf}(shp, weight, k = 5, m_weight = 1,
-  itermax = 1000)
+\method{cartogram_noc}{sf}(x, weight, k = 5, m_weight = 1, itermax = 1000)
 
-\method{cartogram_noc}{SpatialPolygonsDataFrame}(shp, weight, k = 5,
+\method{cartogram_noc}{SpatialPolygonsDataFrame}(x, weight, k = 5,
   m_weight = 1, itermax = 1000)
 }
 \arguments{
-\item{shp}{SpatialPolygonsDataFrame, SpatialPointsDataFrame or an sf object}
+\item{x}{SpatialPolygonsDataFrame, SpatialPointsDataFrame or an sf object}
 
-\item{weight}{Name of the weighting variable in shp}
+\item{weight}{Name of the weighting variable in x}
 
-\item{k}{Share of the shp bounding box filled by the larger circle}
+\item{k}{Share of the bounding box of x filled by the larger circle}
 
 \item{m_weight}{Circles' movements weights. An optional vector of numeric weights 
 (0 to 1 inclusive) to 
@@ -32,7 +31,7 @@ value. Any values outside the range [0, 1] will be clamped to 0 or 1.}
 \item{itermax}{Maximum iterations for the cartogram transformation.}
 }
 \value{
-Non overlaping proportional circles of the same class as shp.
+Non overlaping proportional circles of the same class as x.
 }
 \description{
 Construct a cartogram which represents each geographic region 

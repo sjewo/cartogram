@@ -4,17 +4,18 @@
 \alias{nc_cartogram}
 \title{Calculate Non-Contiguous Cartogram Boundaries}
 \usage{
-nc_cartogram(shp, weight, k = 1, inplace = TRUE)
+nc_cartogram(shp, ...)
 }
 \arguments{
 \item{shp}{SpatialPolygonDataFrame or an sf object}
 
-\item{weight}{Name of the weighting variable in shp}
-
-\item{k}{Factor expansion for the unit with the greater value}
-
-\item{inplace}{If TRUE, each polygon is modified in its original place, 
+\item{...}{Arguments passed on to \code{cartogram_ncont}
+\describe{
+  \item{weight}{Name of the weighting variable in x}
+  \item{k}{Factor expansion for the unit with the greater value}
+  \item{inplace}{If TRUE, each polygon is modified in its original place, 
 if FALSE multi-polygons are centered on their initial centroid}
+}}
 }
 \description{
 This function has been renamed: Please use cartogram_ncont() instead of nc_cartogram().

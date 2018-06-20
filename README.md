@@ -29,7 +29,7 @@ devtools::install_github("sjewo/cartogram")
 
 ## NEWS
 
-  - \[0.1.0\] Non-Overlapping Circles Cartogram (sf and sp)
+  - \[0.1.0\] Non-Overlapping Circles Cartogram (Dorling)
   - \[0.0.3\] sf support added
   - \[0.0.2\] Non-contiguous Area Cartogram
   - \[0.0.2\] Prepare data with missing or extreme values before
@@ -44,8 +44,6 @@ devtools::install_github("sjewo/cartogram")
 library(cartogram)
 library(tmap)
 library(maptools)
-#> Loading required package: sp
-#> Checking rgeos availability: TRUE
 
 data(wrld_simpl)
 
@@ -53,7 +51,7 @@ afr <- wrld_simpl[wrld_simpl$REGION == 2, ]
 afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
-afrc <- cartogram_cont(afr, "POP2005", itermax=5)
+afr_cont <- cartogram_cont(afr, "POP2005", itermax=5)
 #> Mean size error for iteration 1: 5.79457153280442
 #> Mean size error for iteration 2: 4.99349670513046
 #> Mean size error for iteration 3: 4.39148731971216
@@ -61,11 +59,11 @@ afrc <- cartogram_cont(afr, "POP2005", itermax=5)
 #> Mean size error for iteration 5: 3.56785782735669
 
 # plot it
-tm_shape(afrc) + tm_polygons("POP2005", style = "jenks") +
+tm_shape(afr_cont) + tm_polygons("POP2005", style = "jenks") +
   tm_layout(frame = FALSE)
 ```
 
-![](man/figures/README-carto-1.png)<!-- -->
+![](man/figures/README-cont-1.png)<!-- -->
 
 ### Non-contiguous Area Cartogram
 
@@ -73,31 +71,30 @@ Many thanks to @rCarto and @neocarto for contributing the code\!
 
 ``` r
 # construct cartogram
-afrnc <- cartogram_ncont(afr, "POP2005")
+afr_ncont <- cartogram_ncont(afr, "POP2005")
 
 # plot it
 tm_shape(afr) + tm_borders() +
-  tm_shape(afrnc) + tm_polygons("POP2005", style = "jenks") +
+  tm_shape(afr_ncont) + tm_polygons("POP2005", style = "jenks") +
   tm_layout(frame = FALSE)
 ```
 
-![](man/figures/README-nc-1.png)<!-- -->
-
-### Non-Overlapping Circles Cartogram
+![](man/figures/README-ncont-1.png)<!-- --> q \#\#\# Non-Overlapping
+Circles Cartogram
 
 Many thanks to @rCarto for contributing the code\!
 
 ``` r
 # construct cartogram
-afrnoc <- cartogram_noc(afr, "POP2005")
+afr_dorling <- cartogram_dorling(afr, "POP2005")
 
 # plot it
 tm_shape(afr) + tm_borders() +
-  tm_shape(afrnoc) + tm_polygons("POP2005", style = "jenks") +
+  tm_shape(afr_dorling) + tm_polygons("POP2005", style = "jenks") +
   tm_layout(frame = FALSE)
 ```
 
-![](man/figures/README-noc-1.png)<!-- -->
+![](man/figures/README-dorling-1.png)<!-- -->
 
 ## sf support
 
@@ -105,38 +102,38 @@ Thanks to @Nowosad for speeding things up\!
 
 ``` r
 library(sf)
-#> Linking to GEOS 3.6.2, GDAL 2.3.0, proj.4 5.0.1
 
 # Create an sf object
-afr_sf = st_as_sf(afr)
+afr_sf <- st_as_sf(afr)
 
 # Display plots in two columns
 par(mfrow = c(1, 2), mai = c(0, 0, 0, 0))
 
 # Continuous Area Cartogram
-afr_sf_carto <- cartogram_cont(afr_sf, "POP2005", 3)
+afr_sf_cont <- cartogram_cont(afr_sf, "POP2005", 3)
 #> Mean size error for iteration 1: 5.79457153280442
 #> Mean size error for iteration 2: 4.94825547349441
 #> Mean size error for iteration 3: 4.32626995057148
 
 # Non-contiguous Area Cartogram
-afr_sf_nc <- cartogram_ncont(afr_sf, "POP2005")
+afr_sf_ncont <- cartogram_ncont(afr_sf, "POP2005")
 
 # Non-overlapping Circles Cartogram
-afr_sf_noc <- cartogram_noc(afr_sf, "POP2005")
+afr_sf_dorling <- cartogram_dorling(afr_sf, "POP2005")
 
 # Plots
-m1 = tm_shape(afr_sf_carto) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+m1 <- tm_shape(afr_sf_cont) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
   tm_layout(frame = FALSE)
 
-m2 = tm_shape(afr_sf) + tm_borders() + 
-  tm_shape(afr_sf_nc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+m2 <- tm_shape(afr_sf) + tm_borders() + 
+  tm_shape(afr_sf_ncont) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
   tm_layout(frame = FALSE)
 
-m3 = tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+m3 <- tm_shape(afr_sf) + tm_borders() + 
+  tm_shape(afr_sf_dorling) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
   tm_layout(frame = FALSE, legend.outside=T)
 
-ml <- tm_shape(afr_sf_noc) + tm_polygons("POP2005", style = "jenks") +
+ml <- tm_shape(afr_sf_dorling) + tm_polygons("POP2005", style = "jenks") +
   tm_layout(frame = FALSE, legend.only=T, legend.position=c("center","center"))
 
 

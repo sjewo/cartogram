@@ -44,6 +44,8 @@ devtools::install_github("sjewo/cartogram")
 library(cartogram)
 library(tmap)
 library(maptools)
+#> Loading required package: sp
+#> Checking rgeos availability: TRUE
 
 data(wrld_simpl)
 
@@ -51,7 +53,7 @@ afr <- wrld_simpl[wrld_simpl$REGION == 2, ]
 afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
-afr_cont <- cartogram_cont(afr, "POP2005", itermax=5)
+afr_cont <- cartogram_cont(afr, "POP2005", itermax = 5)
 #> Mean size error for iteration 1: 5.79457153280442
 #> Mean size error for iteration 2: 4.99349670513046
 #> Mean size error for iteration 3: 4.39148731971216
@@ -79,8 +81,9 @@ tm_shape(afr) + tm_borders() +
   tm_layout(frame = FALSE)
 ```
 
-![](man/figures/README-ncont-1.png)<!-- --> q \#\#\# Non-Overlapping
-Circles Cartogram
+![](man/figures/README-ncont-1.png)<!-- -->
+
+### Non-Overlapping Circles Cartogram
 
 Many thanks to @rCarto for contributing the code\!
 
@@ -102,12 +105,10 @@ Thanks to @Nowosad for speeding things up\!
 
 ``` r
 library(sf)
+#> Linking to GEOS 3.6.1, GDAL 2.2.4, proj.4 4.9.3
 
 # Create an sf object
 afr_sf <- st_as_sf(afr)
-
-# Display plots in two columns
-par(mfrow = c(1, 2), mai = c(0, 0, 0, 0))
 
 # Continuous Area Cartogram
 afr_sf_cont <- cartogram_cont(afr_sf, "POP2005", 3)
@@ -122,20 +123,19 @@ afr_sf_ncont <- cartogram_ncont(afr_sf, "POP2005")
 afr_sf_dorling <- cartogram_dorling(afr_sf, "POP2005")
 
 # Plots
-m1 <- tm_shape(afr_sf_cont) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+m1 <- tm_shape(afr_sf_cont) + tm_polygons("POP2005", style = "jenks", legend.show = FALSE) +
   tm_layout(frame = FALSE)
 
 m2 <- tm_shape(afr_sf) + tm_borders() + 
-  tm_shape(afr_sf_ncont) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+  tm_shape(afr_sf_ncont) + tm_polygons("POP2005", style = "jenks", legend.show = FALSE) +
   tm_layout(frame = FALSE)
 
 m3 <- tm_shape(afr_sf) + tm_borders() + 
-  tm_shape(afr_sf_dorling) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
-  tm_layout(frame = FALSE, legend.outside=T)
+  tm_shape(afr_sf_dorling) + tm_polygons("POP2005", style = "jenks", legend.show = FALSE) +
+  tm_layout(frame = FALSE, legend.outside = TRUE)
 
 ml <- tm_shape(afr_sf_dorling) + tm_polygons("POP2005", style = "jenks") +
-  tm_layout(frame = FALSE, legend.only=T, legend.position=c("center","center"))
-
+  tm_layout(frame = FALSE, legend.only = TRUE, legend.position = c("center", "center"))
 
 tmap_arrange(m1, m2, m3, ml, nrow = 1)
 ```

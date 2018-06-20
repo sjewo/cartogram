@@ -57,7 +57,7 @@ afr <- wrld_simpl[wrld_simpl$REGION == 2, ]
 afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
-afr_cont <- cartogram_cont(afr, "POP2005", itermax=5)
+afr_cont <- cartogram_cont(afr, "POP2005", itermax = 5)
 
 # plot it
 tm_shape(afr_cont) + tm_polygons("POP2005", style = "jenks") +
@@ -77,7 +77,7 @@ tm_shape(afr) + tm_borders() +
   tm_shape(afr_ncont) + tm_polygons("POP2005", style = "jenks") +
   tm_layout(frame = FALSE)
 ```
-q
+
 ### Non-Overlapping Circles Cartogram
 
 Many thanks to @rCarto for contributing the code!
@@ -102,9 +102,6 @@ library(sf)
 # Create an sf object
 afr_sf <- st_as_sf(afr)
 
-# Display plots in two columns
-par(mfrow = c(1, 2), mai = c(0, 0, 0, 0))
-
 # Continuous Area Cartogram
 afr_sf_cont <- cartogram_cont(afr_sf, "POP2005", 3)
 
@@ -115,20 +112,19 @@ afr_sf_ncont <- cartogram_ncont(afr_sf, "POP2005")
 afr_sf_dorling <- cartogram_dorling(afr_sf, "POP2005")
 
 # Plots
-m1 <- tm_shape(afr_sf_cont) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+m1 <- tm_shape(afr_sf_cont) + tm_polygons("POP2005", style = "jenks", legend.show = FALSE) +
   tm_layout(frame = FALSE)
 
 m2 <- tm_shape(afr_sf) + tm_borders() + 
-  tm_shape(afr_sf_ncont) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
+  tm_shape(afr_sf_ncont) + tm_polygons("POP2005", style = "jenks", legend.show = FALSE) +
   tm_layout(frame = FALSE)
 
 m3 <- tm_shape(afr_sf) + tm_borders() + 
-  tm_shape(afr_sf_dorling) + tm_polygons("POP2005", style = "jenks", legend.show=FALSE) +
-  tm_layout(frame = FALSE, legend.outside=T)
+  tm_shape(afr_sf_dorling) + tm_polygons("POP2005", style = "jenks", legend.show = FALSE) +
+  tm_layout(frame = FALSE, legend.outside = TRUE)
 
 ml <- tm_shape(afr_sf_dorling) + tm_polygons("POP2005", style = "jenks") +
-  tm_layout(frame = FALSE, legend.only=T, legend.position=c("center","center"))
-
+  tm_layout(frame = FALSE, legend.only = TRUE, legend.position = c("center", "center"))
 
 tmap_arrange(m1, m2, m3, ml, nrow = 1)
 ```

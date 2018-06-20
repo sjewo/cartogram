@@ -18,12 +18,13 @@
 #' @title Calculate Non-Contiguous Cartogram Boundaries
 #' @description Construct a non-contiguous area cartogram (Olson 1976).
 #'
-#' @param shp SpatialPolygonDataFrame or an sf object
-#' @param weight Name of the weighting variable in shp
+#' @name cartogram_ncont
+#' @param x SpatialPolygonDataFrame or an sf object
+#' @param weight Name of the weighting variable in x
 #' @param k Factor expansion for the unit with the greater value
 #' @param inplace If TRUE, each polygon is modified in its original place, 
 #' if FALSE multi-polygons are centered on their initial centroid
-#' @return An object of the same class as shp with resized polygon boundaries
+#' @return An object of the same class as x with resized polygon boundaries
 #' @export
 #' @import sp
 #' @import rgeos
@@ -39,7 +40,7 @@
 #'                    CRS("+init=epsg:3395"))
 #'
 #' # Create cartogram
-#' afr_nc <- nc_cartogram(afr, "POP2005")
+#' afr_nc <- cartogram_ncont(afr, "POP2005")
 #'
 #' # Plot
 #' plot(afr)
@@ -50,22 +51,34 @@
 #'
 #' afr_sf = st_as_sf(afr)
 #'
-#' afr_sf_nc <- nc_cartogram(afr_sf, "POP2005")
+#' afr_sf_nc <- cartogram_ncont(afr_sf, "POP2005")
 #'
 #' plot(st_geometry(afr_sf))
 #' plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
 #'
 #' @references Olson, J. M. (1976). Noncontiguous Area Cartograms. In The Professional Geographer, 28(4), 371-380.
-nc_cartogram <- function(shp, weight, k = 1, inplace = TRUE){
-  UseMethod("nc_cartogram")
+cartogram_ncont <- function(x, weight, k = 1, inplace = TRUE){
+  UseMethod("cartogram_ncont")
 }
 
-#' @rdname nc_cartogram
+#' @title Calculate Non-Contiguous Cartogram Boundaries
+#' @description This function has been renamed: Please use cartogram_ncont() instead of nc_cartogram().
+#'
 #' @export
-nc_cartogram.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace = TRUE){
+#' @param shp SpatialPolygonDataFrame or an sf object
+#' @inheritDotParams cartogram_ncont -x
+#' @keywords internal
+nc_cartogram <- function(shp, ...) {
+  message("\nPlease use cartogram_ncont() instead of nc_cartogram().\n")
+  cartogram_ncont(x=shp, ...)
+}
+
+#' @rdname cartogram_ncont
+#' @export
+cartogram_ncont.SpatialPolygonsDataFrame <- function(x, weight, k = 1, inplace = TRUE){
 
   var <- weight
-  spdf <- shp[!is.na(shp@data[, var]),]
+  spdf <- x[!is.na(x@data[, var]),]
   
   # size
   surf <- rgeos::gArea(spgeom = spdf, byid = TRUE)
@@ -90,10 +103,10 @@ nc_cartogram.SpatialPolygonsDataFrame <- function(shp, weight, k = 1, inplace = 
   return(spdf)
 }
 
-#' @rdname nc_cartogram
+#' @rdname cartogram_ncont
 #' @export
-nc_cartogram.sf <- function(shp, weight, k = 1, inplace = TRUE){
-  st_as_sf(nc_cartogram.SpatialPolygonsDataFrame(as(shp, "Spatial"),
+cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
+  st_as_sf(cartogram_ncont.SpatialPolygonsDataFrame(as(x, "Spatial"),
                                         weight=weight, k=k, inplace=TRUE))
 }
 

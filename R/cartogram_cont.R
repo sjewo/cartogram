@@ -14,12 +14,12 @@
 # You should have received a copy of the GNU General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#' Calculate Contiguous Cartogram Boundaries
+#' @title Calculate Contiguous Cartogram Boundaries
+#' @description Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
 #'
-#' Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
-#'
-#' @param shp SpatialPolygonDataFrame or an sf object
-#' @param weight Name of the weighting variable in shp
+#' @name cartogram_cont
+#' @param x SpatialPolygonDataFrame or an sf object
+#' @param weight Name of the weighting variable in x
 #' @param itermax Maximum iterations for the cartogram transformation, if maxSizeError ist not reached
 #' @param maxSizeError Stop if meanSizeError is smaller than maxSizeError
 #' @param prepare Weighting values are adjusted to reach convergence much earlier. Possible methods are 
@@ -27,7 +27,7 @@
 #' "remove", remove features with values lower than quantile at threshold,
 #' "none", don't adjust weighting values
 #' @param threshold Define threshold for data preparation
-#' @return An object of the same class as shp
+#' @return An object of the same class as x
 #' @export
 #' @import sp
 #' @import rgeos 
@@ -46,7 +46,7 @@
 #'                     CRS("+init=epsg:3395"))
 #'
 #' # Create cartogram
-#' afr_carto <- cartogram(afr, "POP2005", 3)
+#' afr_carto <- cartogram_cont(afr, "POP2005", 3)
 #'
 #' # Plot 
 #' par(mfcol=c(1,2))
@@ -58,7 +58,7 @@
 #'
 #' afr_sf = st_as_sf(afr)
 #'
-#' afr_sf_carto <- cartogram(afr_sf, "POP2005", 3)
+#' afr_sf_carto <- cartogram_cont(afr_sf, "POP2005", 3)
 #'
 #' # Plot 
 #' par(mfcol=c(1,3))
@@ -67,41 +67,53 @@
 #' plot(st_geometry(afr_sf_carto), main="distorted (sf)")
 #' 
 #' @references Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
-cartogram <- function(shp, weight, itermax=15, maxSizeError=1.0001,
+cartogram_cont <- function(x, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
-    UseMethod("cartogram")
+  UseMethod("cartogram_cont")
 }
 
-#' @rdname cartogram
+#' @title Calculate Contiguous Cartogram Boundaries
+#' @description This function has been renamed: Please use cartogram_cont() instead of cartogram().
+#'
 #' @export
-cartogram.SpatialPolygonsDataFrame <- function(shp, weight, itermax=15, maxSizeError=1.0001,
+#' @param shp SpatialPolygonDataFrame or an sf object
+#' @inheritDotParams cartogram_cont -x
+#' @keywords internal
+cartogram <- function(shp, ...) {
+  message("\nPlease use cartogram_cont() instead of cartogram().\n")
+  cartogram_cont(x=shp, ...)
+}
+
+#' @rdname cartogram_cont
+#' @export
+cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
 
   # prepare data
-  value <- shp@data[,weight]
+  value <- x@data[,weight]
 
   switch(prepare, 
          # remove missing and values below threshold
          "remove"={
            #maxValue <- quantile(value, probs=(1-threshold), na.rm=T)
            minValue <- quantile(value, probs=threshold, na.rm=T)
-           shp <- shp[value > minValue | !is.na(value),]
+           x <- x[value > minValue | !is.na(value),]
            value <- value[value > minValue | !is.na(value)]
          },
          # Adjust ratio
          "adjust"={
            if(any(is.na(value))) {
              warning("NA not allowed in weight vector. Features will be removed from Shape.")
-             shp <- shp[!is.na(value),]
+             x <- x[!is.na(value),]
              value <- value[!is.na(value)]
            }
 
            valueTotal <- sum(value, na.rm=T)
 
            # area for polygons and total area
-           area <- gArea(shp, byid=T)
+           area <- gArea(x, byid=T)
            area[area <0 ] <- 0
-           areaTotal <- gArea(shp)
+           areaTotal <- gArea(x)
 
            # prepare force field calculations
            desired <- areaTotal*value/valueTotal
@@ -119,16 +131,16 @@ cartogram.SpatialPolygonsDataFrame <- function(shp, weight, itermax=15, maxSizeE
   valueTotal <- sum(value, na.rm=T)
 
   # keep row names
-  rown <- rownames(shp@data)
+  rown <- rownames(x@data)
   # identify multi polygons
-  multipol <- sapply(seq_len(nrow(shp)), function(i) length(shp@polygons[[i]]@Polygons))
+  multipol <- sapply(seq_len(nrow(x)), function(i) length(x@polygons[[i]]@Polygons))
   ## save boundaries in lists  
-  tmpcoords <- lapply(seq_len(nrow(shp)), function(i) lapply(seq_len(multipol[i]), function(j) shp@polygons[[i]]@Polygons[[j]]@coords))
+  tmpcoords <- lapply(seq_len(nrow(x)), function(i) lapply(seq_len(multipol[i]), function(j) x@polygons[[i]]@Polygons[[j]]@coords))
 
   # set meanSizeError
   meanSizeError <- 100
 
-  shp.iter <- shp
+  x.iter <- x
 
   # iterate until itermax is reached
   for(z in 1:itermax) {
@@ -136,12 +148,12 @@ cartogram.SpatialPolygonsDataFrame <- function(shp, weight, itermax=15, maxSizeE
     if(meanSizeError < maxSizeError) break
 
     # polygon centroids (centroids for multipart polygons)
-    centroids <- coordinates(rgeos::gCentroid(shp.iter, byid=T))
+    centroids <- coordinates(rgeos::gCentroid(x.iter, byid=T))
 
     # area for polygons and total area
-    area <- rgeos::gArea(shp.iter, byid=T)
+    area <- rgeos::gArea(x.iter, byid=T)
     area[area <0 ] <- 0
-    areaTotal <- rgeos::gArea(shp.iter)
+    areaTotal <- rgeos::gArea(x.iter)
 
     # prepare force field calculations
     desired <- areaTotal*value/valueTotal
@@ -155,10 +167,10 @@ cartogram.SpatialPolygonsDataFrame <- function(shp, weight, itermax=15, maxSizeE
 
     message(paste0("Mean size error for iteration ", z ,": ", meanSizeError))
 
-    for(i in seq_along(shp.iter)) {
+    for(i in seq_along(x.iter)) {
       for(k in seq_len(multipol[i])) {
 
-        newpts <- shp.iter@polygons[[i]]@Polygons[[k]]@coords
+        newpts <- x.iter@polygons[[i]]@Polygons[[k]]@coords
 
         #distance 
         for(j in  seq_len(nrow(centroids))) {
@@ -182,46 +194,46 @@ cartogram.SpatialPolygonsDataFrame <- function(shp, weight, itermax=15, maxSizeE
     }
     
     # construct sp-object for area and centroid calculation
-    shp.iter <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) checkPolygonsGEOS(Polygons(lapply(tmpcoords[[x]], Polygon), rown[x]))),  proj4string = CRS(proj4string(shp)))
+    x.iter <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) checkPolygonsGEOS(Polygons(lapply(tmpcoords[[x]], Polygon), rown[x]))),  proj4string = CRS(proj4string(x)))
 
   }
 
   # construct final shape  
-  shp.carto <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) checkPolygonsGEOS(Polygons(lapply(tmpcoords[[x]], Polygon),rown[x]))), proj4string = CRS(proj4string(shp)))
+  x.carto <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) checkPolygonsGEOS(Polygons(lapply(tmpcoords[[x]], Polygon),rown[x]))), proj4string = CRS(proj4string(x)))
 
   # add data
-  shp.cartodf <- SpatialPolygonsDataFrame(shp.carto, shp@data)
-  return(shp.cartodf)
+  x.cartodf <- SpatialPolygonsDataFrame(x.carto, x@data)
+  return(x.cartodf)
 }
 
-#' @rdname cartogram
+#' @rdname cartogram_cont
 #' @export
-cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
+cartogram_cont.sf <- function(x, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
 
   # prepare data
-  value <- shp[[weight]]
+  value <- x[[weight]]
 
   switch(prepare, 
          # remove missing and values below threshold
          "remove"={
            #maxValue <- quantile(value, probs=(1-threshold), na.rm=T)
            minValue <- quantile(value, probs=threshold, na.rm=T)
-           shp <- shp[value > minValue | !is.na(value),]
+           x <- x[value > minValue | !is.na(value),]
            value <- value[value > minValue | !is.na(value)]
          },
          # Adjust ratio
          "adjust"={
            if(any(is.na(value))) {
              warning("NA not allowed in weight vector. Features will be removed from Shape.")
-             shp <- shp[!is.na(value),]
+             x <- x[!is.na(value),]
              value <- value[!is.na(value)]
            }
 
            valueTotal <- sum(value, na.rm=T)
 
            # area for polygons and total area
-           area <- as.numeric(st_area(shp))
+           area <- as.numeric(st_area(x))
            areaTotal <- sum(area)
            area[area <0 ] <- 0
 
@@ -243,7 +255,7 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
   # set meanSizeError
   meanSizeError <- 100
 
-  shp.iter <- shp
+  x.iter <- x
 
   # iterate until itermax is reached
   for(z in 1:itermax) {
@@ -251,14 +263,14 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
     if(meanSizeError < maxSizeError) break
 
     # polygon centroids (centroids for multipart polygons)
-    centroids_sf <- st_centroid(st_geometry(shp.iter))
+    centroids_sf <- st_centroid(st_geometry(x.iter))
     st_crs(centroids_sf) <- st_crs(NULL)
     centroids <- do.call(rbind, centroids_sf)
 
     # area for polygons and total area
-    area <- as.numeric(st_area(shp.iter))
+    area <- as.numeric(st_area(x.iter))
     area[area <0 ] <- 0
-    areaTotal <- as.numeric(sum(st_area(shp.iter)))
+    areaTotal <- as.numeric(sum(st_area(x.iter)))
 
     # prepare force field calculations
     desired <- areaTotal*value/valueTotal
@@ -272,8 +284,8 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
 
     message(paste0("Mean size error for iteration ", z ,": ", meanSizeError))
 
-    for(i in seq_len(nrow(shp.iter))) {
-      pts <- st_coordinates(st_geometry(shp.iter)[[i]])
+    for(i in seq_len(nrow(x.iter))) {
+      pts <- st_coordinates(st_geometry(x.iter)[[i]])
       idx <- unique(pts[, c("L1", "L2", "L3")])
 
       for(k in seq_len(nrow(idx))) {
@@ -298,13 +310,13 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
         }
 
         # save final coordinates from this iteration to coordinate list
-        st_geometry(shp.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
+        st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
       }
     }
   }
 
   # 
-  return(shp.iter)
+  return(x.iter)
 }
 
 
@@ -317,6 +329,7 @@ cartogram.sf <- function(shp, weight, itermax=15, maxSizeError=1.0001,
 #' @param properly use \code{\link[rgeos]{gContainsProperly}} rather than \code{\link[rgeos]{gContains}}
 #' @param useSTRtree use \pkg{rgeos} STRtree in checking holes, which is much faster, but uses a lot of memory and does not release it on completion
 #' @param force ignore errors from \code{\link[rgeos]{createPolygonsComment}}
+#' @keywords internal
 #' @import rgeos 
 checkPolygonsGEOS <- function(obj, properly=TRUE, force=TRUE, useSTRtree=FALSE) {
   if (!is(obj, "Polygons")) 

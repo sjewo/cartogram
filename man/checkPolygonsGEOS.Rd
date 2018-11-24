@@ -4,7 +4,8 @@
 \alias{checkPolygonsGEOS}
 \title{Check polygons}
 \usage{
-checkPolygonsGEOS(obj, properly = TRUE, force = TRUE, useSTRtree = FALSE)
+checkPolygonsGEOS(obj, properly = TRUE, force = TRUE,
+  useSTRtree = FALSE)
 }
 \arguments{
 \item{obj}{Polygons object}

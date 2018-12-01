@@ -1,4 +1,5 @@
-[0.0.4] Non-Overlapping Circles Cartogram (sp and sf)
+[0.1.1] Speed up sf code
+[0.1.0] Non-Overlapping Circles Cartogram (Dorling)
 [0.0.3] sf support added
 [0.0.2] Non-contiguous Area Cartogram
 [0.0.2] Prepare data with missing or extreme values before cartogram calculation for faster convergence

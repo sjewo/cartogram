@@ -9,11 +9,12 @@
 cartogram_cont(x, weight, itermax = 15, maxSizeError = 1.0001,
   prepare = "adjust", threshold = 0.05)
 
-\method{cartogram_cont}{SpatialPolygonsDataFrame}(x, weight, itermax = 15,
-  maxSizeError = 1.0001, prepare = "adjust", threshold = 0.05)
+\method{cartogram_cont}{SpatialPolygonsDataFrame}(x, weight,
+  itermax = 15, maxSizeError = 1.0001, prepare = "adjust",
+  threshold = 0.05)
 
-\method{cartogram_cont}{sf}(x, weight, itermax = 15, maxSizeError = 1.0001,
-  prepare = "adjust", threshold = 0.05)
+\method{cartogram_cont}{sf}(x, weight, itermax = 15,
+  maxSizeError = 1.0001, prepare = "adjust", threshold = 0.05)
 }
 \arguments{
 \item{x}{SpatialPolygonDataFrame or an sf object}

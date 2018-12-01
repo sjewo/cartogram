@@ -208,114 +208,116 @@ cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSi
 
 #' @rdname cartogram_cont
 #' @export
-cartogram_cont.sf <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold=0.05) {
-
+cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
+                              prepare = "adjust", threshold = 0.05) {
   # prepare data
   value <- x[[weight]]
-
-  switch(prepare, 
+  
+  
+  switch(prepare,
          # remove missing and values below threshold
-         "remove"={
+         "remove" = {
            #maxValue <- quantile(value, probs=(1-threshold), na.rm=T)
-           minValue <- quantile(value, probs=threshold, na.rm=T)
-           x <- x[value > minValue | !is.na(value),]
+           minValue <- quantile(value, probs = threshold, na.rm = T)
+           x <- x[value > minValue | !is.na(value), ]
            value <- value[value > minValue | !is.na(value)]
          },
          # Adjust ratio
-         "adjust"={
-           if(any(is.na(value))) {
+         "adjust" = {
+           if (any(is.na(value))) {
              warning("NA not allowed in weight vector. Features will be removed from Shape.")
-             x <- x[!is.na(value),]
+             x <- x[!is.na(value), ]
              value <- value[!is.na(value)]
            }
-
-           valueTotal <- sum(value, na.rm=T)
-
+           
            # area for polygons and total area
            area <- as.numeric(st_area(x))
            areaTotal <- sum(area)
-           area[area <0 ] <- 0
-
+           area[area < 0] <- 0
+           
+           # sum up total value
+           valueTotal <- sum(value, na.rm = TRUE)
+           
            # prepare force field calculations
-           desired <- areaTotal*value/valueTotal
-           ratio <- desired/area
-           maxRatio <- quantile(ratio, probs=(1-threshold))
-           minRatio <- quantile(ratio, probs=threshold)
-
-           # adjust values 
-           value[ratio > maxRatio] <- (maxRatio * area[ratio > maxRatio] * valueTotal)/areaTotal
-           value[ratio < minRatio] <- (minRatio * area[ratio < minRatio] * valueTotal)/areaTotal
+           desired <- areaTotal * value / valueTotal
+           ratio <- desired / area
+           maxRatio <- quantile(ratio, probs = (1 - threshold))
+           minRatio <- quantile(ratio, probs = threshold)
+           
+           # adjust values
+           value[ratio > maxRatio] <- (maxRatio * area[ratio > maxRatio] * valueTotal) / areaTotal
+           value[ratio < minRatio] <- (minRatio * area[ratio < minRatio] * valueTotal) / areaTotal
          },
-         "none"={})
-
+         "none" = {
+         })
+  
+  
   # sum up total value
-  valueTotal <- sum(value, na.rm=T)
-
+  valueTotal <- sum(value, na.rm = TRUE)
+  
   # set meanSizeError
   meanSizeError <- 100
-
+  
   x.iter <- x
-
+  
   # iterate until itermax is reached
-  for(z in 1:itermax) {
+  for (z in 1:itermax) {
     # break if mean Sizer Error is less than maxSizeError
-    if(meanSizeError < maxSizeError) break
-
+    if (meanSizeError < maxSizeError) break
+    
+    # geometry
+    x.iter_geom <- st_geometry(x.iter)
+    
     # polygon centroids (centroids for multipart polygons)
-    centroids_sf <- st_centroid(st_geometry(x.iter))
+    centroids_sf <- st_centroid(x.iter_geom)
     st_crs(centroids_sf) <- st_crs(NULL)
     centroids <- do.call(rbind, centroids_sf)
-
+    
     # area for polygons and total area
     area <- as.numeric(st_area(x.iter))
-    area[area <0 ] <- 0
-    areaTotal <- as.numeric(sum(st_area(x.iter)))
-
+    areaTotal <- as.numeric(sum(area))
+    area[area < 0] <- 0
+    
     # prepare force field calculations
-    desired <- areaTotal*value/valueTotal
-    desired[desired==0] <- 0.01 # set minimum size to prevent inf values size Error
-    radius <- sqrt(area/pi)
-    mass <- sqrt(desired/pi) - sqrt(area/pi)
-
-    sizeError <- apply(cbind(area,desired), 1, max)/apply(cbind(area,desired), 1, min)
-    meanSizeError <- mean(sizeError, na.rm=T)
-    forceReductionFactor <- 1/(1+meanSizeError)
-
-    message(paste0("Mean size error for iteration ", z ,": ", meanSizeError))
-
-    for(i in seq_len(nrow(x.iter))) {
-      pts <- st_coordinates(st_geometry(x.iter)[[i]])
+    desired <- areaTotal * value / valueTotal
+    desired[desired == 0] <- 0.01 # set minimum size to prevent inf values size Error
+    radius <- sqrt(area / pi)
+    mass <- sqrt(desired / pi) - sqrt(area / pi)
+    
+    sizeError <- apply(cbind(area, desired), 1, max) / apply(cbind(area, desired), 1, min)
+    meanSizeError <- mean(sizeError, na.rm = TRUE)
+    forceReductionFactor <- 1 / (1 + meanSizeError)
+    
+    message(paste0("Mean size error for iteration ", z , ": ", meanSizeError))
+    
+    for (i in seq_len(nrow(x.iter))) {
+      pts <- st_coordinates(x.iter_geom[[i]])
       idx <- unique(pts[, c("L1", "L2", "L3")])
-
-      for(k in seq_len(nrow(idx))) {
-
-        newpts <- pts[pts[,"L1"]==idx[k, "L1"] & pts[, "L2"]==idx[k, "L2"], c("X","Y")]
-        newpts_sf <- st_as_sf(data.frame(newpts), coords=c("X","Y"))
-        distances <- st_distance(newpts_sf, centroids_sf, by_element=FALSE)
-
-        #distance 
-        for(j in  seq_len(nrow(centroids))) {
-
+      
+      for (k in seq_len(nrow(idx))) {
+        newpts <- pts[pts[, "L1"] == idx[k, "L1"] & pts[, "L2"] == idx[k, "L2"], c("X", "Y")]
+        distances <- spDists(newpts, centroids)
+        
+        #distance
+        for (j in  seq_len(nrow(centroids))) {
           distance <- distances[, j]
           
-          # calculate force vector        
+          # calculate force vector
           Fij <- mass[j] * radius[j] / distance
-          Fbij <- mass[j] * (distance/radius[j])^2 * (4 - 3*(distance/radius[j]))
+          Fbij <- mass[j] * (distance / radius[j]) ^ 2 * (4 - 3 * (distance / radius[j]))
           Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
           Fij <- Fij * forceReductionFactor / distance
-
+          
           # calculate new border coordinates
-          newpts <- newpts + cbind(X1=Fij, X2=Fij) * (newpts - centroids[rep(j,nrow(newpts)),])    
+          newpts <- newpts + cbind(X1 = Fij, X2 = Fij) * (newpts - centroids[rep(j, nrow(newpts)), ])
         }
-
+        
         # save final coordinates from this iteration to coordinate list
         st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
       }
     }
   }
-
-  # 
+  
   return(x.iter)
 }
 

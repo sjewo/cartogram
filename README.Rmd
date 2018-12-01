@@ -36,6 +36,7 @@ devtools::install_github("sjewo/cartogram")
 
 ## NEWS
 
+* [0.1.1] Speedup sf code 
 * [0.1.0] Non-Overlapping Circles Cartogram (Dorling)
 * [0.0.3] sf support added
 * [0.0.2] Non-contiguous Area Cartogram

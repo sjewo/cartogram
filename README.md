@@ -29,6 +29,7 @@ devtools::install_github("sjewo/cartogram")
 
 ## NEWS
 
+  - \[0.1.1\] Speedup sf code
   - \[0.1.0\] Non-Overlapping Circles Cartogram (Dorling)
   - \[0.0.3\] sf support added
   - \[0.0.2\] Non-contiguous Area Cartogram
@@ -105,7 +106,7 @@ Thanks to @Nowosad for speeding things up\!
 
 ``` r
 library(sf)
-#> Linking to GEOS 3.6.1, GDAL 2.2.4, proj.4 4.9.3
+#> Linking to GEOS 3.7.0, GDAL 2.3.2, PROJ 5.2.0
 
 # Create an sf object
 afr_sf <- st_as_sf(afr)
@@ -114,7 +115,7 @@ afr_sf <- st_as_sf(afr)
 afr_sf_cont <- cartogram_cont(afr_sf, "POP2005", 3)
 #> Mean size error for iteration 1: 5.79457153280442
 #> Mean size error for iteration 2: 4.94825547349441
-#> Mean size error for iteration 3: 4.32626995057148
+#> Mean size error for iteration 3: 4.32626995057149
 
 # Non-contiguous Area Cartogram
 afr_sf_ncont <- cartogram_ncont(afr_sf, "POP2005")

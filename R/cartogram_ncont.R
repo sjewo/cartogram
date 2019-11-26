@@ -90,7 +90,7 @@ cartogram_ncont.SpatialPolygonsDataFrame <- function(x, weight, k = 1, inplace =
   n <- nrow(spdf)
   for(i in 1:n){
     x <- rescalePoly(spdf[i, ], inplace = inplace, r = spdf[i,]$r)
-    spdf@polygons[[i]] <- checkPolygonsGEOS(x@polygons[[1]])
+    spdf@polygons[[i]] <- maptools:::checkPolygonsGEOS(x@polygons[[1]])
   } 
   spdf@data <- spdf@data[, 1:(ncol(spdf)-1)]
   rp <- rank(-v, ties.method = "random")

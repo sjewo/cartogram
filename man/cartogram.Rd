@@ -9,17 +9,18 @@ cartogram(shp, ...)
 \arguments{
 \item{shp}{SpatialPolygonDataFrame or an sf object}
 
-\item{...}{Arguments passed on to \code{cartogram_cont}
-\describe{
-  \item{weight}{Name of the weighting variable in x}
-  \item{itermax}{Maximum iterations for the cartogram transformation, if maxSizeError ist not reached}
-  \item{maxSizeError}{Stop if meanSizeError is smaller than maxSizeError}
-  \item{prepare}{Weighting values are adjusted to reach convergence much earlier. Possible methods are 
+\item{...}{
+  Arguments passed on to \code{\link[=cartogram_cont]{cartogram_cont}}
+  \describe{
+    \item{\code{weight}}{Name of the weighting variable in x}
+    \item{\code{itermax}}{Maximum iterations for the cartogram transformation, if maxSizeError ist not reached}
+    \item{\code{maxSizeError}}{Stop if meanSizeError is smaller than maxSizeError}
+    \item{\code{prepare}}{Weighting values are adjusted to reach convergence much earlier. Possible methods are 
 "adjust", adjust values to restrict the mass vector to the quantiles defined by threshold and 1-threshold (default),
 "remove", remove features with values lower than quantile at threshold,
 "none", don't adjust weighting values}
-  \item{threshold}{Define threshold for data preparation}
-}}
+    \item{\code{threshold}}{Define threshold for data preparation}
+  }}
 }
 \description{
 This function has been renamed: Please use cartogram_cont() instead of cartogram().

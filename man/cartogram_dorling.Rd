@@ -8,11 +8,9 @@
 \usage{
 cartogram_dorling(x, weight, k = 5, m_weight = 1, itermax = 1000)
 
-\method{cartogram_dorling}{sf}(x, weight, k = 5, m_weight = 1,
-  itermax = 1000)
+\method{cartogram_dorling}{sf}(x, weight, k = 5, m_weight = 1, itermax = 1000)
 
-\method{cartogram_dorling}{SpatialPolygonsDataFrame}(x, weight, k = 5,
-  m_weight = 1, itermax = 1000)
+\method{cartogram_dorling}{SpatialPolygonsDataFrame}(x, weight, k = 5, m_weight = 1, itermax = 1000)
 }
 \arguments{
 \item{x}{SpatialPolygonsDataFrame, SpatialPointsDataFrame or an sf object}

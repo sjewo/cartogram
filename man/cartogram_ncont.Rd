@@ -8,8 +8,7 @@
 \usage{
 cartogram_ncont(x, weight, k = 1, inplace = TRUE)
 
-\method{cartogram_ncont}{SpatialPolygonsDataFrame}(x, weight, k = 1,
-  inplace = TRUE)
+\method{cartogram_ncont}{SpatialPolygonsDataFrame}(x, weight, k = 1, inplace = TRUE)
 
 \method{cartogram_ncont}{sf}(x, weight, k = 1, inplace = TRUE)
 }

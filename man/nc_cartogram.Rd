@@ -9,13 +9,14 @@ nc_cartogram(shp, ...)
 \arguments{
 \item{shp}{SpatialPolygonDataFrame or an sf object}
 
-\item{...}{Arguments passed on to \code{cartogram_ncont}
-\describe{
-  \item{weight}{Name of the weighting variable in x}
-  \item{k}{Factor expansion for the unit with the greater value}
-  \item{inplace}{If TRUE, each polygon is modified in its original place, 
+\item{...}{
+  Arguments passed on to \code{\link[=cartogram_ncont]{cartogram_ncont}}
+  \describe{
+    \item{\code{weight}}{Name of the weighting variable in x}
+    \item{\code{k}}{Factor expansion for the unit with the greater value}
+    \item{\code{inplace}}{If TRUE, each polygon is modified in its original place, 
 if FALSE multi-polygons are centered on their initial centroid}
-}}
+  }}
 }
 \description{
 This function has been renamed: Please use cartogram_ncont() instead of nc_cartogram().

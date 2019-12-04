@@ -76,69 +76,46 @@ nc_cartogram <- function(shp, ...) {
 #' @rdname cartogram_ncont
 #' @export
 cartogram_ncont.SpatialPolygonsDataFrame <- function(x, weight, k = 1, inplace = TRUE){
+  as(cartogram_cont.sf(st_as_sf(x), weight, k = k, inplace = inplace), 'Spatial')
+}
 
+
+#' @rdname cartogram_ncont
+#' @export
+cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
+  
   var <- weight
-  spdf <- x[!is.na(x@data[, var]),]
+  spdf <- x[!is.na(x[, var, drop=T]),]
   
   # size
-  surf <- rgeos::gArea(spgeom = spdf, byid = TRUE)
-  v <- spdf@data[, var] 
+  surf <- st_area(spdf, by_element=T)
+  v <- spdf[, var, drop=T] 
   mv <- max(v)
   ms <- surf[v==mv]
   wArea <- k * v * (ms / mv)
   spdf$r <- sqrt( wArea/ surf)
   n <- nrow(spdf)
   for(i in 1:n){
-    x <- rescalePoly(spdf[i, ], inplace = inplace, r = spdf[i,]$r)
-    spdf@polygons[[i]] <- maptools:::checkPolygonsGEOS(x@polygons[[1]])
+    st_geometry(spdf[i,]) <- rescalePoly.sf(spdf[i, ], 
+                                         inplace = inplace, 
+                                         r = as.numeric(spdf[i,]$r))
   } 
-  spdf@data <- spdf@data[, 1:(ncol(spdf)-1)]
-  rp <- rank(-v, ties.method = "random")
-  num <- integer(n)
-  for (i in 1:n){
-    num[i] <- which(rp == i)
-  }
-  spdf <- spdf[num, ]
-  spdf@plotOrder <- 1:n
-  return(spdf)
+  spdf$r <- NULL
+  return(return(st_buffer(spdf, 0)))
 }
 
-#' @rdname cartogram_ncont
-#' @export
-cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
-  st_as_sf(cartogram_ncont.SpatialPolygonsDataFrame(as(x, "Spatial"),
-                                        weight=weight, k=k, inplace=TRUE))
-}
-
-rescalePoly <- function(spdf, inplace = TRUE, r = 1){
-  nsubpolygon <- length(spdf@polygons[[1]]@Polygons)
-  x <- logical(0)
-  for (i in 1:nsubpolygon){
-    hole <- spdf@polygons[[1]]@Polygons[[i]]@hole
-    x <- c(x,hole)
+rescalePoly.sf <- function(p, r = 1, inplace = T){
+  
+  co <- st_geometry(p)
+  
+  if(inplace) {
+    cntr <- st_centroid(co)
+    ps <- (co - cntr) * r + cntr
+  } else {
+    cop <- st_cast(co, "POLYGON")
+    cntrd = st_centroid(cop) 
+    ps <- st_union((cop - cntrd) * r + cntrd)
   }
-  if (inplace==FALSE){
-    consp <- rgeos::gConvexHull(spdf)
-    centerM <- sp::coordinates(consp)
-  }
-  for (i in 1:nsubpolygon){
-    if(inplace){
-      if(x[i]==FALSE){
-        center <- spdf@polygons[[1]]@Polygons[[i]]@labpt
-      }
-    }else{
-      center <- centerM
-    }
-    spdf@polygons[[1]]@Polygons[[i]]@coords <- 
-      rescale(spdf@polygons[[1]]@Polygons[[i]]@coords, center, r)
-  }  
-  return(spdf)
-}
-
-rescale <- function(vertices, center, r){
-  p <- vertices
-  p2 <- p
-  p2[,1] <- (1 - r) * center[1] + r * p[,1] 
-  p2[,2] <- (1 - r) * center[2] + r * p[,2] 
-  p2
+  
+  return(ps)
 }

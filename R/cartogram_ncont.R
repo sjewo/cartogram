@@ -93,17 +93,19 @@ cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
   mv <- max(v)
   ms <- surf[v==mv]
   wArea <- k * v * (ms / mv)
-  spdf$r <- sqrt( wArea/ surf)
+  spdf$r <- as.numeric(sqrt( wArea/ surf))
+  spdf$r[spdf$r == 0] <- 0.001 # don't shrink polygons to zero area
   n <- nrow(spdf)
   for(i in 1:n){
     st_geometry(spdf[i,]) <- rescalePoly.sf(spdf[i, ], 
                                          inplace = inplace, 
-                                         r = as.numeric(spdf[i,]$r))
+                                         r = spdf[i,]$r)
   } 
   spdf$r <- NULL
   return(return(st_buffer(spdf, 0)))
 }
 
+#' @importFrom sf st_geometry st_centroid st_cast st_union
 rescalePoly.sf <- function(p, r = 1, inplace = T){
   
   co <- st_geometry(p)

@@ -26,8 +26,6 @@
 #' if FALSE multi-polygons are centered on their initial centroid
 #' @return An object of the same class as x with resized polygon boundaries
 #' @export
-#' @import sp
-#' @import rgeos
 #' @importFrom methods is slot as
 #' @examples
 #' library(maptools)

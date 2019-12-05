@@ -29,8 +29,6 @@
 #' @param threshold Define threshold for data preparation
 #' @return An object of the same class as x
 #' @export
-#' @import sp
-#' @import rgeos 
 #' @importFrom methods is slot
 #' @importFrom stats quantile
 #' @importFrom sf st_area st_as_sf st_centroid st_coordinates st_distance st_geometry st_geometry<- st_point st_crs st_crs<-
@@ -85,6 +83,7 @@ cartogram <- function(shp, ...) {
 }
 
 #' @rdname cartogram_cont
+#' @importFrom sf st_as_sf
 #' @export
 cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
@@ -94,6 +93,7 @@ cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSi
 }
 
 #' @rdname cartogram_cont
+#' @importFrom sf st_area st_geometry st_centroid st_crs st_coordinates st_buffer
 #' @export
 cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
                               prepare = "adjust", threshold = 0.05) {
@@ -182,7 +182,14 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
 
       for (k in seq_len(nrow(idx))) {
         newpts <- pts[pts[, "L1"] == idx[k, "L1"] & pts[, "L2"] == idx[k, "L2"], c("X", "Y")]
-        distances <- spDists(newpts, centroids)
+        
+        distances <- apply(centroids, 1, function(pt) {
+          ptm <- matrix(pt, nrow=nrow(newpts), ncol=2, byrow=T)
+          sqrt(rowSums((newpts - ptm)^2))
+        })
+        
+        #dold <- spDists(newpts, centroids)
+        #all.equal(distances, dold)
         
         #distance
         for (j in  seq_len(nrow(centroids))) {

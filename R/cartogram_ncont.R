@@ -106,6 +106,7 @@ cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
 }
 
 #' @importFrom sf st_geometry st_centroid st_cast st_union
+#' @keywords internal
 rescalePoly.sf <- function(p, r = 1, inplace = T){
   
   co <- st_geometry(p)

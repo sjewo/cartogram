@@ -93,7 +93,7 @@ cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSi
 }
 
 #' @rdname cartogram_cont
-#' @importFrom sf st_area st_geometry st_centroid st_crs st_coordinates st_buffer
+#' @importFrom sf st_area st_geometry st_geometry_type st_centroid st_crs st_coordinates st_buffer
 #' @export
 cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
                               prepare = "adjust", threshold = 0.05) {

@@ -72,13 +72,15 @@ nc_cartogram <- function(shp, ...) {
 }
 
 #' @rdname cartogram_ncont
+#' @importFrom sf st_as_sf
 #' @export
 cartogram_ncont.SpatialPolygonsDataFrame <- function(x, weight, k = 1, inplace = TRUE){
-  as(cartogram_cont.sf(st_as_sf(x), weight, k = k, inplace = inplace), 'Spatial')
+  as(cartogram_ncont.sf(st_as_sf(x), weight, k = k, inplace = inplace), 'Spatial')
 }
 
 
 #' @rdname cartogram_ncont
+#' @importFrom sf st_geometry st_area st_buffer
 #' @export
 cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
   

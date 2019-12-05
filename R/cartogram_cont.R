@@ -100,7 +100,6 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
   # prepare data
   value <- x[[weight]]
   
-  
   switch(prepare,
          # remove missing and values below threshold
          "remove" = {
@@ -179,8 +178,8 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     
     for (i in seq_len(nrow(x.iter))) {
       pts <- st_coordinates(x.iter_geom[[i]])
-      idx <- unique(pts[, c("L1", "L2", "L3")])
-      
+      idx <- unique(pts[, colnames(pts) %in% c("L1", "L2", "L3")])
+
       for (k in seq_len(nrow(idx))) {
         newpts <- pts[pts[, "L1"] == idx[k, "L1"] & pts[, "L2"] == idx[k, "L2"], c("X", "Y")]
         distances <- spDists(newpts, centroids)
@@ -200,7 +199,11 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
         }
         
         # save final coordinates from this iteration to coordinate list
-        st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
+        if (st_geometry_type(st_geometry(x.iter)[[i]]) == "POLYGON"){
+          st_geometry(x.iter)[[i]][[idx[k, "L1"]]] <- newpts
+        } else {
+          st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
+        }
       }
     }
   }
@@ -208,5 +211,3 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
   # return and try to fix self-intersections
   return(st_buffer(x.iter, 0))
 }
-
-

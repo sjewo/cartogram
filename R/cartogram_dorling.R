@@ -53,11 +53,13 @@ cartogram_dorling <- function(x, weight, k = 5, m_weight = 1, itermax= 1000) {
 }
 
 #' @rdname cartogram_dorling
+#' @importFrom sf st_is_longlat st_as_sf st_geometry st_coordinates st_geometry st_centroid st_crs
+#' @importFrom packcircles circleRepelLayout
 #' @export
 cartogram_dorling.sf <- function(x, weight, k = 5, m_weight = 1, itermax= 1000){
   # proj or unproj
   if (sf::st_is_longlat(x)) {
-    warning("Using an unprojected map. Converting to equal area is recommended", call. = FALSE)
+    stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
   }
   # no 0 values
   x <- x[x[[weight]]>0,]
@@ -82,5 +84,5 @@ cartogram_dorling.sf <- function(x, weight, k = 5, m_weight = 1, itermax= 1000){
 #' @rdname cartogram_dorling
 #' @export
 cartogram_dorling.SpatialPolygonsDataFrame <- function(x, weight, k = 5, m_weight = 1, itermax = 1000){
-  as(cartogram_dorling.sf(st_as_sf(x), weight = weight, k = k, m_weight = m_weight, itermax = itermax), "Spatial")
+  as(cartogram_dorling.sf(sf::st_as_sf(x), weight = weight, k = k, m_weight = m_weight, itermax = itermax), "Spatial")
 }

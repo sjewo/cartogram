@@ -67,7 +67,7 @@ cartogram_ncont <- function(x, weight, k = 1, inplace = TRUE){
 #' @inheritDotParams cartogram_ncont -x
 #' @keywords internal
 nc_cartogram <- function(shp, ...) {
-  message("\nPlease use cartogram_ncont() instead of nc_cartogram().\n")
+  message("\nPlease use cartogram_ncont() instead of nc_cartogram().\n", call. = F)
   cartogram_ncont(x=shp, ...)
 }
 
@@ -75,20 +75,24 @@ nc_cartogram <- function(shp, ...) {
 #' @importFrom sf st_as_sf
 #' @export
 cartogram_ncont.SpatialPolygonsDataFrame <- function(x, weight, k = 1, inplace = TRUE){
-  as(cartogram_ncont.sf(st_as_sf(x), weight, k = k, inplace = inplace), 'Spatial')
+  as(cartogram_ncont.sf(sf::st_as_sf(x), weight, k = k, inplace = inplace), 'Spatial')
 }
 
 
 #' @rdname cartogram_ncont
-#' @importFrom sf st_geometry st_area st_buffer
+#' @importFrom sf st_geometry st_area st_buffer st_is_longlat
 #' @export
 cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
   
+  if (isTRUE(sf::st_is_longlat(x))) {
+    stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
+  }
+
   var <- weight
   spdf <- x[!is.na(x[, var, drop=T]),]
   
   # size
-  surf <- st_area(spdf, by_element=T)
+  surf <- sf::st_area(spdf, by_element=T)
   v <- spdf[, var, drop=T] 
   mv <- max(v)
   ms <- surf[v==mv]
@@ -97,27 +101,27 @@ cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
   spdf$r[spdf$r == 0] <- 0.001 # don't shrink polygons to zero area
   n <- nrow(spdf)
   for(i in 1:n){
-    st_geometry(spdf[i,]) <- rescalePoly.sf(spdf[i, ], 
+    sf::st_geometry(spdf[i,]) <- rescalePoly.sf(spdf[i, ], 
                                          inplace = inplace, 
                                          r = spdf[i,]$r)
   } 
   spdf$r <- NULL
-  return(return(st_buffer(spdf, 0)))
+  return(return(sf::st_buffer(spdf, 0)))
 }
 
 #' @importFrom sf st_geometry st_centroid st_cast st_union
 #' @keywords internal
 rescalePoly.sf <- function(p, r = 1, inplace = T){
   
-  co <- st_geometry(p)
+  co <- sf::st_geometry(p)
   
   if(inplace) {
-    cntr <- st_centroid(co)
+    cntr <- sf::st_centroid(co)
     ps <- (co - cntr) * r + cntr
   } else {
-    cop <- st_cast(co, "POLYGON")
-    cntrd = st_centroid(cop) 
-    ps <- st_union((cop - cntrd) * r + cntrd)
+    cop <- sf::st_cast(co, "POLYGON")
+    cntrd = sf::st_centroid(cop) 
+    ps <- sf::st_union((cop - cntrd) * r + cntrd)
   }
   
   return(ps)

@@ -87,16 +87,20 @@ cartogram <- function(shp, ...) {
 #' @export
 cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
-  as(cartogram_cont.sf(st_as_sf(x), weight, itermax=itermax, maxSizeError=maxSizeError,
+  as(cartogram_cont.sf(sf::st_as_sf(x), weight, itermax=itermax, maxSizeError=maxSizeError,
                     prepare=prepare, threshold=threshold), 'Spatial')
 
 }
 
 #' @rdname cartogram_cont
-#' @importFrom sf st_area st_geometry st_geometry_type st_centroid st_crs st_coordinates st_buffer
+#' @importFrom sf st_area st_geometry st_geometry_type st_centroid st_crs st_coordinates st_buffer st_is_longlat
 #' @export
 cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
                               prepare = "adjust", threshold = 0.05) {
+
+  if (isTRUE(sf::st_is_longlat(x))) {
+    stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
+  }
   # prepare data
   value <- x[[weight]]
   
@@ -152,15 +156,15 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     if (meanSizeError < maxSizeError) break
     
     # geometry
-    x.iter_geom <- st_geometry(x.iter)
+    x.iter_geom <- sf::st_geometry(x.iter)
     
     # polygon centroids (centroids for multipart polygons)
-    centroids_sf <- st_centroid(x.iter_geom)
-    st_crs(centroids_sf) <- st_crs(NULL)
+    centroids_sf <- sf::st_centroid(x.iter_geom)
+    st_crs(centroids_sf) <- sf::st_crs(NULL)
     centroids <- do.call(rbind, centroids_sf)
     
     # area for polygons and total area
-    area <- as.numeric(st_area(x.iter))
+    area <- as.numeric(sf::st_area(x.iter))
     areaTotal <- as.numeric(sum(area))
     area[area < 0] <- 0
     
@@ -177,7 +181,7 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     message(paste0("Mean size error for iteration ", z , ": ", meanSizeError))
     
     for (i in seq_len(nrow(x.iter))) {
-      pts <- st_coordinates(x.iter_geom[[i]])
+      pts <- sf::st_coordinates(x.iter_geom[[i]])
       idx <- unique(pts[, colnames(pts) %in% c("L1", "L2", "L3")])
 
       for (k in seq_len(nrow(idx))) {
@@ -206,15 +210,15 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
         }
         
         # save final coordinates from this iteration to coordinate list
-        if (st_geometry_type(st_geometry(x.iter)[[i]]) == "POLYGON"){
-          st_geometry(x.iter)[[i]][[idx[k, "L1"]]] <- newpts
+        if (sf::st_geometry_type(sf::st_geometry(x.iter)[[i]]) == "POLYGON"){
+          sf::st_geometry(x.iter)[[i]][[idx[k, "L1"]]] <- newpts
         } else {
-          st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
+          sf::st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
         }
       }
     }
   }
   
   # return and try to fix self-intersections
-  return(st_buffer(x.iter, 0))
+  return(sf::st_buffer(x.iter, 0))
 }

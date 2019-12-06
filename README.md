@@ -29,6 +29,9 @@ devtools::install_github("sjewo/cartogram")
 
 ## NEWS
 
+  - \[0.2.0\] Migrated all functions to sf, fixed problems with
+    multipolygons. cartogram functions won’t accept features with
+    longitude/latitude coordinates anymore.
   - \[0.1.1\] Speedup sf code
   - \[0.1.0\] Non-Overlapping Circles Cartogram (Dorling)
   - \[0.0.3\] sf support added
@@ -55,11 +58,13 @@ afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
 afr_cont <- cartogram_cont(afr, "POP2005", itermax = 5)
+#> Warning in CPL_crs_from_proj4string(x): GDAL Message 1: +init=epsg:XXXX syntax
+#> is deprecated. It might return a CRS with a non-EPSG compliant axis order.
 #> Mean size error for iteration 1: 5.79457153280442
-#> Mean size error for iteration 2: 4.99349670513046
-#> Mean size error for iteration 3: 4.39148731971216
-#> Mean size error for iteration 4: 3.92873533652118
-#> Mean size error for iteration 5: 3.56785782735669
+#> Mean size error for iteration 2: 4.94825547349441
+#> Mean size error for iteration 3: 4.32626995057149
+#> Mean size error for iteration 4: 3.84940324694301
+#> Mean size error for iteration 5: 3.45917774259599
 
 # plot it
 tm_shape(afr_cont) + tm_polygons("POP2005", style = "jenks") +
@@ -106,7 +111,10 @@ Thanks to @Nowosad for speeding things up\!
 
 ``` r
 library(sf)
-#> Linking to GEOS 3.7.0, GDAL 2.3.2, PROJ 5.2.0
+#> Linking to GEOS 3.8.0, GDAL 3.0.2, PROJ 6.2.0
+#> WARNING: different compile-time and runtime versions for GEOS found:
+#> Linked against: 3.8.0-CAPI-1.13.1  compiled against: 3.7.2-CAPI-1.11.2
+#> It is probably a good idea to reinstall sf, and maybe rgeos and rgdal too
 
 # Create an sf object
 afr_sf <- st_as_sf(afr)

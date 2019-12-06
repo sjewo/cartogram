@@ -29,8 +29,6 @@
 #' @param threshold Define threshold for data preparation
 #' @return An object of the same class as x
 #' @export
-#' @import sp
-#' @import rgeos 
 #' @importFrom methods is slot
 #' @importFrom stats quantile
 #' @importFrom sf st_area st_as_sf st_centroid st_coordinates st_distance st_geometry st_geometry<- st_point st_crs st_crs<-
@@ -85,131 +83,24 @@ cartogram <- function(shp, ...) {
 }
 
 #' @rdname cartogram_cont
+#' @importFrom sf st_as_sf
 #' @export
 cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05) {
+  as(cartogram_cont.sf(sf::st_as_sf(x), weight, itermax=itermax, maxSizeError=maxSizeError,
+                    prepare=prepare, threshold=threshold), 'Spatial')
 
-  # prepare data
-  value <- x@data[,weight]
-
-  switch(prepare, 
-         # remove missing and values below threshold
-         "remove"={
-           #maxValue <- quantile(value, probs=(1-threshold), na.rm=T)
-           minValue <- quantile(value, probs=threshold, na.rm=T)
-           x <- x[value > minValue | !is.na(value),]
-           value <- value[value > minValue | !is.na(value)]
-         },
-         # Adjust ratio
-         "adjust"={
-           if(any(is.na(value))) {
-             warning("NA not allowed in weight vector. Features will be removed from Shape.")
-             x <- x[!is.na(value),]
-             value <- value[!is.na(value)]
-           }
-
-           valueTotal <- sum(value, na.rm=T)
-
-           # area for polygons and total area
-           area <- gArea(x, byid=T)
-           area[area <0 ] <- 0
-           areaTotal <- gArea(x)
-
-           # prepare force field calculations
-           desired <- areaTotal*value/valueTotal
-           ratio <- desired/area
-           maxRatio <- quantile(ratio, probs=(1-threshold))
-           minRatio <- quantile(ratio, probs=threshold)
-
-           # adjust values 
-           value[ratio > maxRatio] <- (maxRatio * area[ratio > maxRatio] * valueTotal)/areaTotal
-           value[ratio < minRatio] <- (minRatio * area[ratio < minRatio] * valueTotal)/areaTotal
-         },
-         "none"={})
-
-  # sum up total value
-  valueTotal <- sum(value, na.rm=T)
-
-  # keep row names
-  rown <- rownames(x@data)
-  # identify multi polygons
-  multipol <- sapply(seq_len(nrow(x)), function(i) length(x@polygons[[i]]@Polygons))
-  ## save boundaries in lists  
-  tmpcoords <- lapply(seq_len(nrow(x)), function(i) lapply(seq_len(multipol[i]), function(j) x@polygons[[i]]@Polygons[[j]]@coords))
-
-  # set meanSizeError
-  meanSizeError <- 100
-
-  x.iter <- x
-
-  # iterate until itermax is reached
-  for(z in 1:itermax) {
-    # break if mean Sizer Error is less than maxSizeError
-    if(meanSizeError < maxSizeError) break
-
-    # polygon centroids (centroids for multipart polygons)
-    centroids <- coordinates(rgeos::gCentroid(x.iter, byid=T))
-
-    # area for polygons and total area
-    area <- rgeos::gArea(x.iter, byid=T)
-    area[area <0 ] <- 0
-    areaTotal <- rgeos::gArea(x.iter)
-
-    # prepare force field calculations
-    desired <- areaTotal*value/valueTotal
-    desired[desired==0] <- 0.01 # set minimum size to prevent inf values size Error
-    radius <- sqrt(area/pi)
-    mass <- sqrt(desired/pi) - sqrt(area/pi)
-
-    sizeError <- apply(cbind(area,desired), 1, max)/apply(cbind(area,desired), 1, min)
-    meanSizeError <- mean(sizeError, na.rm=T)
-    forceReductionFactor <- 1/(1+meanSizeError)
-
-    message(paste0("Mean size error for iteration ", z ,": ", meanSizeError))
-
-    for(i in seq_along(x.iter)) {
-      for(k in seq_len(multipol[i])) {
-
-        newpts <- x.iter@polygons[[i]]@Polygons[[k]]@coords
-
-        #distance 
-        for(j in  seq_len(nrow(centroids))) {
-
-          # distance to centroid j        
-          distance <- spDistsN1(newpts, centroids[j,])
-
-          # calculate force vector        
-          Fij <- mass[j] * radius[j] / distance
-          Fbij <- mass[j] * (distance/radius[j])^2 * (4 - 3*(distance/radius[j]))
-          Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
-          Fij <- Fij * forceReductionFactor / distance
-
-          # calculate new border coordinates
-          newpts <- newpts + cbind(Fij,Fij) * (newpts - centroids[rep(j,nrow(newpts)),])    
-        }
-
-        # save final coordinates from this iteration to coordinate list
-        tmpcoords[[i]][[k]] <- newpts
-      }
-    }
-    
-    # construct sp-object for area and centroid calculation
-    x.iter <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) maptools:::checkPolygonsGEOS(Polygons(lapply(tmpcoords[[x]], Polygon), rown[x]))),  proj4string = CRS(proj4string(x)))
-
-  }
-
-  # construct final shape  
-  x.carto <- SpatialPolygons(lapply(seq_along(tmpcoords), function(x) maptools:::checkPolygonsGEOS(Polygons(lapply(tmpcoords[[x]], Polygon),rown[x]))), proj4string = CRS(proj4string(x)))
-
-  # add data
-  x.cartodf <- SpatialPolygonsDataFrame(x.carto, x@data)
-  return(x.cartodf)
 }
 
 #' @rdname cartogram_cont
+#' @importFrom sf st_area st_geometry st_geometry_type st_centroid st_crs st_coordinates st_buffer st_is_longlat
 #' @export
 cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
                               prepare = "adjust", threshold = 0.05) {
+
+  if (isTRUE(sf::st_is_longlat(x))) {
+    stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
+  }
   # prepare data
   value <- x[[weight]]
   
@@ -265,15 +156,15 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     if (meanSizeError < maxSizeError) break
     
     # geometry
-    x.iter_geom <- st_geometry(x.iter)
+    x.iter_geom <- sf::st_geometry(x.iter)
     
     # polygon centroids (centroids for multipart polygons)
-    centroids_sf <- st_centroid(x.iter_geom)
-    st_crs(centroids_sf) <- st_crs(NULL)
+    centroids_sf <- sf::st_centroid(x.iter_geom)
+    st_crs(centroids_sf) <- sf::st_crs(NULL)
     centroids <- do.call(rbind, centroids_sf)
     
     # area for polygons and total area
-    area <- as.numeric(st_area(x.iter))
+    area <- as.numeric(sf::st_area(x.iter))
     areaTotal <- as.numeric(sum(area))
     area[area < 0] <- 0
     
@@ -290,12 +181,19 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     message(paste0("Mean size error for iteration ", z , ": ", meanSizeError))
     
     for (i in seq_len(nrow(x.iter))) {
-      pts <- st_coordinates(x.iter_geom[[i]])
+      pts <- sf::st_coordinates(x.iter_geom[[i]])
       idx <- unique(pts[, colnames(pts) %in% c("L1", "L2", "L3")])
 
       for (k in seq_len(nrow(idx))) {
         newpts <- pts[pts[, "L1"] == idx[k, "L1"] & pts[, "L2"] == idx[k, "L2"], c("X", "Y")]
-        distances <- spDists(newpts, centroids)
+        
+        distances <- apply(centroids, 1, function(pt) {
+          ptm <- matrix(pt, nrow=nrow(newpts), ncol=2, byrow=T)
+          sqrt(rowSums((newpts - ptm)^2))
+        })
+        
+        #dold <- spDists(newpts, centroids)
+        #all.equal(distances, dold)
         
         #distance
         for (j in  seq_len(nrow(centroids))) {
@@ -312,14 +210,15 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
         }
         
         # save final coordinates from this iteration to coordinate list
-        if (st_geometry_type(st_geometry(x.iter)[[i]]) == "POLYGON"){
-          st_geometry(x.iter)[[i]][[idx[k, "L1"]]] <- newpts
+        if (sf::st_geometry_type(sf::st_geometry(x.iter)[[i]]) == "POLYGON"){
+          sf::st_geometry(x.iter)[[i]][[idx[k, "L1"]]] <- newpts
         } else {
-          st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
+          sf::st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
         }
       }
     }
   }
   
-  return(x.iter)
+  # return and try to fix self-intersections
+  return(sf::st_buffer(x.iter, 0))
 }

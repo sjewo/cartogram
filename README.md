@@ -53,6 +53,7 @@ library(maptools)
 
 data(wrld_simpl)
 
+# keep only the african continent
 afr <- wrld_simpl[wrld_simpl$REGION == 2, ]
 
 # project the map
@@ -70,7 +71,7 @@ afr_cont <- cartogram_cont(afr, "POP2005", itermax = 5)
 
 # plot it
 tm_shape(afr_cont) + tm_polygons("POP2005", style = "jenks") +
-  tm_layout(frame = FALSE)
+  tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
 ```
 
 ![](man/figures/README-cont-1.png)<!-- -->
@@ -86,7 +87,7 @@ afr_ncont <- cartogram_ncont(afr, "POP2005")
 # plot it
 tm_shape(afr) + tm_borders() +
   tm_shape(afr_ncont) + tm_polygons("POP2005", style = "jenks") +
-  tm_layout(frame = FALSE)
+  tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
 ```
 
 ![](man/figures/README-ncont-1.png)<!-- -->
@@ -102,7 +103,7 @@ afr_dorling <- cartogram_dorling(afr, "POP2005")
 # plot it
 tm_shape(afr) + tm_borders() +
   tm_shape(afr_dorling) + tm_polygons("POP2005", style = "jenks") +
-  tm_layout(frame = FALSE)
+  tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
 ```
 
 ![](man/figures/README-dorling-1.png)<!-- -->

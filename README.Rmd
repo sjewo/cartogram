@@ -2,8 +2,8 @@
 title: "cartogram: Create Cartograms with R"
 output:
   github_document:
-    fig_width: 5
-    fig_height: 4.5
+    fig_width: 4
+    fig_height: 3.5
 ---
 
 [![CRAN status](http://www.r-pkg.org/badges/version/cartogram)](https://cran.r-project.org/package=cartogram)
@@ -66,7 +66,7 @@ afr_cont <- cartogram_cont(afr, "POP2005", itermax = 5)
 
 # plot it
 tm_shape(afr_cont) + tm_polygons("POP2005", style = "jenks") +
-  tm_layout(frame = FALSE)
+  tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
 ```
 
 ### Non-contiguous Area Cartogram
@@ -80,7 +80,7 @@ afr_ncont <- cartogram_ncont(afr, "POP2005")
 # plot it
 tm_shape(afr) + tm_borders() +
   tm_shape(afr_ncont) + tm_polygons("POP2005", style = "jenks") +
-  tm_layout(frame = FALSE)
+  tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
 ```
 
 ### Non-Overlapping Circles Cartogram
@@ -94,7 +94,7 @@ afr_dorling <- cartogram_dorling(afr, "POP2005")
 # plot it
 tm_shape(afr) + tm_borders() +
   tm_shape(afr_dorling) + tm_polygons("POP2005", style = "jenks") +
-  tm_layout(frame = FALSE)
+  tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
 ```
 
 ## sf support

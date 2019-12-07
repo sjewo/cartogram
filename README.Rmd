@@ -55,7 +55,10 @@ library(maptools)
 
 data(wrld_simpl)
 
+# keep only the african continent
 afr <- wrld_simpl[wrld_simpl$REGION == 2, ]
+
+# project the map
 afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
@@ -135,4 +138,4 @@ tmap_arrange(m1, m2, m3, ml, nrow = 1)
 
 * Dorling, D. (1996). Area Cartograms: Their Use and Creation. In Concepts and Techniques in Modern Geography (CATMOG), 59.
 * Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
-* Olson, J. M. (1976), Noncontiguous Area Cartograms. The Professional Geographer, 28: 371–380. doi:10.1111/j.0033-0124.1976.00371.x
+* Olson, J. M. (1976), Noncontiguous Area Cartograms. The Professional Geographer, 28: 371–380. [doi:10.1111/j.0033-0124.1976.00371.x](https://doi.org/10.1111/j.0033-0124.1976.00371.x)

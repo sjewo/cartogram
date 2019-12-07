@@ -54,6 +54,8 @@ library(maptools)
 data(wrld_simpl)
 
 afr <- wrld_simpl[wrld_simpl$REGION == 2, ]
+
+# project the map
 afr <- spTransform(afr, CRS("+init=epsg:3395"))
 
 # construct cartogram
@@ -111,10 +113,7 @@ Thanks to @Nowosad for speeding things up\!
 
 ``` r
 library(sf)
-#> Linking to GEOS 3.8.0, GDAL 3.0.2, PROJ 6.2.0
-#> WARNING: different compile-time and runtime versions for GEOS found:
-#> Linked against: 3.8.0-CAPI-1.13.1  compiled against: 3.7.2-CAPI-1.11.2
-#> It is probably a good idea to reinstall sf, and maybe rgeos and rgdal too
+#> Linking to GEOS 3.8.0, GDAL 3.0.2, PROJ 6.2.1
 
 # Create an sf object
 afr_sf <- st_as_sf(afr)
@@ -159,4 +158,5 @@ tmap_arrange(m1, m2, m3, ml, nrow = 1)
     Algorithm To Construct Continuous Area Cartograms. In The
     Professional Geographer, 37(1), 75-81.
   - Olson, J. M. (1976), Noncontiguous Area Cartograms. The Professional
-    Geographer, 28: 371–380. <doi:10.1111/j.0033-0124.1976.00371.x>
+    Geographer, 28: 371–380.
+    [doi:10.1111/j.0033-0124.1976.00371.x](https://doi.org/10.1111/j.0033-0124.1976.00371.x)

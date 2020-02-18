@@ -106,7 +106,7 @@ cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
                                          r = spdf[i,]$r)
   } 
   spdf$r <- NULL
-  sf::st_buffer(spdf, 0))
+  sf::st_buffer(spdf, 0)
 }
 
 #' @importFrom sf st_geometry st_centroid st_cast st_union

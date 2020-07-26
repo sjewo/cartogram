@@ -101,7 +101,7 @@ cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
   spdf$r[spdf$r == 0] <- 0.001 # don't shrink polygons to zero area
   n <- nrow(spdf)
   for(i in 1:n){
-    sf::st_geometry(spdf[i,]) <- rescalePoly.sf(spdf[i, ], 
+    sf::st_geometry(spdf)[i] <- rescalePoly.sf(spdf[i, ], 
                                          inplace = inplace, 
                                          r = spdf[i,]$r)
   } 

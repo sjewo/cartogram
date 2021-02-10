@@ -7,7 +7,7 @@ output:
 ---
 
 [![CRAN status](http://www.r-pkg.org/badges/version/cartogram)](https://cran.r-project.org/package=cartogram)
-[![Build Status](https://travis-ci.org/sjewo/cartogram.svg?branch=master)](https://travis-ci.org/sjewo/cartogram)
+[![Build status](https://github.com/sjewo/cartogram/workflows/R-CMD-check/badge.svg)](https://github.com/sjewo/cartogram/actions?workflow=R-CMD-check)
 [![CRAN Downloads](http://cranlogs.r-pkg.org/badges/cartogram)](https://cran.r-project.org/package=cartogram)
 
 ```{r, echo=F}

@@ -65,7 +65,7 @@ jobs:
       - name: Install Curl dependency
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get install libcurl4-openssl-dev -y
+          sudo apt-get install libcurl4-openssl-dev libudunits2-dev libgdal-dev  -y
 
       - name: Install dependencies
         run: |

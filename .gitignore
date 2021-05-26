@@ -35,3 +35,6 @@ vignettes/*.pdf
 
 # VIM files
 *.swp
+
+# pkgdown
+docs

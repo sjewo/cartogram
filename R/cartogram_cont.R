@@ -27,6 +27,7 @@
 #' "remove", remove features with values lower than quantile at threshold,
 #' "none", don't adjust weighting values
 #' @param threshold Define threshold for data preparation
+#' @param parallel Allow parallel computation for large maps (requires parallel and pbapply packages installed, default=FALSE)
 #' @return An object of the same class as x
 #' @export
 #' @importFrom methods is slot
@@ -66,7 +67,7 @@
 #' 
 #' @references Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
 cartogram_cont <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold=0.05) {
+                      prepare="adjust", threshold=0.05, parallel=FALSE) {
   UseMethod("cartogram_cont")
 }
 
@@ -86,9 +87,9 @@ cartogram <- function(shp, ...) {
 #' @importFrom sf st_as_sf
 #' @export
 cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold=0.05) {
+                      prepare="adjust", threshold=0.05, parallel=FALSE) {
   as(cartogram_cont.sf(sf::st_as_sf(x), weight, itermax=itermax, maxSizeError=maxSizeError,
-                    prepare=prepare, threshold=threshold), 'Spatial')
+                    prepare=prepare, threshold=threshold, parallel=parallel), 'Spatial')
 
 }
 
@@ -96,7 +97,7 @@ cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSi
 #' @importFrom sf st_area st_geometry st_geometry_type st_centroid st_crs st_coordinates st_buffer st_is_longlat
 #' @export
 cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
-                              prepare = "adjust", threshold = 0.05) {
+                              prepare = "adjust", threshold = 0.05, parallel=FALSE) {
 
   if (isTRUE(sf::st_is_longlat(x))) {
     stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
@@ -150,6 +151,18 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
   
   x.iter <- x
   
+  clusters <- NULL
+  nbCores <- NULL
+  if (parallel) {
+      if (base::requireNamespace("parallel", quietly=TRUE) && base::requireNamespace("pbapply", quietly=TRUE)) {
+          pbapply::pboptions(type="none")
+          nbCores <- parallel::detectCores()
+          message(sprintf("Parallel computation using %d cores... ", nbCores))
+      } else {
+          stop("Parallel computation requires 'parallel' and 'pbapply' libraries installed.")
+      }
+  }
+  
   # iterate until itermax is reached
   for (z in 1:itermax) {
     # break if mean Sizer Error is less than maxSizeError
@@ -180,42 +193,107 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     
     message(paste0("Mean size error for iteration ", z , ": ", meanSizeError))
     
-    for (i in seq_len(nrow(x.iter))) {
-      pts <- sf::st_coordinates(x.iter_geom[[i]])
-      idx <- unique(pts[, colnames(pts) %in% c("L1", "L2", "L3")])
+    if (parallel) { ## Parallel computing
+        # Create workers
+        clusters <- parallel::makePSOCKcluster(nbCores)
+        # Export variables to cluster workers
+        parallel::clusterExport(cl=clusters, varlist=c("x.iter_geom","centroids","mass","radius","forceReductionFactor"), envir=environment())
+        # For each polygon... (heavy computation parallelized)
+        ret <- pbapply::pblapply(seq_len(nrow(x.iter)), function(i) {
+            ret.in <- list() # list of list as (i,k) 
+            ret.cpt <- 1
+            pts <- sf::st_coordinates(x.iter_geom[[i]])
+            idx <- as.data.frame(unique(pts[, colnames(pts) %in% c("L1", "L2", "L3")]))
+            if (ncol(idx)==2) {
+              idx <- idx[order(idx$L1, idx$L2),] 
+            } else {
+              idx <- idx[order(idx$L1, idx$L2, idx$L3),] 
+            }
+            for (k in seq_len(nrow(idx))) {
+                newpts <- pts[pts[, "L1"] == idx[k, "L1"] & pts[, "L2"] == idx[k, "L2"], c("X", "Y")]
+                distances <- apply(centroids, 1, function(pt) {
+                    ptm <- matrix(pt, nrow=nrow(newpts), ncol=2, byrow=T)
+                    sqrt(rowSums((newpts - ptm)^2))
+                })
+                #distance
+                for (j in  seq_len(nrow(centroids))) {
+                    distance <- distances[, j]
+                    # calculate force vector
+                    Fij <- mass[j] * radius[j] / distance
+                    Fbij <- mass[j] * (distance / radius[j]) ^ 2 * (4 - 3 * (distance / radius[j]))
+                    Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
+                    Fij <- Fij * forceReductionFactor / distance
+                    # calculate new border coordinates
+                    newpts <- newpts + cbind(X1 = Fij, X2 = Fij) * (newpts - centroids[rep(j, nrow(newpts)), ])
+                }
+                ret.in[[ret.cpt]] <- newpts
+                ret.cpt <- ret.cpt + 1
+            }
+            return(ret.in)
+        }, cl=clusters)
+        
+        # For each polygon.. (actualize points sequentially)
+        for (i in seq_len(nrow(x.iter))) {
+            pts <- sf::st_coordinates(x.iter_geom[[i]])
+            idx <- as.data.frame(unique(pts[, colnames(pts) %in% c("L1", "L2", "L3")]))
+            if (ncol(idx)==2) {
+              idx <- idx[order(idx$L1, idx$L2),] 
+            } else {
+              idx <- idx[order(idx$L1, idx$L2, idx$L3),] 
+            }
+            for (k in seq_len(nrow(idx))) { 
+                # save final coordinates from this iteration to coordinate list
+                newpts <- unlist(ret[[i]][[k]])
+                if (sf::st_geometry_type(sf::st_geometry(x.iter)[[i]]) == "POLYGON"){
+                    sf::st_geometry(x.iter)[[i]][[idx[k, "L1"]]] <- newpts
+                } else {
+                    sf::st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
+                }
+            }
+        }
+    }  else { ## Sequential computing
+        for (i in seq_len(nrow(x.iter))) {
+            pts <- sf::st_coordinates(x.iter_geom[[i]])
+            idx <- unique(pts[, colnames(pts) %in% c("L1", "L2", "L3")])
 
-      for (k in seq_len(nrow(idx))) {
-        newpts <- pts[pts[, "L1"] == idx[k, "L1"] & pts[, "L2"] == idx[k, "L2"], c("X", "Y")]
-        
-        distances <- apply(centroids, 1, function(pt) {
-          ptm <- matrix(pt, nrow=nrow(newpts), ncol=2, byrow=T)
-          sqrt(rowSums((newpts - ptm)^2))
-        })
-        
-        #dold <- spDists(newpts, centroids)
-        #all.equal(distances, dold)
-        
-        #distance
-        for (j in  seq_len(nrow(centroids))) {
-          distance <- distances[, j]
-          
-          # calculate force vector
-          Fij <- mass[j] * radius[j] / distance
-          Fbij <- mass[j] * (distance / radius[j]) ^ 2 * (4 - 3 * (distance / radius[j]))
-          Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
-          Fij <- Fij * forceReductionFactor / distance
-          
-          # calculate new border coordinates
-          newpts <- newpts + cbind(X1 = Fij, X2 = Fij) * (newpts - centroids[rep(j, nrow(newpts)), ])
+            for (k in seq_len(nrow(idx))) {
+                newpts <- pts[pts[, "L1"] == idx[k, "L1"] & pts[, "L2"] == idx[k, "L2"], c("X", "Y")]
+                
+                distances <- apply(centroids, 1, function(pt) {
+                    ptm <- matrix(pt, nrow=nrow(newpts), ncol=2, byrow=T)
+                    sqrt(rowSums((newpts - ptm)^2))
+                })
+                
+                #dold <- spDists(newpts, centroids)
+                #all.equal(distances, dold)
+                
+                #distance
+                for (j in  seq_len(nrow(centroids))) {
+                    distance <- distances[, j]
+                    
+                    # calculate force vector
+                    Fij <- mass[j] * radius[j] / distance
+                    Fbij <- mass[j] * (distance / radius[j]) ^ 2 * (4 - 3 * (distance / radius[j]))
+                    Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
+                    Fij <- Fij * forceReductionFactor / distance
+                    
+                    # calculate new border coordinates
+                    newpts <- newpts + cbind(X1 = Fij, X2 = Fij) * (newpts - centroids[rep(j, nrow(newpts)), ])
+                }
+                
+                # save final coordinates from this iteration to coordinate list
+                if (sf::st_geometry_type(sf::st_geometry(x.iter)[[i]]) == "POLYGON"){
+                    sf::st_geometry(x.iter)[[i]][[idx[k, "L1"]]] <- newpts
+                } else {
+                    sf::st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
+                }
+            }
         }
-        
-        # save final coordinates from this iteration to coordinate list
-        if (sf::st_geometry_type(sf::st_geometry(x.iter)[[i]]) == "POLYGON"){
-          sf::st_geometry(x.iter)[[i]][[idx[k, "L1"]]] <- newpts
-        } else {
-          sf::st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
-        }
-      }
+    }
+    
+    # Terminate workers (if any)
+    if (parallel && !is.null(clusters)) {
+      parallel::stopCluster(clusters)
     }
   }
   

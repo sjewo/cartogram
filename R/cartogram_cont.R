@@ -156,8 +156,13 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
   if (parallel) {
       if (base::requireNamespace("parallel", quietly=TRUE) && base::requireNamespace("pbapply", quietly=TRUE)) {
           pbapply::pboptions(type="none")
-          nbCores <- parallel::detectCores()
-          message(sprintf("Parallel computation using %d cores... ", nbCores))
+          nbCores <- parallel::detectCores(logical=FALSE) - 1
+          if (nbCores < 2) {
+            message(sprintf("Not enough cores (%d) for parallel computation", nbCores))
+            parallel = FALSE
+          } else {
+            message(sprintf("Parallel computation using %d cores... ", nbCores))
+          }
       } else {
           stop("Parallel computation requires 'parallel' and 'pbapply' libraries installed.")
       }

@@ -20,6 +20,8 @@ cartogram(shp, ...)
 "remove", remove features with values lower than quantile at threshold,
 "none", don't adjust weighting values}
     \item{\code{threshold}}{Define threshold for data preparation}
+    \item{\code{parallel}}{Allow parallel computation for large maps (requires parallel and pbapply packages installed, default=FALSE). 
+If an integer value is assigned to 'parallel', it defines the number of cores to be used.}
   }}
 }
 \description{

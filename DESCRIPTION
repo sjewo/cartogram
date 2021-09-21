@@ -13,8 +13,10 @@ Authors@R: c(
 Description: Construct continuous and non-contiguous area cartograms.
 URL: https://github.com/sjewo/cartogram
 BugReports: https://github.com/sjewo/cartogram/issues
-Imports: methods, sf, packcircles
+Imports: methods, sf, packcircles, Rcpp
 Suggests: rgeos, sp, rgdal, maptools, parallel, pbapply
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.1.1
+LinkingTo: 
+    Rcpp

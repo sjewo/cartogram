@@ -12,7 +12,8 @@ cartogram_cont(
   itermax = 15,
   maxSizeError = 1.0001,
   prepare = "adjust",
-  threshold = 0.05
+  threshold = 0.05,
+  parallel = FALSE
 )
 
 \method{cartogram_cont}{SpatialPolygonsDataFrame}(
@@ -21,7 +22,8 @@ cartogram_cont(
   itermax = 15,
   maxSizeError = 1.0001,
   prepare = "adjust",
-  threshold = 0.05
+  threshold = 0.05,
+  parallel = FALSE
 )
 
 \method{cartogram_cont}{sf}(
@@ -30,7 +32,8 @@ cartogram_cont(
   itermax = 15,
   maxSizeError = 1.0001,
   prepare = "adjust",
-  threshold = 0.05
+  threshold = 0.05,
+  parallel = FALSE
 )
 }
 \arguments{
@@ -48,6 +51,9 @@ cartogram_cont(
 "none", don't adjust weighting values}
 
 \item{threshold}{Define threshold for data preparation}
+
+\item{parallel}{Allow parallel computation for large maps (requires parallel and pbapply packages installed, default=FALSE). 
+If an integer value is assigned to 'parallel', it defines the number of cores to be used.}
 }
 \value{
 An object of the same class as x

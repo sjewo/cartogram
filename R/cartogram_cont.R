@@ -27,6 +27,7 @@
 #' "remove", remove features with values lower than quantile at threshold,
 #' "none", don't adjust weighting values
 #' @param threshold Define threshold for data preparation
+#' @param verbose print error on each iteration
 #' @return An object of the same class as x
 #' @export
 #' @importFrom methods is slot
@@ -86,9 +87,9 @@ cartogram <- function(shp, ...) {
 #' @importFrom sf st_as_sf
 #' @export
 cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold=0.05) {
+                      prepare="adjust", threshold=0.05, verbose = FALSE) {
   as(cartogram_cont.sf(sf::st_as_sf(x), weight, itermax=itermax, maxSizeError=maxSizeError,
-                    prepare=prepare, threshold=threshold), 'Spatial')
+                    prepare=prepare, threshold=threshold, verbose=verbose), 'Spatial')
 
 }
 
@@ -96,7 +97,7 @@ cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSi
 #' @importFrom sf st_area st_geometry st_geometry_type st_centroid st_crs st_coordinates st_buffer st_is_longlat
 #' @export
 cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
-                              prepare = "adjust", threshold = 0.05) {
+                              prepare = "adjust", threshold = 0.05, verbose = FALSE) {
 
   if (isTRUE(sf::st_is_longlat(x))) {
     stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
@@ -178,7 +179,8 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     meanSizeError <- mean(sizeError, na.rm = TRUE)
     forceReductionFactor <- 1 / (1 + meanSizeError)
     
-    message(paste0("Mean size error for iteration ", z , ": ", meanSizeError))
+    if(verbose)
+      message(paste0("Mean size error for iteration ", z , ": ", meanSizeError))
     
     for (i in seq_len(nrow(x.iter))) {
       pts <- sf::st_coordinates(x.iter_geom[[i]])

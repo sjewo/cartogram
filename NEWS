@@ -1,3 +1,4 @@
+[0.3.0] Remove sp, rgdal and maptools from examples and suggestions.
 [0.2.2] Fix geometry replacement in cartogram_ncont
 [0.2.0] Migrated all functions to sf, fixed problems with multipolygons. cartogram functions won't accept features with longitude/latitude coordinates anymore.
 [0.1.1] Speedup sf code

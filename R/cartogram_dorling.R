@@ -2,7 +2,7 @@
 #' @description Construct a cartogram which represents each geographic region 
 #' as non-overlapping circles (Dorling 1996).
 #' @name cartogram_dorling
-#' @param x SpatialPolygonsDataFrame, SpatialPointsDataFrame or an sf object
+#' @param x a polygon or multiplogyon sf object
 #' @param weight Name of the weighting variable in x
 #' @param k Share of the bounding box of x filled by the larger circle
 #' @param m_weight Circles' movements weights. An optional vector of numeric weights 
@@ -17,37 +17,23 @@
 #' @export
 #' @references Dorling, D. (1996). Area Cartograms: Their Use and Creation. In Concepts and Techniques in Modern Geography (CATMOG), 59.
 #' @examples
-#' library(maptools)
-#' library(cartogram)
-#' library(rgdal)
-#' data(wrld_simpl)
+#'library(sf)
+#'library(cartogram)
+#'
+# Load North Carolina SIDS data
+#'nc = st_read(system.file("shape/nc.shp", package="sf"), quiet = TRUE)
+#'
+#'# transform to NAD83 / UTM zone 16N
+#'nc_utm <- st_transform(nc, 26916)
+#'
+#'# Create cartogram
+#'nc_utm_carto <- cartogram_dorling(nc_utm, weight = "BIR74")
+#'
+#'# Plot 
+#'par(mfrow=c(2,1))
+#'plot(nc[,"BIR74"], main="original", key.pos = NULL, reset = FALSE)
+#'plot(nc_utm_carto[,"BIR74"], main="distorted", key.pos = NULL, reset = FALSE)
 #' 
-#' # Remove uninhabited regions
-#' afr <- spTransform(wrld_simpl[wrld_simpl$REGION==2 & wrld_simpl$POP2005 > 0,], 
-#'                    CRS("+init=epsg:3395"))
-#' 
-#' # Create cartogram
-#' afr_carto <- cartogram_dorling(afr, "POP2005")
-#' 
-#' # Plot 
-#' par(mfcol=c(1,2))
-#' plot(afr, main="original")
-#' 
-#' plot(afr, main="distorted (sp)")
-#' plot(afr_carto, col = "red", add=TRUE)
-#' 
-#' # Same with sf objects
-#' library(sf)
-#' 
-#' afr_sf = st_as_sf(afr)
-#' 
-#' afr_sf_carto <- cartogram_dorling(afr_sf, "POP2005")
-#' 
-#' # Plot 
-#' par(mfcol=c(1,3))
-#' plot(afr, main="original")
-#' plot(afr_carto, main="distorted (sp)")
-#' plot(st_geometry(afr_sf_carto), main="distorted (sf)")
 cartogram_dorling <- function(x, weight, k = 5, m_weight = 1, itermax= 1000) {
   UseMethod("cartogram_dorling")
 }

@@ -19,7 +19,7 @@
 #' @description Construct a non-contiguous area cartogram (Olson 1976).
 #'
 #' @name cartogram_ncont
-#' @param x SpatialPolygonDataFrame or an sf object
+#' @param x a polygon or multiplogyon sf object
 #' @param weight Name of the weighting variable in x
 #' @param k Factor expansion for the unit with the greater value
 #' @param inplace If TRUE, each polygon is modified in its original place, 
@@ -28,31 +28,23 @@
 #' @export
 #' @importFrom methods is slot as
 #' @examples
-#' library(maptools)
-#' library(cartogram)
-#' library(rgdal)
-#' data(wrld_simpl)
-#' 
-#' # Remove uninhabited regions
-#' afr <- spTransform(wrld_simpl[wrld_simpl$REGION==2 & wrld_simpl$POP2005 > 0,],
-#'                    CRS("+init=epsg:3395"))
+#'library(sf)
+#'library(cartogram)
 #'
-#' # Create cartogram
-#' afr_nc <- cartogram_ncont(afr, "POP2005")
+# Load North Carolina SIDS data
+#'nc = st_read(system.file("shape/nc.shp", package="sf"), quiet = TRUE)
 #'
-#' # Plot
-#' plot(afr)
-#' plot(afr_nc, add = TRUE, col = 'red')
+#'# transform to NAD83 / UTM zone 16N
+#'nc_utm <- st_transform(nc, 26916)
 #'
-#' # Same with sf objects
-#' library(sf)
+#'# Create cartogram
+#'nc_utm_carto <- cartogram_ncont(nc_utm, weight = "BIR74")
 #'
-#' afr_sf = st_as_sf(afr)
-#'
-#' afr_sf_nc <- cartogram_ncont(afr_sf, "POP2005")
-#'
-#' plot(st_geometry(afr_sf))
-#' plot(st_geometry(afr_sf_nc), add = TRUE, col = 'red')
+#'# Plot 
+#'par(mfrow=c(2,1))
+#'plot(nc[,"BIR74"], main="original", key.pos = NULL, reset = FALSE)
+#'plot(st_geometry(nc_utm), main="distorted", reset = FALSE)
+#'plot(nc_utm_carto[,"BIR74"], add =TRUE)
 #'
 #' @references Olson, J. M. (1976). Noncontiguous Area Cartograms. In The Professional Geographer, 28(4), 371-380.
 cartogram_ncont <- function(x, weight, k = 1, inplace = TRUE){

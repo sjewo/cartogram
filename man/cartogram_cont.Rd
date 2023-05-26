@@ -12,7 +12,8 @@ cartogram_cont(
   itermax = 15,
   maxSizeError = 1.0001,
   prepare = "adjust",
-  threshold = 0.05
+  threshold = 0.05,
+  verbose = FALSE
 )
 
 \method{cartogram_cont}{SpatialPolygonsDataFrame}(
@@ -21,7 +22,8 @@ cartogram_cont(
   itermax = 15,
   maxSizeError = 1.0001,
   prepare = "adjust",
-  threshold = 0.05
+  threshold = 0.05,
+  verbose = FALSE
 )
 
 \method{cartogram_cont}{sf}(
@@ -30,11 +32,12 @@ cartogram_cont(
   itermax = 15,
   maxSizeError = 1.0001,
   prepare = "adjust",
-  threshold = 0.05
+  threshold = 0.05,
+  verbose = FALSE
 )
 }
 \arguments{
-\item{x}{SpatialPolygonDataFrame or an sf object}
+\item{x}{a polygon or multiplogyon sf object}
 
 \item{weight}{Name of the weighting variable in x}
 
@@ -48,6 +51,8 @@ cartogram_cont(
 "none", don't adjust weighting values}
 
 \item{threshold}{Define threshold for data preparation}
+
+\item{verbose}{print meanSizeError on each iteration}
 }
 \value{
 An object of the same class as x
@@ -56,36 +61,21 @@ An object of the same class as x
 Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
 }
 \examples{
-
-library(maptools)
+library(sf)
 library(cartogram)
-library(rgdal)
-data(wrld_simpl)
 
-# Remove uninhabited regions
-afr <- spTransform(wrld_simpl[wrld_simpl$REGION==2 & wrld_simpl$POP2005 > 0,], 
-                    CRS("+init=epsg:3395"))
+nc = st_read(system.file("shape/nc.shp", package="sf"), quiet = TRUE)
+
+# transform to NAD83 / UTM zone 16N
+nc_utm <- st_transform(nc, 26916)
 
 # Create cartogram
-afr_carto <- cartogram_cont(afr, "POP2005", 3)
+nc_utm_carto <- cartogram_cont(nc_utm, weight = "BIR74", itermax = 5)
 
 # Plot 
-par(mfcol=c(1,2))
-plot(afr, main="original")
-plot(afr_carto, main="distorted (sp)")
-
-# Same with sf objects
-library(sf)
-
-afr_sf = st_as_sf(afr)
-
-afr_sf_carto <- cartogram_cont(afr_sf, "POP2005", 3)
-
-# Plot 
-par(mfcol=c(1,3))
-plot(afr, main="original")
-plot(afr_carto, main="distorted (sp)")
-plot(st_geometry(afr_sf_carto), main="distorted (sf)")
+par(mfrow=c(2,1))
+plot(nc[,"BIR74"], main="original", key.pos = NULL, reset = FALSE)
+plot(nc_utm_carto[,"BIR74"], main="distorted", key.pos = NULL, reset = FALSE)
 
 }
 \references{

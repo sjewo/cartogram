@@ -18,7 +18,7 @@
 #' @description Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985)
 #'
 #' @name cartogram_cont
-#' @param x SpatialPolygonDataFrame or an sf object
+#' @param x a polygon or multiplogyon sf object
 #' @param weight Name of the weighting variable in x
 #' @param itermax Maximum iterations for the cartogram transformation, if maxSizeError ist not reached
 #' @param maxSizeError Stop if meanSizeError is smaller than maxSizeError
@@ -27,46 +27,33 @@
 #' "remove", remove features with values lower than quantile at threshold,
 #' "none", don't adjust weighting values
 #' @param threshold Define threshold for data preparation
+#' @param verbose print meanSizeError on each iteration
 #' @return An object of the same class as x
 #' @export
 #' @importFrom methods is slot
 #' @importFrom stats quantile
 #' @importFrom sf st_area st_as_sf st_centroid st_coordinates st_distance st_geometry st_geometry<- st_point st_crs st_crs<-
 #' @examples
-#' 
-#' library(maptools)
-#' library(cartogram)
-#' library(rgdal)
-#' data(wrld_simpl)
-#' 
-#' # Remove uninhabited regions
-#' afr <- spTransform(wrld_simpl[wrld_simpl$REGION==2 & wrld_simpl$POP2005 > 0,], 
-#'                     CRS("+init=epsg:3395"))
+#'library(sf)
+#'library(cartogram)
 #'
-#' # Create cartogram
-#' afr_carto <- cartogram_cont(afr, "POP2005", 3)
+# Load North Carolina SIDS data
+#'nc = st_read(system.file("shape/nc.shp", package="sf"), quiet = TRUE)
 #'
-#' # Plot 
-#' par(mfcol=c(1,2))
-#' plot(afr, main="original")
-#' plot(afr_carto, main="distorted (sp)")
+#'# transform to NAD83 / UTM zone 16N
+#'nc_utm <- st_transform(nc, 26916)
 #'
-#' # Same with sf objects
-#' library(sf)
+#'# Create cartogram
+#'nc_utm_carto <- cartogram_cont(nc_utm, weight = "BIR74", itermax = 5)
 #'
-#' afr_sf = st_as_sf(afr)
-#'
-#' afr_sf_carto <- cartogram_cont(afr_sf, "POP2005", 3)
-#'
-#' # Plot 
-#' par(mfcol=c(1,3))
-#' plot(afr, main="original")
-#' plot(afr_carto, main="distorted (sp)")
-#' plot(st_geometry(afr_sf_carto), main="distorted (sf)")
+#'# Plot 
+#'par(mfrow=c(2,1))
+#'plot(nc[,"BIR74"], main="original", key.pos = NULL, reset = FALSE)
+#'plot(nc_utm_carto[,"BIR74"], main="distorted", key.pos = NULL, reset = FALSE)
 #' 
 #' @references Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
 cartogram_cont <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold=0.05) {
+                      prepare="adjust", threshold=0.05, verbose = FALSE) {
   UseMethod("cartogram_cont")
 }
 
@@ -86,9 +73,9 @@ cartogram <- function(shp, ...) {
 #' @importFrom sf st_as_sf
 #' @export
 cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold=0.05) {
+                      prepare="adjust", threshold=0.05, verbose = FALSE) {
   as(cartogram_cont.sf(sf::st_as_sf(x), weight, itermax=itermax, maxSizeError=maxSizeError,
-                    prepare=prepare, threshold=threshold), 'Spatial')
+                    prepare=prepare, threshold=threshold, verbose=verbose), 'Spatial')
 
 }
 
@@ -96,7 +83,7 @@ cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSi
 #' @importFrom sf st_area st_geometry st_geometry_type st_centroid st_crs st_coordinates st_buffer st_is_longlat
 #' @export
 cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
-                              prepare = "adjust", threshold = 0.05) {
+                              prepare = "adjust", threshold = 0.05, verbose = FALSE) {
 
   if (isTRUE(sf::st_is_longlat(x))) {
     stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
@@ -178,7 +165,8 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     meanSizeError <- mean(sizeError, na.rm = TRUE)
     forceReductionFactor <- 1 / (1 + meanSizeError)
     
-    message(paste0("Mean size error for iteration ", z , ": ", meanSizeError))
+    if(verbose)
+      message(paste0("Mean size error for iteration ", z , ": ", meanSizeError))
     
     for (i in seq_len(nrow(x.iter))) {
       pts <- sf::st_coordinates(x.iter_geom[[i]])

@@ -21,7 +21,8 @@ cartogram_cont(
   itermax = 15,
   maxSizeError = 1.0001,
   prepare = "adjust",
-  threshold = 0.05
+  threshold = 0.05,
+  verbose = FALSE
 )
 
 \method{cartogram_cont}{sf}(
@@ -50,7 +51,7 @@ cartogram_cont(
 
 \item{threshold}{Define threshold for data preparation}
 
-\item{verbose}{print error on each iteration}
+\item{verbose}{print meanSizeError on each iteration}
 }
 \value{
 An object of the same class as x

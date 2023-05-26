@@ -27,7 +27,7 @@
 #' "remove", remove features with values lower than quantile at threshold,
 #' "none", don't adjust weighting values
 #' @param threshold Define threshold for data preparation
-#' @param verbose print error on each iteration
+#' @param verbose print meanSizeError on each iteration
 #' @return An object of the same class as x
 #' @export
 #' @importFrom methods is slot

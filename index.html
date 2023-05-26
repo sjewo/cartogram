@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,25 +33,19 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">cartogram</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="reference/index.html">Reference</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/sjewo/cartogram/">
+  <a href="https://github.com/sjewo/cartogram/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -66,154 +62,99 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="cartogram-create-cartograms-with-r" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#cartogram-create-cartograms-with-r" class="anchor"></a>cartogram: Create Cartograms with R</h1></div>
-
+<div class="section level1">
+<div class="page-header"><h1 id="cartogram-create-cartograms-with-r">cartogram: Create Cartograms with R<a class="anchor" aria-label="anchor" href="#cartogram-create-cartograms-with-r"></a>
+</h1></div>
+<p><a href="https://cran.r-project.org/package=cartogram" class="external-link"><img src="http://www.r-pkg.org/badges/version/cartogram" alt="CRAN status"></a> <a href="https://github.com/sjewo/cartogram/actions?workflow=R-CMD-check" class="external-link"><img src="https://github.com/sjewo/cartogram/workflows/R-CMD-check/badge.svg" alt="Build status"></a> <a href="https://cran.r-project.org/package=cartogram" class="external-link"><img src="http://cranlogs.r-pkg.org/badges/cartogram" alt="CRAN Downloads"></a></p>
 <p>Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985), non-contiguous Area Cartograms (Olson 1976), and non-overlapping Circles Cartogram (Dorling el al. 1996) in R.</p>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
 <p>You can install the <strong>cartogram</strong> package from CRAN as follows:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"cartogram"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cartogram"</span><span class="op">)</span></span></code></pre></div>
 <p>To upgrade to the latest development version of <code>cartogram</code>, install the package <code>devtools</code> and run the following command:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">"sjewo/cartogram"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"sjewo/cartogram"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="news" class="section level2">
-<h2 class="hasAnchor">
-<a href="#news" class="anchor"></a>NEWS</h2>
+<div class="section level2">
+<h2 id="news">NEWS<a class="anchor" aria-label="anchor" href="#news"></a>
+</h2>
 <ul>
-<li>
-<br><span class="math display">0.2.0</span><br> Migrated all functions to sf, fixed problems with multipolygons. cartogram functions won’t accept features with longitude/latitude coordinates anymore.</li>
-<li>
-<br><span class="math display">0.1.1</span><br> Speedup sf code</li>
-<li>
-<br><span class="math display">0.1.0</span><br> Non-Overlapping Circles Cartogram (Dorling)</li>
-<li>
-<br><span class="math display">0.0.3</span><br> sf support added</li>
-<li>
-<br><span class="math display">0.0.2</span><br> Non-contiguous Area Cartogram</li>
-<li>
-<br><span class="math display">0.0.2</span><br> Prepare data with missing or extreme values before cartogram calculation for faster convergence</li>
-<li>
-<br><span class="math display">0.0.1</span><br> Initial Release</li>
+<li>[0.3.0] Remove <code>sp</code>, <code>rgdal</code> and <code>maptools</code> from examples and suggestions. <code>cartogram_cont</code> has a new parameter <code>verbose = FALSE</code> to hide print of size error on each iteration.</li>
+<li>[0.2.0] Migrated all functions to sf, fixed problems with multipolygons. cartogram functions won’t accept features with longitude/latitude coordinates anymore.</li>
+<li>[0.1.1] Update sf code: Thanks to @Nowosad for speeding things up!</li>
+<li>[0.1.0] Non-Overlapping Circles Cartogram (Dorling)</li>
+<li>[0.0.3] sf support added</li>
+<li>[0.0.2] Non-contiguous Area Cartogram</li>
+<li>[0.0.2] Prepare data with missing or extreme values before cartogram calculation for faster convergence</li>
+<li>[0.0.1] Initial Release</li>
 </ul>
 </div>
-<div id="examples" class="section level2">
-<h2 class="hasAnchor">
-<a href="#examples" class="anchor"></a>Examples</h2>
-<div id="continuous-area-cartogram" class="section level3">
-<h3 class="hasAnchor">
-<a href="#continuous-area-cartogram" class="anchor"></a>Continuous Area Cartogram</h3>
+<div class="section level2">
+<h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
+</h2>
+<div class="section level3">
+<h3 id="continuous-area-cartogram">Continuous Area Cartogram<a class="anchor" aria-label="anchor" href="#continuous-area-cartogram"></a>
+</h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sjewo/cartogram">cartogram</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">tmap</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://maptools.r-forge.r-project.org/">maptools</a></span><span class="op">)</span>
-<span class="co">#&gt; Loading required package: sp</span>
-<span class="co">#&gt; Checking rgeos availability: TRUE</span>
-
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">wrld_simpl</span><span class="op">)</span>
-
-<span class="co"># keep only the african continent</span>
-<span class="va">afr</span> <span class="op">&lt;-</span> <span class="va">wrld_simpl</span><span class="op">[</span><span class="va">wrld_simpl</span><span class="op">$</span><span class="va">REGION</span> <span class="op">==</span> <span class="fl">2</span>, <span class="op">]</span>
-
-<span class="co"># project the map</span>
-<span class="va">afr</span> <span class="op">&lt;-</span> <span class="fu">spTransform</span><span class="op">(</span><span class="va">afr</span>, <span class="fu">CRS</span><span class="op">(</span><span class="st">"+init=epsg:3395"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="co"># construct cartogram</span>
-<span class="va">afr_cont</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_cont.html">cartogram_cont</a></span><span class="op">(</span><span class="va">afr</span>, <span class="st">"POP2005"</span>, itermax <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>
-<span class="co">#&gt; Warning in CPL_crs_from_proj4string(x): GDAL Message 1: +init=epsg:XXXX syntax</span>
-<span class="co">#&gt; is deprecated. It might return a CRS with a non-EPSG compliant axis order.</span>
-<span class="co">#&gt; Mean size error for iteration 1: 5.79457153280442</span>
-<span class="co">#&gt; Mean size error for iteration 2: 4.94825547349441</span>
-<span class="co">#&gt; Mean size error for iteration 3: 4.32626995057149</span>
-<span class="co">#&gt; Mean size error for iteration 4: 3.84940324694301</span>
-<span class="co">#&gt; Mean size error for iteration 5: 3.45917774259599</span>
-
-<span class="co"># plot it</span>
-<span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_cont</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_polygons</span><span class="op">(</span><span class="st">"POP2005"</span>, style <span class="op">=</span> <span class="st">"jenks"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">tm_layout</span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>, legend.position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"bottom"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sjewo/cartogram" class="external-link">cartogram</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap" class="external-link">tmap</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"World"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># keep only the african continent</span></span>
+<span><span class="va">afr</span> <span class="op">&lt;-</span> <span class="va">World</span><span class="op">[</span><span class="va">World</span><span class="op">$</span><span class="va">continent</span> <span class="op">==</span> <span class="st">"Africa"</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="co"># project the map</span></span>
+<span><span class="va">afr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="va">afr</span>, <span class="fl">3395</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># construct cartogram</span></span>
+<span><span class="va">afr_cont</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_cont.html">cartogram_cont</a></span><span class="op">(</span><span class="va">afr</span>, <span class="st">"pop_est"</span>, itermax <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># plot it</span></span>
+<span><span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_cont</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_polygons</span><span class="op">(</span><span class="st">"pop_est"</span>, style <span class="op">=</span> <span class="st">"jenks"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">tm_layout</span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>, legend.position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"bottom"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-cont-1.png"><!-- --></p>
 </div>
-<div id="non-contiguous-area-cartogram" class="section level3">
-<h3 class="hasAnchor">
-<a href="#non-contiguous-area-cartogram" class="anchor"></a>Non-contiguous Area Cartogram</h3>
+<div class="section level3">
+<h3 id="non-contiguous-area-cartogram">Non-contiguous Area Cartogram<a class="anchor" aria-label="anchor" href="#non-contiguous-area-cartogram"></a>
+</h3>
 <p>Many thanks to @rCarto and @neocarto for contributing the code!</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># construct cartogram</span>
-<span class="va">afr_ncont</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_ncont.html">cartogram_ncont</a></span><span class="op">(</span><span class="va">afr</span>, <span class="st">"POP2005"</span><span class="op">)</span>
-
-<span class="co"># plot it</span>
-<span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_borders</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_ncont</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_polygons</span><span class="op">(</span><span class="st">"POP2005"</span>, style <span class="op">=</span> <span class="st">"jenks"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">tm_layout</span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>, legend.position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"bottom"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># construct cartogram</span></span>
+<span><span class="va">afr_ncont</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_ncont.html">cartogram_ncont</a></span><span class="op">(</span><span class="va">afr</span>, <span class="st">"pop_est"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># plot it</span></span>
+<span><span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_borders</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_ncont</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_polygons</span><span class="op">(</span><span class="st">"pop_est"</span>, style <span class="op">=</span> <span class="st">"jenks"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">tm_layout</span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>, legend.position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"bottom"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-ncont-1.png"><!-- --></p>
 </div>
-<div id="non-overlapping-circles-cartogram" class="section level3">
-<h3 class="hasAnchor">
-<a href="#non-overlapping-circles-cartogram" class="anchor"></a>Non-Overlapping Circles Cartogram</h3>
+<div class="section level3">
+<h3 id="non-overlapping-circles-cartogram">Non-Overlapping Circles Cartogram<a class="anchor" aria-label="anchor" href="#non-overlapping-circles-cartogram"></a>
+</h3>
 <p>Many thanks to @rCarto for contributing the code!</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># construct cartogram</span>
-<span class="va">afr_dorling</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_dorling.html">cartogram_dorling</a></span><span class="op">(</span><span class="va">afr</span>, <span class="st">"POP2005"</span><span class="op">)</span>
-
-<span class="co"># plot it</span>
-<span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_borders</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_dorling</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_polygons</span><span class="op">(</span><span class="st">"POP2005"</span>, style <span class="op">=</span> <span class="st">"jenks"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">tm_layout</span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>, legend.position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"bottom"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># construct cartogram</span></span>
+<span><span class="va">afr_dorling</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_dorling.html">cartogram_dorling</a></span><span class="op">(</span><span class="va">afr</span>, <span class="st">"pop_est"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># plot it</span></span>
+<span><span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_borders</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_dorling</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_polygons</span><span class="op">(</span><span class="st">"pop_est"</span>, style <span class="op">=</span> <span class="st">"jenks"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">tm_layout</span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>, legend.position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"bottom"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-dorling-1.png"><!-- --></p>
 </div>
 </div>
-<div id="sf-support" class="section level2">
-<h2 class="hasAnchor">
-<a href="#sf-support" class="anchor"></a>sf support</h2>
-<p>Thanks to @Nowosad for speeding things up!</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
-<span class="co">#&gt; Linking to GEOS 3.8.0, GDAL 3.0.2, PROJ 6.2.1</span>
-
-<span class="co"># Create an sf object</span>
-<span class="va">afr_sf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="va">afr</span><span class="op">)</span>
-
-<span class="co"># Continuous Area Cartogram</span>
-<span class="va">afr_sf_cont</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_cont.html">cartogram_cont</a></span><span class="op">(</span><span class="va">afr_sf</span>, <span class="st">"POP2005"</span>, <span class="fl">3</span><span class="op">)</span>
-<span class="co">#&gt; Mean size error for iteration 1: 5.79457153280442</span>
-<span class="co">#&gt; Mean size error for iteration 2: 4.94825547349441</span>
-<span class="co">#&gt; Mean size error for iteration 3: 4.32626995057149</span>
-
-<span class="co"># Non-contiguous Area Cartogram</span>
-<span class="va">afr_sf_ncont</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_ncont.html">cartogram_ncont</a></span><span class="op">(</span><span class="va">afr_sf</span>, <span class="st">"POP2005"</span><span class="op">)</span>
-
-<span class="co"># Non-overlapping Circles Cartogram</span>
-<span class="va">afr_sf_dorling</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_dorling.html">cartogram_dorling</a></span><span class="op">(</span><span class="va">afr_sf</span>, <span class="st">"POP2005"</span><span class="op">)</span>
-
-<span class="co"># Plots</span>
-<span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_sf_cont</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_polygons</span><span class="op">(</span><span class="st">"POP2005"</span>, style <span class="op">=</span> <span class="st">"jenks"</span>, legend.show <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">tm_layout</span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_sf</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_borders</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_sf_ncont</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_polygons</span><span class="op">(</span><span class="st">"POP2005"</span>, style <span class="op">=</span> <span class="st">"jenks"</span>, legend.show <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">tm_layout</span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="va">m3</span> <span class="op">&lt;-</span> <span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_sf</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_borders</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_sf_dorling</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_polygons</span><span class="op">(</span><span class="st">"POP2005"</span>, style <span class="op">=</span> <span class="st">"jenks"</span>, legend.show <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">tm_layout</span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>, legend.outside <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-
-<span class="va">ml</span> <span class="op">&lt;-</span> <span class="fu">tm_shape</span><span class="op">(</span><span class="va">afr_sf_dorling</span><span class="op">)</span> <span class="op">+</span> <span class="fu">tm_polygons</span><span class="op">(</span><span class="st">"POP2005"</span>, style <span class="op">=</span> <span class="st">"jenks"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">tm_layout</span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>, legend.only <span class="op">=</span> <span class="cn">TRUE</span>, legend.position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"center"</span>, <span class="st">"center"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu">tmap_arrange</span><span class="op">(</span><span class="va">m1</span>, <span class="va">m2</span>, <span class="va">m3</span>, <span class="va">ml</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
-<p><img src="reference/figures/README-sfsupport-1.png"><!-- --></p>
-</div>
-<div id="references" class="section level2">
-<h2 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h2>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
 <ul>
 <li>Dorling, D. (1996). Area Cartograms: Their Use and Creation. In Concepts and Techniques in Modern Geography (CATMOG), 59.</li>
 <li>Dougenik, J. A., Chrisman, N. R., &amp; Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.</li>
-<li>Olson, J. M. (1976), Noncontiguous Area Cartograms. The Professional Geographer, 28: 371–380. <a href="https://doi.org/10.1111/j.0033-0124.1976.00371.x">doi:10.1111/j.0033-0124.1976.00371.x</a>
+<li>Olson, J. M. (1976), Noncontiguous Area Cartograms. The Professional Geographer, 28: 371–380. <a href="https://doi.org/10.1111/j.0033-0124.1976.00371.x" class="external-link">doi:10.1111/j.0033-0124.1976.00371.x</a>
 </li>
 </ul>
 </div>
@@ -222,48 +163,51 @@
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Download from CRAN at <br><a href="https://cloud.r-project.org/package=cartogram">https://​cloud.r-project.org/​package=cartogram</a>
-</li>
-<li>Browse source code at <br><a href="https://github.com/sjewo/cartogram/">https://​github.com/​sjewo/​cartogram/​</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/sjewo/cartogram/issues">https://​github.com/​sjewo/​cartogram/​issues</a>
-</li>
-</ul>
-</div>
-<div class="license">
-<h2>License</h2>
-<ul class="list-unstyled">
-<li><a href="https://www.r-project.org/Licenses/GPL-3">GPL-3</a></li>
-</ul>
-</div>
-<div class="developers">
-<h2>Developers</h2>
-<ul class="list-unstyled">
-<li>Sebastian Jeworutzki <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-2671-5253" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li><a href="authors.html">All authors...</a></li>
+<li><a href="https://cloud.r-project.org/package=cartogram" class="external-link">View on CRAN</a></li>
+<li><a href="https://github.com/sjewo/cartogram/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/sjewo/cartogram/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
+<div class="license">
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li><a href="https://cran.r-project.org/package=cartogram"><img src="http://www.r-pkg.org/badges/version/cartogram" alt="CRAN status"></a></li>
-<li><a href="https://github.com/sjewo/cartogram/actions?workflow=R-CMD-check"><img src="https://github.com/sjewo/cartogram/workflows/R-CMD-check/badge.svg" alt="Build status"></a></li>
-<li><a href="https://cran.r-project.org/package=cartogram"><img src="http://cranlogs.r-pkg.org/badges/cartogram" alt="CRAN Downloads"></a></li>
+<li><a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a></li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing cartogram</a></li>
+</ul>
 </div>
+
+<div class="developers">
+<h2 data-toc-skip>Developers</h2>
+<ul class="list-unstyled">
+<li>Sebastian Jeworutzki <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-2671-5253" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li><a href="authors.html">More about authors...</a></li>
+</ul>
+</div>
+
+
+
+  </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Sebastian Jeworutzki.</p>
+  <p></p>
+<p>Developed by Sebastian Jeworutzki.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
@@ -271,6 +215,8 @@
 
   
 
+
+  
 
   </body>
 </html>

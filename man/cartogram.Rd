@@ -20,6 +20,7 @@ cartogram(shp, ...)
 "remove", remove features with values lower than quantile at threshold,
 "none", don't adjust weighting values}
     \item{\code{threshold}}{Define threshold for data preparation}
+    \item{\code{verbose}}{print meanSizeError on each iteration}
   }}
 }
 \description{

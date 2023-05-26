@@ -53,7 +53,7 @@
 #' 
 #' @references Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
 cartogram_cont <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold=0.05) {
+                      prepare="adjust", threshold=0.05, verbose = FALSE) {
   UseMethod("cartogram_cont")
 }
 

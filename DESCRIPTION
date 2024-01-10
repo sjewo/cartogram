@@ -10,7 +10,7 @@ Authors@R: c(
   person("Jakub", "Nowosad", email = "nowosad.jakub@gmail.com", role = "ctb", comment = c(ORCID = "0000-0002-1057-3721"))
   )
 Description: Construct continuous and non-contiguous area cartograms.
-URL: https://github.com/sjewo/cartogram
+URL: https://github.com/sjewo/cartogram, https://sjewo.github.io/cartogram/
 BugReports: https://github.com/sjewo/cartogram/issues
 Imports: methods, sf, packcircles
 Suggests: 

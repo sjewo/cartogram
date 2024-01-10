@@ -1,12 +1,15 @@
 cartogram: Create Cartograms with R
 ================
 
+<!-- badges: start -->
+
 [![CRAN
 status](http://www.r-pkg.org/badges/version/cartogram)](https://cran.r-project.org/package=cartogram)
 [![Build
 status](https://github.com/sjewo/cartogram/workflows/R-CMD-check/badge.svg)](https://github.com/sjewo/cartogram/actions?workflow=R-CMD-check)
 [![CRAN
 Downloads](http://cranlogs.r-pkg.org/badges/cartogram)](https://cran.r-project.org/package=cartogram)
+<!-- badges: end -->
 
 Construct a continuous area cartogram by a rubber sheet distortion
 algorithm (Dougenik et al. 1985), non-contiguous Area Cartograms (Olson
@@ -26,22 +29,6 @@ package `devtools` and run the following command:
 ``` r
 devtools::install_github("sjewo/cartogram")
 ```
-
-## NEWS
-
-- \[0.3.0\] Remove `sp`, `rgdal` and `maptools` from examples and
-  suggestions. `cartogram_cont` has a new parameter `verbose = FALSE` to
-  hide print of size error on each iteration.
-- \[0.2.0\] Migrated all functions to sf, fixed problems with
-  multipolygons. cartogram functions won’t accept features with
-  longitude/latitude coordinates anymore.
-- \[0.1.1\] Update sf code: Thanks to @Nowosad for speeding things up!
-- \[0.1.0\] Non-Overlapping Circles Cartogram (Dorling)
-- \[0.0.3\] sf support added
-- \[0.0.2\] Non-contiguous Area Cartogram
-- \[0.0.2\] Prepare data with missing or extreme values before cartogram
-  calculation for faster convergence
-- \[0.0.1\] Initial Release
 
 ## Examples
 

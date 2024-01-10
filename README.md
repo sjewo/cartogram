@@ -5,8 +5,7 @@ cartogram: Create Cartograms with R
 
 [![CRAN
 status](http://www.r-pkg.org/badges/version/cartogram)](https://cran.r-project.org/package=cartogram)
-[![Build
-status](https://github.com/sjewo/cartogram/workflows/R-CMD-check/badge.svg)](https://github.com/sjewo/cartogram/actions?workflow=R-CMD-check)
+[![R-CMD-check](https://github.com/sjewo/cartogram/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sjewo/cartogram/actions/workflows/R-CMD-check.yaml)
 [![CRAN
 Downloads](http://cranlogs.r-pkg.org/badges/cartogram)](https://cran.r-project.org/package=cartogram)
 <!-- badges: end -->

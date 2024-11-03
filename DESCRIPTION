@@ -16,7 +16,6 @@ Imports:
     methods,
     sf,
     packcircles,
-    progressr,
     furrr,
     parallelly,
     future

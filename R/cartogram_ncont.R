@@ -111,6 +111,7 @@ cartogram_ncont.sf <- function(
   spdf$r <- as.numeric(sqrt( wArea/ surf))
   spdf$r[spdf$r == 0] <- 0.001 # don't shrink polygons to zero area
   n <- nrow(spdf)
+  crs <- st_crs(spdf) # save crs
   future::plan(future::multisession, workers = n_cores)
   spdf_geometry_list <- furrr::future_map(1:n, function(i) {
     rescalePoly.sf(spdf[i, ], 
@@ -122,6 +123,7 @@ cartogram_ncont.sf <- function(
   )
   future::plan(future::sequential)
   spdf$geometry <- do.call(c, spdf_geometry_list)
+  st_crs(spdf) <- crs # restore crs
   spdf$r <- NULL
   sf::st_buffer(spdf, 0)
 }

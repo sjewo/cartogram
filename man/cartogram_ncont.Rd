@@ -6,11 +6,29 @@
 \alias{cartogram_ncont.sf}
 \title{Calculate Non-Contiguous Cartogram Boundaries}
 \usage{
-cartogram_ncont(x, weight, k = 1, inplace = TRUE)
+cartogram_ncont(
+  x,
+  weight,
+  k = 1,
+  inplace = TRUE,
+  n_cpu = parallelly::availableCores()
+)
 
-\method{cartogram_ncont}{SpatialPolygonsDataFrame}(x, weight, k = 1, inplace = TRUE)
+\method{cartogram_ncont}{SpatialPolygonsDataFrame}(
+  x,
+  weight,
+  k = 1,
+  inplace = TRUE,
+  n_cores = parallelly::availableCores()
+)
 
-\method{cartogram_ncont}{sf}(x, weight, k = 1, inplace = TRUE)
+\method{cartogram_ncont}{sf}(
+  x,
+  weight,
+  k = 1,
+  inplace = TRUE,
+  n_cores = parallelly::availableCores()
+)
 }
 \arguments{
 \item{x}{a polygon or multiplogyon sf object}
@@ -21,6 +39,8 @@ cartogram_ncont(x, weight, k = 1, inplace = TRUE)
 
 \item{inplace}{If TRUE, each polygon is modified in its original place, 
 if FALSE multi-polygons are centered on their initial centroid}
+
+\item{n_cpu}{Number of cores to use. Defaults to maximum available identified with \code{\link[parallelly]{availableCores}}.}
 }
 \value{
 An object of the same class as x with resized polygon boundaries

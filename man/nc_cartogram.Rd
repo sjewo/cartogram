@@ -16,6 +16,7 @@ nc_cartogram(shp, ...)
     \item{\code{k}}{Factor expansion for the unit with the greater value}
     \item{\code{inplace}}{If TRUE, each polygon is modified in its original place, 
 if FALSE multi-polygons are centered on their initial centroid}
+    \item{\code{n_cpu}}{Number of cores to use. Defaults to maximum available identified with \code{\link[parallelly]{availableCores}}.}
   }}
 }
 \description{

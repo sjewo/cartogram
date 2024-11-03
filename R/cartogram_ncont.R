@@ -24,6 +24,7 @@
 #' @param k Factor expansion for the unit with the greater value
 #' @param inplace If TRUE, each polygon is modified in its original place, 
 #' if FALSE multi-polygons are centered on their initial centroid
+#' @param n_cpu Number of cores to use. Defaults to maximum available identified with \code{\link[parallelly]{availableCores}}.
 #' @return An object of the same class as x with resized polygon boundaries
 #' @export
 #' @importFrom methods is slot as
@@ -47,7 +48,13 @@
 #'plot(nc_utm_carto[,"BIR74"], add =TRUE)
 #'
 #' @references Olson, J. M. (1976). Noncontiguous Area Cartograms. In The Professional Geographer, 28(4), 371-380.
-cartogram_ncont <- function(x, weight, k = 1, inplace = TRUE){
+cartogram_ncont <- function(
+  x,
+  weight,
+  k = 1,
+  inplace = TRUE,
+  n_cpu = parallelly::availableCores()
+){
   UseMethod("cartogram_ncont")
 }
 
@@ -66,15 +73,27 @@ nc_cartogram <- function(shp, ...) {
 #' @rdname cartogram_ncont
 #' @importFrom sf st_as_sf
 #' @export
-cartogram_ncont.SpatialPolygonsDataFrame <- function(x, weight, k = 1, inplace = TRUE){
-  as(cartogram_ncont.sf(sf::st_as_sf(x), weight, k = k, inplace = inplace), 'Spatial')
+cartogram_ncont.SpatialPolygonsDataFrame <- function(
+  x,
+  weight,
+  k = 1,
+  inplace = TRUE,
+  n_cores = parallelly::availableCores()
+){
+  as(cartogram_ncont.sf(sf::st_as_sf(x), weight, k = k, inplace = inplace, n_cores = n_cores), 'Spatial')
 }
 
 
 #' @rdname cartogram_ncont
 #' @importFrom sf st_geometry st_area st_buffer st_is_longlat
 #' @export
-cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
+cartogram_ncont.sf <- function(
+  x,
+  weight,
+  k = 1,
+  inplace = TRUE,
+  n_cores = parallelly::availableCores()
+) {
   
   if (isTRUE(sf::st_is_longlat(x))) {
     stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
@@ -92,11 +111,17 @@ cartogram_ncont.sf <- function(x, weight, k = 1, inplace = TRUE){
   spdf$r <- as.numeric(sqrt( wArea/ surf))
   spdf$r[spdf$r == 0] <- 0.001 # don't shrink polygons to zero area
   n <- nrow(spdf)
-  for(i in 1:n){
-    sf::st_geometry(spdf)[i] <- rescalePoly.sf(spdf[i, ], 
-                                         inplace = inplace, 
-                                         r = spdf[i,]$r)
-  } 
+  future::plan(future::multisession, workers = n_cores)
+  spdf_geometry_list <- furrr::future_map(1:n, function(i) {
+    rescalePoly.sf(spdf[i, ], 
+                   inplace = inplace, 
+                   r = spdf$r[i])
+  },
+    .progress = TRUE,
+    .options = furrr::furrr_options(seed = TRUE)
+  )
+  future::plan(future::sequential)
+  spdf$geometry <- do.call(c, spdf_geometry_list)
   spdf$r <- NULL
   sf::st_buffer(spdf, 0)
 }

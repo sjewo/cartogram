@@ -12,8 +12,17 @@ Authors@R: c(
 Description: Construct continuous and non-contiguous area cartograms.
 URL: https://github.com/sjewo/cartogram, https://sjewo.github.io/cartogram/
 BugReports: https://github.com/sjewo/cartogram/issues
-Imports: methods, sf, packcircles
-Suggests: 
+Imports: 
+    methods,
+    sf,
+    packcircles,
+    progressr,
+    furrr,
+    parallelly,
+    future
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

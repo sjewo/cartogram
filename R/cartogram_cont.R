@@ -28,6 +28,11 @@
 #' "none", don't adjust weighting values
 #' @param threshold Define threshold for data preparation
 #' @param verbose print meanSizeError on each iteration
+#' @param n_cpu Number of cores to use. Defaults to "respect_future_plan". Available options are:
+#' * "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}}
+#' * "auto" - Use all available cores except one
+#' * a `numeric` value - Use the specified number of cores
+#' @param show_progress A `logical` value. If TRUE, show progress bar. Defaults to TRUE.
 #' @return An object of the same class as x
 #' @export
 #' @importFrom methods is slot
@@ -53,7 +58,8 @@
 #' 
 #' @references Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
 cartogram_cont <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold=0.05, verbose = FALSE) {
+                      prepare="adjust", threshold=0.05, verbose = FALSE,
+                      n_cpu="respect_future_plan", show_progress=TRUE) {
   UseMethod("cartogram_cont")
 }
 
@@ -73,9 +79,10 @@ cartogram <- function(shp, ...) {
 #' @importFrom sf st_as_sf
 #' @export
 cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold=0.05, verbose = FALSE) {
+                      prepare="adjust", threshold=0.05, verbose = FALSE,
+                      n_cpu="respect_future_plan", show_progress=TRUE) {
   as(cartogram_cont.sf(sf::st_as_sf(x), weight, itermax=itermax, maxSizeError=maxSizeError,
-                    prepare=prepare, threshold=threshold, verbose=verbose), 'Spatial')
+                    prepare=prepare, threshold=threshold, verbose=verbose, n_cpu=n_cpu, show_progress=show_progress), 'Spatial')
 
 }
 
@@ -83,11 +90,48 @@ cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSi
 #' @importFrom sf st_area st_geometry st_geometry_type st_centroid st_crs st_coordinates st_buffer st_is_longlat
 #' @export
 cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
-                              prepare = "adjust", threshold = 0.05, verbose = FALSE) {
+                              prepare = "adjust", threshold = 0.05, verbose = FALSE, n_cpu="respect_future_plan", show_progress=TRUE) {
 
   if (isTRUE(sf::st_is_longlat(x))) {
     stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
   }
+  
+  # Check n_cpu parameter and set up parallel processing
+  if(length(n_cpu) > 1) {
+    stop('Invalid value for `n_cpu`. Use "respect_future_plan", "auto", or a numeric value.', call. = FALSE)
+  }
+
+  # Determine if we should use multithreading
+  if (is.numeric(n_cpu) & n_cpu == 1) {
+    multithreadded <- FALSE
+  } else if (is.numeric(n_cpu) & n_cpu > 1) {
+    cartogram_assert_package(c("future", "future.apply"))
+    future::plan(future::multisession, workers = n_cpu)
+    multithreadded <- TRUE
+  } else if (n_cpu == "auto") {
+    cartogram_assert_package("parallelly")
+    n_cpu <- max(parallelly::availableCores() - 1, 1)
+    if (n_cpu == 1) {
+      multithreadded <- FALSE
+    } else if (n_cpu > 1) {
+      cartogram_assert_package(c("future", "future.apply"))
+      future::plan(future::multisession, workers = n_cpu)
+      multithreadded <- TRUE
+    }
+  } else if (n_cpu == "respect_future_plan") {
+    if (rlang::is_installed("future")) {
+      if (is(future::plan(), "sequential")) {
+        multithreadded <- FALSE
+      } else {
+        multithreadded <- TRUE
+      }
+    } else {
+      multithreadded <- FALSE
+    }
+  } else {
+    stop('Invalid value for `n_cpu`. Use "respect_future_plan", "auto", or a numeric value.', call. = FALSE)
+  }
+  
   # prepare data
   value <- x[[weight]]
   
@@ -168,45 +212,81 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     if(verbose)
       message(paste0("Mean size error for iteration ", z , ": ", meanSizeError))
     
-    for (i in seq_len(nrow(x.iter))) {
-      pts <- sf::st_coordinates(x.iter_geom[[i]])
-      idx <- unique(pts[, colnames(pts) %in% c("L1", "L2", "L3")])
-
-      for (k in seq_len(nrow(idx))) {
-        newpts <- pts[pts[, "L1"] == idx[k, "L1"] & pts[, "L2"] == idx[k, "L2"], c("X", "Y")]
-        
-        distances <- apply(centroids, 1, function(pt) {
-          ptm <- matrix(pt, nrow=nrow(newpts), ncol=2, byrow=T)
-          sqrt(rowSums((newpts - ptm)^2))
-        })
-        
-        #dold <- spDists(newpts, centroids)
-        #all.equal(distances, dold)
-        
-        #distance
-        for (j in  seq_len(nrow(centroids))) {
-          distance <- distances[, j]
-          
-          # calculate force vector
-          Fij <- mass[j] * radius[j] / distance
-          Fbij <- mass[j] * (distance / radius[j]) ^ 2 * (4 - 3 * (distance / radius[j]))
-          Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
-          Fij <- Fij * forceReductionFactor / distance
-          
-          # calculate new border coordinates
-          newpts <- newpts + cbind(X1 = Fij, X2 = Fij) * (newpts - centroids[rep(j, nrow(newpts)), ])
-        }
-        
-        # save final coordinates from this iteration to coordinate list
-        if (sf::st_geometry_type(sf::st_geometry(x.iter)[[i]]) == "POLYGON"){
-          sf::st_geometry(x.iter)[[i]][[idx[k, "L1"]]] <- newpts
-        } else {
-          sf::st_geometry(x.iter)[[i]][[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
-        }
+    # Process polygons either in parallel or sequentially
+    if (multithreadded) {
+      if (show_progress) {
+        cartogram_assert_package("progressr")
+        progressr::handlers(global = TRUE)
+        progressr::handlers("progress")
+        p <- progressr::progressor(along = seq_len(nrow(x.iter)))
+      } else {
+        p <- function(...) NULL
       }
+      
+      x.iter_geom <- future.apply::future_lapply(
+        seq_len(nrow(x.iter)),
+        function(i) {
+          if (show_progress) p(sprintf("Processing polygon %d in iteration %d", i, z))
+          process_polygon(x.iter_geom[[i]], centroids, mass, radius, forceReductionFactor)
+        },
+        future.seed = TRUE
+      )
+    } else {
+      if (show_progress) {
+        pb <- utils::txtProgressBar(min = 0, max = nrow(x.iter), style = 3)
+      }
+      
+      x.iter_geom <- lapply(
+        seq_len(nrow(x.iter)),
+        function(i) {
+          if (show_progress) utils::setTxtProgressBar(pb, i)
+          process_polygon(x.iter_geom[[i]], centroids, mass, radius, forceReductionFactor)
+        }
+      )
+      
+      if (show_progress) close(pb)
     }
+    
+    sf::st_geometry(x.iter) <- do.call(sf::st_sfc, x.iter_geom)
   }
   
-  # return and try to fix self-intersections
+  # Clean up parallel workers if they were created within this function
+  if ((is.numeric(n_cpu) & n_cpu > 1) || n_cpu == "auto") {
+    future::plan(future::sequential)
+  }
+  
   return(sf::st_buffer(x.iter, 0))
+}
+
+#' @keywords internal
+process_polygon <- function(poly_geom, centroids, mass, radius, forceReductionFactor) {
+  pts <- sf::st_coordinates(poly_geom)
+  idx <- unique(pts[, colnames(pts) %in% c("L1", "L2", "L3")])
+  
+  for (k in seq_len(nrow(idx))) {
+    newpts <- pts[pts[, "L1"] == idx[k, "L1"] & pts[, "L2"] == idx[k, "L2"], c("X", "Y")]
+    
+    distances <- apply(centroids, 1, function(pt) {
+      ptm <- matrix(pt, nrow=nrow(newpts), ncol=2, byrow=T)
+      sqrt(rowSums((newpts - ptm)^2))
+    })
+    
+    for (j in seq_len(nrow(centroids))) {
+      distance <- distances[, j]
+      
+      Fij <- mass[j] * radius[j] / distance
+      Fbij <- mass[j] * (distance / radius[j]) ^ 2 * (4 - 3 * (distance / radius[j]))
+      Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
+      Fij <- Fij * forceReductionFactor / distance
+      
+      newpts <- newpts + cbind(X1 = Fij, X2 = Fij) * (newpts - centroids[rep(j, nrow(newpts)), ])
+    }
+    
+    if (sf::st_geometry_type(poly_geom) == "POLYGON") {
+      poly_geom[[idx[k, "L1"]]] <- newpts
+    } else {
+      poly_geom[[idx[k, "L2"]]][[idx[k, "L1"]]] <- newpts
+    }
+  }
+  return(poly_geom)
 }

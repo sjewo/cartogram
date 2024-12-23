@@ -21,6 +21,11 @@ cartogram(shp, ...)
 "none", don't adjust weighting values}
     \item{\code{threshold}}{Define threshold for data preparation}
     \item{\code{verbose}}{print meanSizeError on each iteration}
+    \item{\code{n_cpu}}{Number of cores to use. Defaults to "respect_future_plan". Available options are:
+* "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}}
+* "auto" - Use all available cores except one
+* a `numeric` value - Use the specified number of cores}
+    \item{\code{show_progress}}{A `logical` value. If TRUE, show progress bar. Defaults to TRUE.}
   }}
 }
 \description{

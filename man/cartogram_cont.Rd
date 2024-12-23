@@ -13,7 +13,9 @@ cartogram_cont(
   maxSizeError = 1.0001,
   prepare = "adjust",
   threshold = 0.05,
-  verbose = FALSE
+  verbose = FALSE,
+  n_cpu = "respect_future_plan",
+  show_progress = TRUE
 )
 
 \method{cartogram_cont}{SpatialPolygonsDataFrame}(
@@ -23,7 +25,9 @@ cartogram_cont(
   maxSizeError = 1.0001,
   prepare = "adjust",
   threshold = 0.05,
-  verbose = FALSE
+  verbose = FALSE,
+  n_cpu = "respect_future_plan",
+  show_progress = TRUE
 )
 
 \method{cartogram_cont}{sf}(
@@ -33,7 +37,9 @@ cartogram_cont(
   maxSizeError = 1.0001,
   prepare = "adjust",
   threshold = 0.05,
-  verbose = FALSE
+  verbose = FALSE,
+  n_cpu = "respect_future_plan",
+  show_progress = TRUE
 )
 }
 \arguments{
@@ -53,6 +59,13 @@ cartogram_cont(
 \item{threshold}{Define threshold for data preparation}
 
 \item{verbose}{print meanSizeError on each iteration}
+
+\item{n_cpu}{Number of cores to use. Defaults to "respect_future_plan". Available options are:
+* "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}}
+* "auto" - Use all available cores except one
+* a `numeric` value - Use the specified number of cores}
+
+\item{show_progress}{A `logical` value. If TRUE, show progress bar. Defaults to TRUE.}
 }
 \value{
 An object of the same class as x

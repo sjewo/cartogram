@@ -11,7 +11,8 @@ cartogram_ncont(
   weight,
   k = 1,
   inplace = TRUE,
-  n_cpu = parallelly::availableCores()
+  n_cpu = "respect_future_plan",
+  show_progress = TRUE
 )
 
 \method{cartogram_ncont}{SpatialPolygonsDataFrame}(
@@ -19,7 +20,8 @@ cartogram_ncont(
   weight,
   k = 1,
   inplace = TRUE,
-  n_cores = parallelly::availableCores()
+  n_cpu = "respect_future_plan",
+  show_progress = TRUE
 )
 
 \method{cartogram_ncont}{sf}(
@@ -27,7 +29,8 @@ cartogram_ncont(
   weight,
   k = 1,
   inplace = TRUE,
-  n_cores = parallelly::availableCores()
+  n_cpu = "respect_future_plan",
+  show_progress = TRUE
 )
 }
 \arguments{
@@ -40,7 +43,10 @@ cartogram_ncont(
 \item{inplace}{If TRUE, each polygon is modified in its original place, 
 if FALSE multi-polygons are centered on their initial centroid}
 
-\item{n_cpu}{Number of cores to use. Defaults to maximum available identified with \code{\link[parallelly]{availableCores}}.}
+\item{n_cpu}{Number of cores to use. Defaults to "respect_future_plan". Available options are:
+* "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}} (e.g. `future::plan(future::multisession, workers = 4)`) before running the `cartogram_ncont` function.
+* "auto" - Use all except available cores (identified with \code{\link[parallelly]{availableCores}}) except 1, to keep the system responsive.
+* a `numeric` value - Use the specified number of cores. In this case `cartogram_ncont` will use set the specified number of cores internally with `future::plan(future::multisession, workers = n_cpu)` and revert that back by switching the plan back to `future::sequential`. If only 1 core is set, the function will not require `future` and `future.apply` and will run on a single core.}
 }
 \value{
 An object of the same class as x with resized polygon boundaries

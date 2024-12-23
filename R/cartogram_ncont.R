@@ -24,7 +24,10 @@
 #' @param k Factor expansion for the unit with the greater value
 #' @param inplace If TRUE, each polygon is modified in its original place, 
 #' if FALSE multi-polygons are centered on their initial centroid
-#' @param n_cpu Number of cores to use. Defaults to maximum available identified with \code{\link[parallelly]{availableCores}}.
+#' @param n_cpu Number of cores to use. Defaults to "respect_future_plan". Available options are:
+#' * "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}} (e.g. `future::plan(future::multisession, workers = 4)`) before running the `cartogram_ncont` function.
+#' * "auto" - Use all except available cores (identified with \code{\link[parallelly]{availableCores}}) except 1, to keep the system responsive.
+#' * a `numeric` value - Use the specified number of cores. In this case `cartogram_ncont` will use set the specified number of cores internally with `future::plan(future::multisession, workers = n_cpu)` and revert that back by switching the plan back to `future::sequential`. If only 1 core is set, the function will not require `future` and `future.apply` and will run on a single core.
 #' @return An object of the same class as x with resized polygon boundaries
 #' @export
 #' @importFrom methods is slot as
@@ -53,7 +56,8 @@ cartogram_ncont <- function(
   weight,
   k = 1,
   inplace = TRUE,
-  n_cpu = parallelly::availableCores()
+  n_cpu = "respect_future_plan",
+  show_progress = TRUE
 ){
   UseMethod("cartogram_ncont")
 }
@@ -78,9 +82,10 @@ cartogram_ncont.SpatialPolygonsDataFrame <- function(
   weight,
   k = 1,
   inplace = TRUE,
-  n_cores = parallelly::availableCores()
+  n_cpu = "respect_future_plan",
+  show_progress = TRUE
 ){
-  as(cartogram_ncont.sf(sf::st_as_sf(x), weight, k = k, inplace = inplace, n_cores = n_cores), 'Spatial')
+  as(cartogram_ncont.sf(sf::st_as_sf(x), weight, k = k, inplace = inplace, n_cpu = n_cpu, show_progress = show_progress), 'Spatial')
 }
 
 
@@ -92,11 +97,37 @@ cartogram_ncont.sf <- function(
   weight,
   k = 1,
   inplace = TRUE,
-  n_cores = parallelly::availableCores()
+  n_cpu = "respect_future_plan",
+  show_progress = TRUE
 ) {
   
   if (isTRUE(sf::st_is_longlat(x))) {
     stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
+  }
+
+  if(length(n_cpu) > 1) {
+    stop('Invalid value for `n_cpu`. Use "respect_future_plan", "auto", or a numeric value.', call. = FALSE)
+  }
+
+  if (is.numeric(n_cpu) & n_cpu == 1) {
+    multithreadded <- FALSE
+  } else if (is.numeric(n_cpu) & n_cpu > 1) {
+    cartogram_assert_package(c("future", "future.apply"))
+    future::plan(future::multisession, workers = n_cpu)
+    multithreadded <- TRUE
+  } else if (n_cpu == "auto") {
+    cartogram_assert_package(c("future", "future.apply", "parallelly"))
+    future::plan(future::multisession, workers = parallelly::availableCores() - 1)
+    multithreadded <- TRUE
+  } else if (n_cpu == "respect_future_plan") {
+    if (rlang::is_installed("future")) {
+      multithreadded <- TRUE
+    } else {
+      # if future is not installed, there is definetly no multithreading plan active, so just fallback to single core code
+      multithreadded <- FALSE
+    }
+  } else if (n_cpu != "respect_future_plan") {
+    stop('Invalid value for `n_cpu`. Use "respect_future_plan", "auto", or a numeric value.', call. = FALSE)
   }
 
   var <- weight
@@ -112,16 +143,58 @@ cartogram_ncont.sf <- function(
   spdf$r[spdf$r == 0] <- 0.001 # don't shrink polygons to zero area
   n <- nrow(spdf)
   crs <- st_crs(spdf) # save crs
-  future::plan(future::multisession, workers = n_cores)
-  spdf_geometry_list <- furrr::future_map(1:n, function(i) {
-    rescalePoly.sf(spdf[i, ], 
-                   inplace = inplace, 
-                   r = spdf$r[i])
-  },
-    .progress = TRUE,
-    .options = furrr::furrr_options(seed = TRUE)
-  )
-  future::plan(future::sequential)
+  
+  if (multithreadded == TRUE) {
+    cartogram_assert_package(c("future.apply"))
+    # handle show_progress
+    if (show_progress) {
+      cartogram_assert_package("progressr")
+      progressr::handlers(global = TRUE)
+      progressr::handlers("progress")
+      p <- progressr::progressor(along = seq_len(nrow(spdf)))
+    } else {
+      p <- function(...) NULL # don't show progress
+    }
+    
+    spdf_geometry_list <- future.apply::future_lapply(
+      X = seq_len(nrow(spdf)),
+      FUN = function(i) {
+        p(sprintf("Processing polygon %d", i))
+        rescalePoly.sf(
+          spdf[i, ],
+          r = spdf$r[i],
+          inplace = inplace
+        )
+      },
+      future.seed = TRUE
+    )
+
+    # revert back to sequential if future::plan was applied within the function
+    if (is.numeric(n_cpu) | n_cpu == "auto") {
+      future::plan(future::sequential)
+    }
+  } else if (multithreadded == FALSE) {
+    if (show_progress) {
+      pb <- utils::txtProgressBar(min = 0, max = nrow(spdf), style = 3)
+    }
+    spdf_geometry_list <- lapply(
+      X = seq_len(nrow(spdf)),
+      FUN = function(i) {
+        if (show_progress) {
+          utils::setTxtProgressBar(pb, i)
+        }
+        rescalePoly.sf(
+          spdf[i, ],
+          r = spdf$r[i],
+          inplace = inplace
+        )
+      }
+    )
+    
+    if (show_progress) {
+      close(pb)
+    }
+  }
   spdf$geometry <- do.call(c, spdf_geometry_list)
   st_crs(spdf) <- crs # restore crs
   spdf$r <- NULL

@@ -116,9 +116,15 @@ cartogram_ncont.sf <- function(
     future::plan(future::multisession, workers = n_cpu)
     multithreadded <- TRUE
   } else if (n_cpu == "auto") {
-    cartogram_assert_package(c("future", "future.apply", "parallelly"))
-    future::plan(future::multisession, workers = max(parallelly::availableCores() - 1, 1))
-    multithreadded <- TRUE
+    cartogram_assert_package("parallelly")
+    n_cpu <- max(parallelly::availableCores() - 1, 1)
+    if (n_cpu == 1) {
+      multithreadded <- FALSE
+    } else if (n_cpu > 1) {
+      cartogram_assert_package(c("future", "future.apply"))
+      future::plan(future::multisession, workers = n_cpu)
+      multithreadded <- TRUE
+    }
   } else if (n_cpu == "respect_future_plan") {
     if (rlang::is_installed("future")) {
       multithreadded <- TRUE

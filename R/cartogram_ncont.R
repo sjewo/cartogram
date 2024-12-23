@@ -127,7 +127,11 @@ cartogram_ncont.sf <- function(
     }
   } else if (n_cpu == "respect_future_plan") {
     if (rlang::is_installed("future")) {
-      multithreadded <- TRUE
+      if ( is(future::plan(), "sequential") ) {
+        multithreadded <- FALSE
+      } else {
+        multithreadded <- TRUE
+      }
     } else {
       # if future is not installed, there is definetly no multithreading plan active, so just fallback to single core code
       multithreadded <- FALSE

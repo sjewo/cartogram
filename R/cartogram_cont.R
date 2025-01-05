@@ -29,9 +29,9 @@
 #' @param threshold Define threshold for data preparation
 #' @param verbose print meanSizeError on each iteration
 #' @param n_cpu Number of cores to use. Defaults to "respect_future_plan". Available options are:
-#' * "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}}
-#' * "auto" - Use all available cores except one
-#' * a `numeric` value - Use the specified number of cores
+#' * "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}} (e.g. `future::plan(future::multisession, workers = 4)`) before running the `cartogram_cont` function.
+#' * "auto" - Use all except available cores (identified with \code{\link[parallelly]{availableCores}}) except 1, to keep the system responsive.
+#' * a `numeric` value - Use the specified number of cores. In this case `cartogram_cont` will use set the specified number of cores internally with `future::plan(future::multisession, workers = n_cpu)` and revert that back by switching the plan back to whichever plan might have been set before by the user. If only 1 core is set, the function will not require `future` and `future.apply` and will run on a single core.
 #' @param show_progress A `logical` value. If TRUE, show progress bar. Defaults to TRUE.
 #' @return An object of the same class as x
 #' @export
@@ -106,7 +106,8 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     multithreadded <- FALSE
   } else if (is.numeric(n_cpu) & n_cpu > 1) {
     cartogram_assert_package(c("future", "future.apply"))
-    future::plan(future::multisession, workers = n_cpu)
+    original_plan <- future::plan(future::multisession, workers = n_cpu)
+    on.exit(future::plan(original_plan), add = TRUE)
     multithreadded <- TRUE
   } else if (n_cpu == "auto") {
     cartogram_assert_package("parallelly")
@@ -115,7 +116,8 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
       multithreadded <- FALSE
     } else if (n_cpu > 1) {
       cartogram_assert_package(c("future", "future.apply"))
-      future::plan(future::multisession, workers = n_cpu)
+      original_plan <- future::plan(future::multisession, workers = n_cpu)
+      on.exit(future::plan(original_plan), add = TRUE)
       multithreadded <- TRUE
     }
   } else if (n_cpu == "respect_future_plan") {
@@ -249,12 +251,6 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     
     sf::st_geometry(x.iter) <- do.call(sf::st_sfc, x.iter_geom)
   }
-  
-  # Clean up parallel workers if they were created within this function
-  if ((is.numeric(n_cpu) & n_cpu > 1) || n_cpu == "auto") {
-    future::plan(future::sequential)
-  }
-  
   return(sf::st_buffer(x.iter, 0))
 }
 

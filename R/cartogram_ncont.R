@@ -27,7 +27,7 @@
 #' @param n_cpu Number of cores to use. Defaults to "respect_future_plan". Available options are:
 #' * "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}} (e.g. `future::plan(future::multisession, workers = 4)`) before running the `cartogram_ncont` function.
 #' * "auto" - Use all except available cores (identified with \code{\link[parallelly]{availableCores}}) except 1, to keep the system responsive.
-#' * a `numeric` value - Use the specified number of cores. In this case `cartogram_ncont` will use set the specified number of cores internally with `future::plan(future::multisession, workers = n_cpu)` and revert that back by switching the plan back to `future::sequential`. If only 1 core is set, the function will not require `future` and `future.apply` and will run on a single core.
+#' * a `numeric` value - Use the specified number of cores. In this case `cartogram_ncont` will use set the specified number of cores internally with `future::plan(future::multisession, workers = n_cpu)` and revert that back by switching the plan back to whichever plan might have been set before by the user. If only 1 core is set, the function will not require `future` and `future.apply` and will run on a single core.
 #' @param show_progress A `logical` value. If TRUE, show progress bar. Defaults to TRUE.
 #' @return An object of the same class as x with resized polygon boundaries
 #' @export
@@ -114,7 +114,8 @@ cartogram_ncont.sf <- function(
     multithreadded <- FALSE
   } else if (is.numeric(n_cpu) & n_cpu > 1) {
     cartogram_assert_package(c("future", "future.apply"))
-    future::plan(future::multisession, workers = n_cpu)
+    original_plan <- future::plan(future::multisession, workers = n_cpu)
+    on.exit(future::plan(original_plan), add = TRUE)
     multithreadded <- TRUE
   } else if (n_cpu == "auto") {
     cartogram_assert_package("parallelly")
@@ -123,7 +124,8 @@ cartogram_ncont.sf <- function(
       multithreadded <- FALSE
     } else if (n_cpu > 1) {
       cartogram_assert_package(c("future", "future.apply"))
-      future::plan(future::multisession, workers = n_cpu)
+      original_plan <- future::plan(future::multisession, workers = n_cpu)
+      on.exit(future::plan(original_plan), add = TRUE)
       multithreadded <- TRUE
     }
   } else if (n_cpu == "respect_future_plan") {
@@ -179,11 +181,6 @@ cartogram_ncont.sf <- function(
       },
       future.seed = TRUE
     )
-
-    # revert back to sequential if future::plan was applied within the function
-    if (is.numeric(n_cpu) | n_cpu == "auto") {
-      future::plan(future::sequential)
-    }
   } else if (multithreadded == FALSE) {
     if (show_progress) {
       pb <- utils::txtProgressBar(min = 0, max = nrow(spdf), style = 3)

@@ -2,24 +2,27 @@ Package: cartogram
 Title: Create Cartograms with R
 Version: 0.3.0
 Authors@R: c(
-  person("Sebastian", "Jeworutzki", email = "sebastian.jeworutzki@ruhr-uni-bochum.de", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-2671-5253")),
-  person("Timothee", "Giraud", role = "ctb"),
-  person("Nicolas", "Lambert", role = "ctb"),
-  person("Roger", "Bivand", role = c("cph"), email = "Roger.Bivand@nhh.no"),
-  person("Edzer", "Pebesma", role = "cph"),
-  person("Jakub", "Nowosad", email = "nowosad.jakub@gmail.com", role = "ctb", comment = c(ORCID = "0000-0002-1057-3721"))
+    person("Sebastian", "Jeworutzki", , "sebastian.jeworutzki@ruhr-uni-bochum.de", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-2671-5253")),
+    person("Timothee", "Giraud", role = "ctb"),
+    person("Nicolas", "Lambert", role = "ctb"),
+    person("Roger", "Bivand", , "Roger.Bivand@nhh.no", role = "cph"),
+    person("Edzer", "Pebesma", role = "cph"),
+    person("Jakub", "Nowosad", , "nowosad.jakub@gmail.com", role = "ctb",
+           comment = c(ORCID = "0000-0002-1057-3721")),
+    person("Egor", "Kotov", , "kotov.egor@gmail.com", role = "ctb",
+           comment = c(ORCID = "0000-0001-6690-5345"))
   )
 Description: Construct continuous and non-contiguous area cartograms.
-URL: https://github.com/sjewo/cartogram, https://sjewo.github.io/cartogram/
+License: GPL-3
+URL: https://github.com/sjewo/cartogram,
+    https://sjewo.github.io/cartogram/
 BugReports: https://github.com/sjewo/cartogram/issues
 Imports: 
     methods,
+    packcircles,
     rlang,
-    sf,
-    packcircles
-License: GPL-3
-Encoding: UTF-8
-RoxygenNote: 7.3.2
+    sf
 Suggests: 
     future,
     future.apply,
@@ -27,3 +30,5 @@ Suggests:
     progressr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Encoding: UTF-8
+RoxygenNote: 7.3.2

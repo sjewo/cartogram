@@ -33,6 +33,7 @@
 #' @export
 #' @importFrom methods is slot as
 #' @examples
+#'# ========= Basic example =========
 #'library(sf)
 #'library(cartogram)
 #'
@@ -51,6 +52,60 @@
 #'plot(st_geometry(nc_utm), main="distorted", reset = FALSE)
 #'plot(nc_utm_carto[,"BIR74"], add =TRUE)
 #'
+#' 
+#'# ========= Advanced example 1 =========
+#'# Faster cartogram using multiple CPU cores
+#'# using n_cpu parameter
+#'library(sf)
+#'library(cartogram)
+#'
+# Load North Carolina SIDS data
+#'nc = st_read(system.file("shape/nc.shp", package="sf"), quiet = TRUE)
+#'
+#'# transform to NAD83 / UTM zone 16N
+#'nc_utm <- st_transform(nc, 26916)
+#'
+#'# Create cartogram using 2 CPU cores on local machine
+#'nc_utm_carto <- cartogram_ncont(nc_utm, weight = "BIR74", n_cpu = 2)
+#'
+#'# Plot 
+#'par(mfrow=c(2,1))
+#'plot(nc[,"BIR74"], main="original", key.pos = NULL, reset = FALSE)
+#'plot(st_geometry(nc_utm), main="distorted", reset = FALSE)
+#'plot(nc_utm_carto[,"BIR74"], add =TRUE)
+#' 
+#' 
+#'# ========= Advanced example 2 =========
+#'# Faster cartogram using multiple CPU cores
+#'# using future package plan
+#'library(sf)
+#'library(cartogram)
+#'library(future)
+#'
+# Load North Carolina SIDS data
+#'nc = st_read(system.file("shape/nc.shp", package="sf"), quiet = TRUE)
+#'
+#'# transform to NAD83 / UTM zone 16N
+#'nc_utm <- st_transform(nc, 26916)
+#
+#'# Set the future plan with 2 CPU local cores
+#'# You can of course use any other plans, not just multisession
+#'future::plan(future::multisession, workers = 2)
+#' 
+#'# Create cartogram with multiple CPU cores
+#'# The cartogram_cont() will respect the plan set above
+#'nc_utm_carto <- cartogram_ncont(nc_utm, weight = "BIR74")
+#' 
+#'# Shutdown the R processes that were created by the future plan
+#'future::plan(future::sequential) 
+#' 
+#'# Plot 
+#'par(mfrow=c(2,1))
+#'plot(nc[,"BIR74"], main="original", key.pos = NULL, reset = FALSE)
+#'plot(st_geometry(nc_utm), main="distorted", reset = FALSE)
+#'plot(nc_utm_carto[,"BIR74"], add =TRUE)
+#' 
+#' 
 #' @references Olson, J. M. (1976). Noncontiguous Area Cartograms. In The Professional Geographer, 28(4), 371-380.
 cartogram_ncont <- function(
   x,

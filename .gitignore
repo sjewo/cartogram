@@ -38,3 +38,6 @@ vignettes/*.pdf
 
 # pkgdown
 docs
+
+# private folder for draft test scripts
+private

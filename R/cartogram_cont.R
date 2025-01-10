@@ -323,14 +323,17 @@ process_polygon <- function(poly_geom, centroids, mass, radius, forceReductionFa
     for (j in seq_len(nrow(centroids))) {
       distance <- distances[, j]
       
+      # calculate force vector
       Fij <- mass[j] * radius[j] / distance
       Fbij <- mass[j] * (distance / radius[j]) ^ 2 * (4 - 3 * (distance / radius[j]))
       Fij[distance <= radius[j]] <- Fbij[distance <= radius[j]]
       Fij <- Fij * forceReductionFactor / distance
       
+      # calculate new border coordinates
       newpts <- newpts + cbind(X1 = Fij, X2 = Fij) * (newpts - centroids[rep(j, nrow(newpts)), ])
     }
     
+    # save final coordinates from this iteration
     if (sf::st_geometry_type(poly_geom) == "POLYGON") {
       poly_geom[[idx[k, "L1"]]] <- newpts
     } else {

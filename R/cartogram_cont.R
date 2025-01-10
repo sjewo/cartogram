@@ -270,8 +270,9 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     meanSizeError <- mean(sizeError, na.rm = TRUE)
     forceReductionFactor <- 1 / (1 + meanSizeError)
     
-    if(verbose)
-      message(paste0("Mean size error for iteration ", z , ": ", meanSizeError))
+    if(verbose) {
+      message(paste0("Mean size error for iteration ", z , ": ", round(meanSizeError, 5)))
+    }
     
     # Process polygons either in parallel or sequentially
     if (multithreadded) {

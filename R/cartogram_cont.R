@@ -83,6 +83,7 @@
 #'# ========= Advanced example 2 =========
 #'# Faster cartogram using multiple CPU cores
 #'# using future package plan
+#'\donttest{
 #'library(sf)
 #'library(cartogram)
 #'library(future)
@@ -108,7 +109,8 @@
 #'par(mfrow=c(2,1))
 #'plot(nc[,"BIR74"], main="original", key.pos = NULL, reset = FALSE)
 #'plot(nc_utm_carto[,"BIR74"], main="distorted", key.pos = NULL, reset = FALSE)
-#' 
+#'}
+#'
 #' @references Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
 cartogram_cont <- function(x, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold=0.05, verbose = FALSE,

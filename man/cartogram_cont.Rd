@@ -116,6 +116,7 @@ plot(nc_utm_carto[,"BIR74"], main="distorted", key.pos = NULL, reset = FALSE)
 # ========= Advanced example 2 =========
 # Faster cartogram using multiple CPU cores
 # using future package plan
+\donttest{
 library(sf)
 library(cartogram)
 library(future)
@@ -140,6 +141,7 @@ future::plan(future::sequential)
 par(mfrow=c(2,1))
 plot(nc[,"BIR74"], main="original", key.pos = NULL, reset = FALSE)
 plot(nc_utm_carto[,"BIR74"], main="distorted", key.pos = NULL, reset = FALSE)
+}
 
 }
 \references{

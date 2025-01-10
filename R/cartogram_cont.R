@@ -323,6 +323,10 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     
     sf::st_geometry(x.iter) <- do.call(sf::st_sfc, x.iter_geom)
   }
+  
+  # Restore CRS
+  st_crs(x.iter) <- st_crs(x)
+  
   return(sf::st_buffer(x.iter, 0))
 }
 

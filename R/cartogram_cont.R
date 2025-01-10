@@ -155,6 +155,11 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
   if(length(n_cpu) > 1) {
     stop('Invalid value for `n_cpu`. Use "respect_future_plan", "auto", or a numeric value.', call. = FALSE)
   }
+  
+  # Check if weight variable exists
+  if(!(weight %in% names(x))) {
+    stop('There is no variable "', weight, '" in object "', deparse(substitute(x)), '".', call. = FALSE)
+  }
 
   # Determine if we should use multithreading
   if (is.numeric(n_cpu) & n_cpu == 1) {

@@ -174,6 +174,10 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
       original_plan <- future::plan(future::multisession, workers = n_cpu)
       on.exit(future::plan(original_plan), add = TRUE)
       multithreadded <- TRUE
+      
+      if(verbose) {
+        message("Using ", n_cpu, " cores for parallel processing.\n")
+      }
     }
   } else if (n_cpu == "respect_future_plan") {
     if (rlang::is_installed("future")) {

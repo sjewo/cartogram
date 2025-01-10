@@ -26,7 +26,7 @@
 #' "adjust", adjust values to restrict the mass vector to the quantiles defined by threshold and 1-threshold (default),
 #' "remove", remove features with values lower than quantile at threshold,
 #' "none", don't adjust weighting values
-#' @param threshold Define threshold for data preparation
+#' @param threshold "auto" or a threshold value between 0 and 1. With “auto”, the value is 0.05 or, if the proportion of zeros in the weight is greater than 0.05, the value is adjusted accordingly.
 #' @param verbose print meanSizeError on each iteration
 #' @param n_cpu Number of cores to use. Defaults to "respect_future_plan". Available options are:
 #' * "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}} (e.g. `future::plan(future::multisession, workers = 4)`) before running the `cartogram_cont` function.
@@ -113,7 +113,7 @@
 #'
 #' @references Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
 cartogram_cont <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold=0.05, verbose = FALSE,
+                      prepare="adjust", threshold="auto", verbose = FALSE,
                       n_cpu="respect_future_plan", show_progress=TRUE) {
   UseMethod("cartogram_cont")
 }
@@ -134,7 +134,7 @@ cartogram <- function(shp, ...) {
 #' @importFrom sf st_as_sf
 #' @export
 cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold=0.05, verbose = FALSE,
+                      prepare="adjust", threshold="auto", verbose = FALSE,
                       n_cpu="respect_future_plan", show_progress=TRUE) {
   as(cartogram_cont.sf(sf::st_as_sf(x), weight, itermax=itermax, maxSizeError=maxSizeError,
                     prepare=prepare, threshold=threshold, verbose=verbose, n_cpu=n_cpu, show_progress=show_progress), 'Spatial')
@@ -145,7 +145,7 @@ cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSi
 #' @importFrom sf st_area st_geometry st_geometry_type st_centroid st_crs st_coordinates st_buffer st_is_longlat
 #' @export
 cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
-                              prepare = "adjust", threshold = 0.05, verbose = FALSE, n_cpu="respect_future_plan", show_progress=TRUE) {
+                              prepare = "adjust", threshold = "auto", verbose = FALSE, n_cpu="respect_future_plan", show_progress=TRUE) {
 
   if (isTRUE(sf::st_is_longlat(x))) {
     stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
@@ -195,6 +195,13 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
   
   # prepare data
   value <- x[[weight]]
+  
+  # Adjust threshold on zero inflated data
+  # Set the threshold value to the proportion of zeros + number of cases corresponding to 1% of the observations, if larger than default value of 0.05
+  if(threshold == "auto") {
+    threshold <- round(max(0.05, (sum(value == 0, na.rm = TRUE) + ceiling(length(value)/100) )/ length(value)), 2)
+    message("\nSetting threshold parameter to ", threshold, ".\n")
+  }
   
   switch(prepare,
          # remove missing and values below threshold

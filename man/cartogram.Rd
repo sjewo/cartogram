@@ -19,7 +19,7 @@ cartogram(shp, ...)
 "adjust", adjust values to restrict the mass vector to the quantiles defined by threshold and 1-threshold (default),
 "remove", remove features with values lower than quantile at threshold,
 "none", don't adjust weighting values}
-    \item{\code{threshold}}{Define threshold for data preparation}
+    \item{\code{threshold}}{"auto" or a threshold value between 0 and 1. With “auto”, the value is 0.05 or, if the proportion of zeros in the weight is greater than 0.05, the value is adjusted accordingly.}
     \item{\code{verbose}}{print meanSizeError on each iteration}
     \item{\code{n_cpu}}{Number of cores to use. Defaults to "respect_future_plan". Available options are:
 * "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}} (e.g. `future::plan(future::multisession, workers = 4)`) before running the `cartogram_cont` function.

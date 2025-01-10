@@ -12,7 +12,7 @@ cartogram_cont(
   itermax = 15,
   maxSizeError = 1.0001,
   prepare = "adjust",
-  threshold = 0.05,
+  threshold = "auto",
   verbose = FALSE,
   n_cpu = "respect_future_plan",
   show_progress = TRUE
@@ -24,7 +24,7 @@ cartogram_cont(
   itermax = 15,
   maxSizeError = 1.0001,
   prepare = "adjust",
-  threshold = 0.05,
+  threshold = "auto",
   verbose = FALSE,
   n_cpu = "respect_future_plan",
   show_progress = TRUE
@@ -36,7 +36,7 @@ cartogram_cont(
   itermax = 15,
   maxSizeError = 1.0001,
   prepare = "adjust",
-  threshold = 0.05,
+  threshold = "auto",
   verbose = FALSE,
   n_cpu = "respect_future_plan",
   show_progress = TRUE
@@ -56,7 +56,7 @@ cartogram_cont(
 "remove", remove features with values lower than quantile at threshold,
 "none", don't adjust weighting values}
 
-\item{threshold}{Define threshold for data preparation}
+\item{threshold}{"auto" or a threshold value between 0 and 1. With “auto”, the value is 0.05 or, if the proportion of zeros in the weight is greater than 0.05, the value is adjusted accordingly.}
 
 \item{verbose}{print meanSizeError on each iteration}
 

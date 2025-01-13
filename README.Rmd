@@ -40,7 +40,7 @@ remotes::install_github("sjewo/cartogram")
 
 ### Continuous Area Cartogram
 
-```{r cont}
+```{r cont, fig.asp = 1.2}
 library(cartogram)
 library(sf)
 library(tmap)
@@ -65,7 +65,7 @@ tm_shape(afr_cont) + tm_polygons("pop_est", style = "jenks") +
 
 Many thanks to @rCarto and @neocarto for contributing the code!
 
-```{r ncont}
+```{r ncont, fig.asp = 1.2}
 # construct cartogram
 afr_ncont <- cartogram_ncont(afr, "pop_est")
 
@@ -79,7 +79,7 @@ tm_shape(afr) + tm_borders() +
 
 Many thanks to @rCarto for contributing the code!
 
-```{r dorling}
+```{r dorling, fig.asp = 1.2}
 # construct cartogram
 afr_dorling <- cartogram_dorling(afr, "pop_est")
 
@@ -93,7 +93,7 @@ tm_shape(afr) + tm_borders() +
 
 Many thanks to @e-kotov for contributing the code!
 
-```{r parallel}
+```{r parallel, fig.asp = 1.2}
 library(cartogram)
 library(sf)
 library(tmap)

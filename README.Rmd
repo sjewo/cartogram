@@ -89,6 +89,35 @@ tm_shape(afr) + tm_borders() +
   tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
 ```
 
+## Use multiple CPU cores
+
+Many thanks to @e-kotov for contributing the code!
+
+```{r parallel}
+library(cartogram)
+library(sf)
+library(tmap)
+
+library(future)
+library(future.apply)
+library(parallelly)
+
+data("World")
+
+# keep only the african continent
+afr <- World[World$continent == "Africa", ]
+
+# project the map
+afr <- st_transform(afr, 3395)
+
+# Create cartogram using 2 CPU cores on local machine
+afr_cont <- cartogram_cont(afr, weight = "pop_est", itermax = 5, n_cpu = 2)
+
+# plot it
+tm_shape(afr_cont) + tm_polygons("pop_est", style = "jenks") +
+  tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
+```
+
 ## References
 
 * Dorling, D. (1996). Area Cartograms: Their Use and Creation. In Concepts and Techniques in Modern Geography (CATMOG), 59.

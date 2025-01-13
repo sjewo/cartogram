@@ -7,9 +7,9 @@ output:
 ---
 
 <!-- badges: start -->
-[![CRAN status](http://www.r-pkg.org/badges/version/cartogram)](https://cran.r-project.org/package=cartogram)
+[![CRAN status](https://www.r-pkg.org/badges/version/cartogram)](https://cran.r-project.org/package=cartogram)
 [![R-CMD-check](https://github.com/sjewo/cartogram/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sjewo/cartogram/actions/workflows/R-CMD-check.yaml)
-[![CRAN Downloads](http://cranlogs.r-pkg.org/badges/cartogram)](https://cran.r-project.org/package=cartogram)
+[![CRAN Downloads](https://cranlogs.r-pkg.org/badges/cartogram)](https://cran.r-project.org/package=cartogram)
 <!-- badges: end -->
 
 ```{r, echo=F}

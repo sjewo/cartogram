@@ -30,10 +30,10 @@ You can install the **cartogram** package from CRAN as follows:
 install.packages("cartogram")
 ```
 
-To upgrade to the latest development version of `cartogram`, install the package `devtools` and run the following command:
+To upgrade to the latest development version of `cartogram`, install the package `remotes` and run the following command:
 
 ```{r, eval=FALSE}
-devtools::install_github("sjewo/cartogram")
+remotes::install_github("sjewo/cartogram")
 ```
 
 ## Examples

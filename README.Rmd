@@ -111,7 +111,9 @@ afr <- World[World$continent == "Africa", ]
 afr <- st_transform(afr, 3395)
 
 # Create cartogram using 2 CPU cores on local machine
-afr_cont <- cartogram_cont(afr, weight = "pop_est", itermax = 5, n_cpu = 2)
+afr_cont <- cartogram_cont(afr, weight = "pop_est", 
+                           itermax = 5, n_cpu = 2, 
+                           show_progress = FALSE)
 
 # plot it
 tm_shape(afr_cont) + tm_polygons("pop_est", style = "jenks") +

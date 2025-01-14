@@ -14,8 +14,8 @@ cartogram_cont(
   prepare = "adjust",
   threshold = "auto",
   verbose = FALSE,
-  n_cpu = "respect_future_plan",
-  show_progress = TRUE
+  n_cpu = getOption("cartogram_n_cpu", "respect_future_plan"),
+  show_progress = getOption("cartogram.show_progress", TRUE)
 )
 
 \method{cartogram_cont}{SpatialPolygonsDataFrame}(
@@ -26,8 +26,8 @@ cartogram_cont(
   prepare = "adjust",
   threshold = "auto",
   verbose = FALSE,
-  n_cpu = "respect_future_plan",
-  show_progress = TRUE
+  n_cpu = getOption("cartogram_n_cpu", "respect_future_plan"),
+  show_progress = getOption("cartogram.show_progress", TRUE)
 )
 
 \method{cartogram_cont}{sf}(
@@ -38,8 +38,8 @@ cartogram_cont(
   prepare = "adjust",
   threshold = "auto",
   verbose = FALSE,
-  n_cpu = "respect_future_plan",
-  show_progress = TRUE
+  n_cpu = getOption("cartogram_n_cpu", "respect_future_plan"),
+  show_progress = getOption("cartogram.show_progress", TRUE)
 )
 }
 \arguments{

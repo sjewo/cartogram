@@ -114,7 +114,8 @@
 #' @references Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
 cartogram_cont <- function(x, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold="auto", verbose = FALSE,
-                      n_cpu="respect_future_plan", show_progress=TRUE) {
+                      n_cpu=getOption("cartogram_n_cpu", "respect_future_plan"), 
+                      show_progress=getOption("cartogram.show_progress", TRUE)) {
   UseMethod("cartogram_cont")
 }
 
@@ -135,7 +136,8 @@ cartogram <- function(shp, ...) {
 #' @export
 cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSizeError=1.0001,
                       prepare="adjust", threshold="auto", verbose = FALSE,
-                      n_cpu="respect_future_plan", show_progress=TRUE) {
+                      n_cpu=getOption("cartogram_n_cpu", "respect_future_plan"), 
+                      show_progress=getOption("cartogram.show_progress", TRUE)) {
   as(cartogram_cont.sf(sf::st_as_sf(x), weight, itermax=itermax, maxSizeError=maxSizeError,
                     prepare=prepare, threshold=threshold, verbose=verbose, n_cpu=n_cpu, show_progress=show_progress), 'Spatial')
 
@@ -145,11 +147,17 @@ cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSi
 #' @importFrom sf st_area st_geometry st_geometry_type st_centroid st_crs st_coordinates st_buffer st_is_longlat
 #' @export
 cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
-                              prepare = "adjust", threshold = "auto", verbose = FALSE, n_cpu="respect_future_plan", show_progress=TRUE) {
+                              prepare = "adjust", threshold = "auto", verbose = FALSE, 
+                              n_cpu=getOption("cartogram_n_cpu", "respect_future_plan"), 
+                              show_progress=getOption("cartogram.show_progress", TRUE)) {
 
   if (isTRUE(sf::st_is_longlat(x))) {
     stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
   }
+  
+  # Set progress bar (test)
+  if(is.character(show_progress))
+    show_progress = FALSE
   
   # Check n_cpu parameter and set up parallel processing
   if(length(n_cpu) > 1) {
@@ -257,6 +265,10 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
   x.iter <- x
   
   # iterate until itermax is reached
+  if (show_progress) {
+    pb <- utils::txtProgressBar(min = 0, max = itermax, style = 3)
+  }
+  
   for (z in 1:itermax) {
     # break if mean Sizer Error is less than maxSizeError
     if (meanSizeError < maxSizeError) break
@@ -290,41 +302,29 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     
     # Process polygons either in parallel or sequentially
     if (multithreadded) {
-      if (show_progress) {
-        cartogram_assert_package("progressr")
-        progressr::handlers(global = TRUE)
-        progressr::handlers("progress")
-        p <- progressr::progressor(along = seq_len(nrow(x.iter)))
-      } else {
-        p <- function(...) NULL
-      }
-      
       x.iter_geom <- future.apply::future_lapply(
         seq_len(nrow(x.iter)),
         function(i) {
-          if (show_progress) p(sprintf("Processing polygon %d in iteration %d", i, z))
           process_polygon(x.iter_geom[[i]], centroids, mass, radius, forceReductionFactor)
         },
         future.seed = TRUE
       )
     } else {
-      if (show_progress) {
-        pb <- utils::txtProgressBar(min = 0, max = nrow(x.iter), style = 3)
-      }
       
       x.iter_geom <- lapply(
         seq_len(nrow(x.iter)),
         function(i) {
-          if (show_progress) utils::setTxtProgressBar(pb, i)
           process_polygon(x.iter_geom[[i]], centroids, mass, radius, forceReductionFactor)
         }
       )
-      
-      if (show_progress) close(pb)
     }
     
+    if (show_progress) {utils::setTxtProgressBar(pb, z)}
     sf::st_geometry(x.iter) <- do.call(sf::st_sfc, x.iter_geom)
   }
+  
+  if (show_progress) {close(pb)}
+      
   
   # Restore CRS
   st_crs(x.iter) <- st_crs(x)

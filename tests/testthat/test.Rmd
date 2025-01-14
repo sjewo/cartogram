@@ -1,0 +1,26 @@
+---
+title: "test"
+output: html_document
+---
+
+
+```{r parallel, fig.asp = 1.2}
+library(cartogram)
+library(sf)
+library(tmap)
+
+data("World")
+
+# keep only the african continent
+afr <- World[World$continent == "Africa", ]
+
+# project the map
+afr <- st_transform(afr, 3395)
+
+# Create cartogram using 2 CPU cores on local machine
+afr_cont <- cartogram_cont(afr, weight = "pop_est", itermax = 5)
+
+# plot it
+tm_shape(afr_cont) + tm_polygons("pop_est", style = "jenks") +
+  tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
+```

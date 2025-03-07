@@ -33,6 +33,7 @@
 #' * "auto" - Use all except available cores (identified with \code{\link[parallelly]{availableCores}}) except 1, to keep the system responsive.
 #' * a `numeric` value - Use the specified number of cores. In this case `cartogram_cont` will use set the specified number of cores internally with `future::plan(future::multisession, workers = n_cpu)` and revert that back by switching the plan back to whichever plan might have been set before by the user. If only 1 core is set, the function will not require `future` and `future.apply` and will run on a single core.
 #' @param show_progress A `logical` value. If TRUE, show progress bar. Defaults to TRUE.
+#' @param animate A `logical` value. If TRUE, save geometry distortion for each itertion and add a column .cartogram_iteration.
 #' @return An object of the same class as x
 #' @export
 #' @importFrom methods is slot
@@ -111,11 +112,20 @@
 #'plot(nc_utm_carto[,"BIR74"], main="distorted", key.pos = NULL, reset = FALSE)
 #'}
 #'
+#'# Animate distortion
+#'nc_utm_carto <- cartogram_cont(nc_utm, weight = "BIR74", itermax = 5, animate = TRUE)
+#'
+#'for (i in unique(nc_utm_carto$.cartogram_iteration)) {
+#'Sys.sleep(0.3)
+#'plot(nc_utm_carto[nc_utm_carto$.cartogram_iteration == i, "BIR74"]) 
+#'}
+#'
 #' @references Dougenik, J. A., Chrisman, N. R., & Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.
 cartogram_cont <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold="auto", verbose = FALSE,
-                      n_cpu=getOption("cartogram_n_cpu", "respect_future_plan"), 
-                      show_progress=getOption("cartogram.show_progress", TRUE)) {
+                           prepare="adjust", threshold="auto", verbose = FALSE,
+                           n_cpu=getOption("cartogram_n_cpu", "respect_future_plan"), 
+                           show_progress=getOption("cartogram.show_progress", TRUE),
+                           animate = FALSE) {
   UseMethod("cartogram_cont")
 }
 
@@ -135,12 +145,13 @@ cartogram <- function(shp, ...) {
 #' @importFrom sf st_as_sf
 #' @export
 cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSizeError=1.0001,
-                      prepare="adjust", threshold="auto", verbose = FALSE,
-                      n_cpu=getOption("cartogram_n_cpu", "respect_future_plan"), 
-                      show_progress=getOption("cartogram.show_progress", TRUE)) {
+                                                    prepare="adjust", threshold="auto", verbose = FALSE,
+                                                    n_cpu=getOption("cartogram_n_cpu", "respect_future_plan"), 
+                                                    show_progress=getOption("cartogram.show_progress", TRUE),
+                                                    animate = FALSE) {
   as(cartogram_cont.sf(sf::st_as_sf(x), weight, itermax=itermax, maxSizeError=maxSizeError,
-                    prepare=prepare, threshold=threshold, verbose=verbose, n_cpu=n_cpu, show_progress=show_progress), 'Spatial')
-
+                       prepare=prepare, threshold=threshold, verbose=verbose, n_cpu=n_cpu, show_progress=show_progress), 'Spatial')
+  
 }
 
 #' @rdname cartogram_cont
@@ -149,8 +160,9 @@ cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax=15, maxSi
 cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
                               prepare = "adjust", threshold = "auto", verbose = FALSE, 
                               n_cpu=getOption("cartogram_n_cpu", "respect_future_plan"), 
-                              show_progress=getOption("cartogram.show_progress", TRUE)) {
-
+                              show_progress=getOption("cartogram.show_progress", TRUE),
+                              animate = FALSE) {
+  
   if (isTRUE(sf::st_is_longlat(x))) {
     stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = F)
   }
@@ -168,7 +180,7 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
   if(!(weight %in% names(x))) {
     stop('There is no variable "', weight, '" in object "', deparse(substitute(x)), '".', call. = FALSE)
   }
-
+  
   # Determine if we should use multithreading
   if (is.numeric(n_cpu) & n_cpu == 1) {
     multithreadded <- FALSE
@@ -264,6 +276,12 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
   
   x.iter <- x
   
+  if(animate) {
+    x.animate <- x
+    x.animate[, ".cartogram_iteration"] <- 0   
+  }
+  
+  
   # iterate until itermax is reached
   if (show_progress) {
     pb <- utils::txtProgressBar(min = 0, max = itermax, style = 3)
@@ -320,16 +338,28 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
     }
     
     if (show_progress) {utils::setTxtProgressBar(pb, z)}
+    
+    # update geometry
     sf::st_geometry(x.iter) <- do.call(sf::st_sfc, x.iter_geom)
+    
+    if(animate) {
+      st_crs(x.iter) <- st_crs(x)
+      x.new <- sf::st_buffer(x.iter, 0)
+      x.new[, ".cartogram_iteration"] <- z 
+      x.animate <- rbind(x.animate, x.new)
+    }
   }
   
   if (show_progress) {close(pb)}
-      
+  
   
   # Restore CRS
-  st_crs(x.iter) <- st_crs(x)
-  
-  return(sf::st_buffer(x.iter, 0))
+  if(animate) {
+    return(x.animate)
+  } else {
+    st_crs(x.iter) <- st_crs(x)
+    return(sf::st_buffer(x.iter, 0))
+  } 
 }
 
 #' @keywords internal

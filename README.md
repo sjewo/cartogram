@@ -52,13 +52,9 @@ afr_cont <- cartogram_cont(afr, "pop_est", itermax = 5)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%
 
 # plot it
-tm_shape(afr_cont) + tm_polygons("pop_est", style = "jenks") +
+tm_shape(afr_cont) + 
+  tm_polygons("pop_est", fill.scale = tm_scale_intervals(style = "jenks")) +
   tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
-#> 
-#> ── tmap v3 code detected ───────────────────────────────────────────────────────
-#> [v3->v4] `tm_polygons()`: instead of `style = "jenks"`, use fill.scale =
-#> `tm_scale_intervals()`.
-#> ℹ Migrate the argument(s) 'style' to 'tm_scale_intervals(<HERE>)'
 ```
 
 ![](man/figures/README-cont-1.png)<!-- -->
@@ -74,13 +70,9 @@ afr_ncont <- cartogram_ncont(afr, "pop_est")
 
 # plot it
 tm_shape(afr) + tm_borders() +
-  tm_shape(afr_ncont) + tm_polygons("pop_est", style = "jenks") +
+  tm_shape(afr_ncont) + 
+  tm_polygons("pop_est", fill.scale = tm_scale_intervals(style = "jenks")) +
   tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
-#> 
-#> ── tmap v3 code detected ───────────────────────────────────────────────────────
-#> [v3->v4] `tm_polygons()`: instead of `style = "jenks"`, use fill.scale =
-#> `tm_scale_intervals()`.
-#> ℹ Migrate the argument(s) 'style' to 'tm_scale_intervals(<HERE>)'
 ```
 
 ![](man/figures/README-ncont-1.png)<!-- -->
@@ -95,13 +87,9 @@ afr_dorling <- cartogram_dorling(afr, "pop_est")
 
 # plot it
 tm_shape(afr) + tm_borders() +
-  tm_shape(afr_dorling) + tm_polygons("pop_est", style = "jenks") +
+  tm_shape(afr_dorling) + 
+  tm_polygons("pop_est", fill.scale = tm_scale_intervals(style = "jenks")) +
   tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
-#> 
-#> ── tmap v3 code detected ───────────────────────────────────────────────────────
-#> [v3->v4] `tm_polygons()`: instead of `style = "jenks"`, use fill.scale =
-#> `tm_scale_intervals()`.
-#> ℹ Migrate the argument(s) 'style' to 'tm_scale_intervals(<HERE>)'
 ```
 
 ![](man/figures/README-dorling-1.png)<!-- -->
@@ -133,16 +121,42 @@ afr_cont <- cartogram_cont(afr, weight = "pop_est",
                            show_progress = FALSE)
 
 # plot it
-tm_shape(afr_cont) + tm_polygons("pop_est", style = "jenks") +
+tm_shape(afr_cont) + 
+  tm_polygons("pop_est", fill.scale = tm_scale_intervals(style = "jenks")) +
   tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
-#> 
-#> ── tmap v3 code detected ───────────────────────────────────────────────────────
-#> [v3->v4] `tm_polygons()`: instead of `style = "jenks"`, use fill.scale =
-#> `tm_scale_intervals()`.
-#> ℹ Migrate the argument(s) 'style' to 'tm_scale_intervals(<HERE>)'
 ```
 
 ![](man/figures/README-parallel-1.png)<!-- -->
+
+## Animation
+
+``` r
+library(sf)
+library(cartogram)
+
+data("World")
+
+# keep only the african continent
+afr <- World[World$continent == "Africa", ]
+
+# project the map
+afr <- st_transform(afr, 3395)
+
+# Create cartogram and animate distortion
+afr_cont <- cartogram_cont(afr, weight = "pop_est", 
+                           itermax = 15, n_cpu = 2, 
+                           show_progress = FALSE,
+                           animate = TRUE)
+
+for (i in unique(afr_cont$.cartogram_iteration)) {
+  map <- tm_shape(afr_cont[afr_cont$.cartogram_iteration==i, ]) + 
+    tm_polygons("pop_est", fill.scale = tm_scale_intervals(style = "jenks")) +
+    tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
+  print(map)
+}
+```
+
+![](man/figures/README-animate-.gif)<!-- -->
 
 ## References
 

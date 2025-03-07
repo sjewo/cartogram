@@ -57,7 +57,8 @@ afr <- st_transform(afr, 3395)
 afr_cont <- cartogram_cont(afr, "pop_est", itermax = 5)
 
 # plot it
-tm_shape(afr_cont) + tm_polygons("pop_est", style = "jenks") +
+tm_shape(afr_cont) + 
+  tm_polygons("pop_est", fill.scale = tm_scale_intervals(style = "jenks")) +
   tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
 ```
 
@@ -71,7 +72,8 @@ afr_ncont <- cartogram_ncont(afr, "pop_est")
 
 # plot it
 tm_shape(afr) + tm_borders() +
-  tm_shape(afr_ncont) + tm_polygons("pop_est", style = "jenks") +
+  tm_shape(afr_ncont) + 
+  tm_polygons("pop_est", fill.scale = tm_scale_intervals(style = "jenks")) +
   tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
 ```
 
@@ -85,7 +87,8 @@ afr_dorling <- cartogram_dorling(afr, "pop_est")
 
 # plot it
 tm_shape(afr) + tm_borders() +
-  tm_shape(afr_dorling) + tm_polygons("pop_est", style = "jenks") +
+  tm_shape(afr_dorling) + 
+  tm_polygons("pop_est", fill.scale = tm_scale_intervals(style = "jenks")) +
   tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
 ```
 
@@ -116,9 +119,40 @@ afr_cont <- cartogram_cont(afr, weight = "pop_est",
                            show_progress = FALSE)
 
 # plot it
-tm_shape(afr_cont) + tm_polygons("pop_est", style = "jenks") +
+tm_shape(afr_cont) + 
+  tm_polygons("pop_est", fill.scale = tm_scale_intervals(style = "jenks")) +
   tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
 ```
+
+## Animation
+
+```{r animate, animation.hook="gifski", fig.asp = 1.2, interval=0.18}
+library(sf)
+library(cartogram)
+
+data("World")
+
+# keep only the african continent
+afr <- World[World$continent == "Africa", ]
+
+# project the map
+afr <- st_transform(afr, 3395)
+
+# Create cartogram and animate distortion
+afr_cont <- cartogram_cont(afr, weight = "pop_est", 
+                           itermax = 15, n_cpu = 2, 
+                           show_progress = FALSE,
+                           animate = TRUE)
+
+for (i in unique(afr_cont$.cartogram_iteration)) {
+  map <- tm_shape(afr_cont[afr_cont$.cartogram_iteration==i, ]) + 
+    tm_polygons("pop_est", fill.scale = tm_scale_intervals(style = "jenks")) +
+    tm_layout(frame = FALSE, legend.position = c("left", "bottom"))
+  print(map)
+}
+
+```
+
 
 ## References
 

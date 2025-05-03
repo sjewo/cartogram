@@ -51,7 +51,7 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>Construct a continuous area cartogram by a rubber sheet distortion algorithm (Dougenik et al. 1985), non-contiguous Area Cartograms (Olson 1976), and non-overlapping Circles Cartogram (Dorling el al. 1996) in R.</p>
+<p><code>cartogram</code> is an R package that implements methods for generating continuous area cartograms (based on the rubber sheet distortion algorithm by Dougenik et al., 1985), non-contiguous area cartograms (Olson, 1976), and non-overlapping circles cartograms (Dorling et al., 1996).</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -76,55 +76,71 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"World"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># keep only the african continent</span></span>
+<span><span class="co"># Keep only the African continent</span></span>
 <span><span class="va">afr</span> <span class="op">&lt;-</span> <span class="va">World</span><span class="op">[</span><span class="va">World</span><span class="op">$</span><span class="va">continent</span> <span class="op">==</span> <span class="st">"Africa"</span>, <span class="op">]</span></span>
 <span></span>
-<span><span class="co"># project the map</span></span>
+<span><span class="co"># Project the map</span></span>
 <span><span class="va">afr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="va">afr</span>, <span class="fl">3395</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># construct cartogram</span></span>
+<span><span class="co"># Construct continuous area cartogram</span></span>
 <span><span class="va">afr_cont</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_cont.html">cartogram_cont</a></span><span class="op">(</span><span class="va">afr</span>, <span class="st">"pop_est"</span>, itermax <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%</span></span>
 <span></span>
-<span><span class="co"># plot it</span></span>
-<span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">afr_cont</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_polygons.html" class="external-link">tm_polygons</a></span><span class="op">(</span><span class="st">"pop_est"</span>, </span>
+<span><span class="co"># Plot the cartogram</span></span>
+<span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">afr_cont</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_polygons.html" class="external-link">tm_polygons</a></span><span class="op">(</span><span class="st">"pop_est"</span>,</span>
 <span>              fill.scale <span class="op">=</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_scale_intervals.html" class="external-link">tm_scale_intervals</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"jenks"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_layout.html" class="external-link">tm_layout</a></span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_layout.html" class="external-link">tm_layout</a></span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>            legend.position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"bottom"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-cont-1.png"><!-- --></p>
 </div>
 <div class="section level3">
 <h3 id="non-contiguous-area-cartogram">Non-contiguous Area Cartogram<a class="anchor" aria-label="anchor" href="#non-contiguous-area-cartogram"></a>
 </h3>
-<p>Many thanks to @rCarto and @neocarto for contributing the code!</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># construct cartogram</span></span>
-<span><span class="va">afr_ncont</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_ncont.html">cartogram_ncont</a></span><span class="op">(</span><span class="va">afr</span>, <span class="st">"pop_est"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |=                                                                     |   2%  |                                                                              |===                                                                   |   4%  |                                                                              |====                                                                  |   6%  |                                                                              |=====                                                                 |   8%  |                                                                              |=======                                                               |  10%  |                                                                              |========                                                              |  12%  |                                                                              |==========                                                            |  14%  |                                                                              |===========                                                           |  16%  |                                                                              |============                                                          |  18%  |                                                                              |==============                                                        |  20%  |                                                                              |===============                                                       |  22%  |                                                                              |================                                                      |  24%  |                                                                              |==================                                                    |  25%  |                                                                              |===================                                                   |  27%  |                                                                              |=====================                                                 |  29%  |                                                                              |======================                                                |  31%  |                                                                              |=======================                                               |  33%  |                                                                              |=========================                                             |  35%  |                                                                              |==========================                                            |  37%  |                                                                              |===========================                                           |  39%  |                                                                              |=============================                                         |  41%  |                                                                              |==============================                                        |  43%  |                                                                              |================================                                      |  45%  |                                                                              |=================================                                     |  47%  |                                                                              |==================================                                    |  49%  |                                                                              |====================================                                  |  51%  |                                                                              |=====================================                                 |  53%  |                                                                              |======================================                                |  55%  |                                                                              |========================================                              |  57%  |                                                                              |=========================================                             |  59%  |                                                                              |===========================================                           |  61%  |                                                                              |============================================                          |  63%  |                                                                              |=============================================                         |  65%  |                                                                              |===============================================                       |  67%  |                                                                              |================================================                      |  69%  |                                                                              |=================================================                     |  71%  |                                                                              |===================================================                   |  73%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================                |  76%  |                                                                              |=======================================================               |  78%  |                                                                              |========================================================              |  80%  |                                                                              |==========================================================            |  82%  |                                                                              |===========================================================           |  84%  |                                                                              |============================================================          |  86%  |                                                                              |==============================================================        |  88%  |                                                                              |===============================================================       |  90%  |                                                                              |=================================================================     |  92%  |                                                                              |==================================================================    |  94%  |                                                                              |===================================================================   |  96%  |                                                                              |===================================================================== |  98%  |                                                                              |======================================================================| 100%</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sjewo/cartogram" class="external-link">cartogram</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap" class="external-link">tmap</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># plot it</span></span>
-<span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">afr</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"World"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Keep only the African continent</span></span>
+<span><span class="va">afr</span> <span class="op">&lt;-</span> <span class="va">World</span><span class="op">[</span><span class="va">World</span><span class="op">$</span><span class="va">continent</span> <span class="op">==</span> <span class="st">"Africa"</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Project the map</span></span>
+<span><span class="va">afr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="va">afr</span>, <span class="fl">3395</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot the original map boundaries</span></span>
+<span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">afr</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_polygons.html" class="external-link">tm_borders</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">afr_ncont</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="co"># Add the the cartogram</span></span>
+<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="fu"><a href="reference/cartogram_ncont.html">cartogram_ncont</a></span><span class="op">(</span><span class="va">afr</span>, <span class="st">"pop_est"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_polygons.html" class="external-link">tm_polygons</a></span><span class="op">(</span><span class="st">"pop_est"</span>,</span>
 <span>              fill.scale <span class="op">=</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_scale_intervals.html" class="external-link">tm_scale_intervals</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"jenks"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_layout.html" class="external-link">tm_layout</a></span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_layout.html" class="external-link">tm_layout</a></span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>            legend.position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"bottom"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-ncont-1.png"><!-- --></p>
 </div>
 <div class="section level3">
 <h3 id="non-overlapping-circles-cartogram">Non-Overlapping Circles Cartogram<a class="anchor" aria-label="anchor" href="#non-overlapping-circles-cartogram"></a>
 </h3>
-<p>Many thanks to @rCarto for contributing the code!</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># construct cartogram</span></span>
-<span><span class="va">afr_dorling</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_dorling.html">cartogram_dorling</a></span><span class="op">(</span><span class="va">afr</span>, <span class="st">"pop_est"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sjewo/cartogram" class="external-link">cartogram</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap" class="external-link">tmap</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># plot it</span></span>
-<span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">afr</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"World"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Keep only the African continent</span></span>
+<span><span class="va">afr</span> <span class="op">&lt;-</span> <span class="va">World</span><span class="op">[</span><span class="va">World</span><span class="op">$</span><span class="va">continent</span> <span class="op">==</span> <span class="st">"Africa"</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Project the map</span></span>
+<span><span class="va">afr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="va">afr</span>, <span class="fl">3395</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot the original map boundaries</span></span>
+<span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">afr</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_polygons.html" class="external-link">tm_borders</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">afr_dorling</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="co"># Add the the cartogram</span></span>
+<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="fu"><a href="reference/cartogram_dorling.html">cartogram_dorling</a></span><span class="op">(</span><span class="va">afr</span>, <span class="st">"pop_est"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_polygons.html" class="external-link">tm_polygons</a></span><span class="op">(</span><span class="st">"pop_est"</span>,</span>
 <span>              fill.scale <span class="op">=</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_scale_intervals.html" class="external-link">tm_scale_intervals</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"jenks"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_layout.html" class="external-link">tm_layout</a></span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -135,12 +151,10 @@
 <div class="section level2">
 <h2 id="use-multiple-cpu-cores">Use multiple CPU cores<a class="anchor" aria-label="anchor" href="#use-multiple-cpu-cores"></a>
 </h2>
-<p>Many thanks to @e-kotov for contributing the code!</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sjewo/cartogram" class="external-link">cartogram</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap" class="external-link">tmap</a></span><span class="op">)</span></span>
-<span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.apply.futureverse.org" class="external-link">future.apply</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://parallelly.futureverse.org" class="external-link">parallelly</a></span><span class="op">)</span></span>
@@ -148,28 +162,39 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"World"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># keep only the african continent</span></span>
+<span><span class="co"># Keep only the African continent</span></span>
 <span><span class="va">afr</span> <span class="op">&lt;-</span> <span class="va">World</span><span class="op">[</span><span class="va">World</span><span class="op">$</span><span class="va">continent</span> <span class="op">==</span> <span class="st">"Africa"</span>, <span class="op">]</span></span>
 <span></span>
-<span><span class="co"># project the map</span></span>
+<span><span class="co"># Project the map</span></span>
 <span><span class="va">afr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="va">afr</span>, <span class="fl">3395</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create cartogram using 2 CPU cores on local machine</span></span>
-<span><span class="va">afr_cont</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_cont.html">cartogram_cont</a></span><span class="op">(</span><span class="va">afr</span>, weight <span class="op">=</span> <span class="st">"pop_est"</span>, </span>
-<span>                           itermax <span class="op">=</span> <span class="fl">5</span>, n_cpu <span class="op">=</span> <span class="fl">2</span>, </span>
-<span>                           show_progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co"># Create cartogram using 2 CPU cores on the local machine</span></span>
+<span><span class="co"># This can speed up computation for larger datasets.</span></span>
+<span><span class="co"># Set show_progress to TRUE for a progress indicator.</span></span>
+<span><span class="va">afr_cont</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cartogram_cont.html">cartogram_cont</a></span><span class="op">(</span><span class="va">afr</span>, weight <span class="op">=</span> <span class="st">"pop_est"</span>,</span>
+<span>                            itermax <span class="op">=</span> <span class="fl">5</span>, </span>
+<span>                            n_cpu <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                            show_progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># plot it</span></span>
-<span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">afr_cont</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="co"># Plot the cartogram</span></span>
+<span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html" class="external-link">tm_shape</a></span><span class="op">(</span><span class="va">afr_cont</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_polygons.html" class="external-link">tm_polygons</a></span><span class="op">(</span><span class="st">"pop_est"</span>,</span>
 <span>              fill.scale <span class="op">=</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_scale_intervals.html" class="external-link">tm_scale_intervals</a></span><span class="op">(</span>style <span class="op">=</span> <span class="st">"jenks"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_layout.html" class="external-link">tm_layout</a></span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>  <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_layout.html" class="external-link">tm_layout</a></span><span class="op">(</span>frame <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>            legend.position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"bottom"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-parallel-1.png"><!-- --></p>
 </div>
 <div class="section level2">
+<h2 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
+</h2>
+<p>The non-contiguous area cartogram and non-overlapping circles cartogram functionalities include major code contributions from @rCarto and @neocarto.</p>
+<p>@nowosad contributed to the package by transitioning it to use the <code>sf</code> package and by enhancing the documentation, a task further supported by documentation improvements from @oliveroy.</p>
+<p>The functionality to utilize multiple CPU cores was contributed by @e-kotov.</p>
+</div>
+<div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<p>This package implements algorithms based on the following seminal works:</p>
 <ul>
 <li>Dorling, D. (1996). Area Cartograms: Their Use and Creation. In Concepts and Techniques in Modern Geography (CATMOG), 59.</li>
 <li>Dougenik, J. A., Chrisman, N. R., &amp; Niemeyer, D. R. (1985). An Algorithm To Construct Continuous Area Cartograms. In The Professional Geographer, 37(1), 75-81.</li>

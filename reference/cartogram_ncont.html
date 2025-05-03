@@ -91,14 +91,14 @@ if FALSE multi-polygons are centered on their initial centroid</p></dd>
 
 
 <dt id="arg-n-cpu">n_cpu<a class="anchor" aria-label="anchor" href="#arg-n-cpu"></a></dt>
-<dd><p>Number of cores to use. Defaults to "respect_future_plan". Available options are:
-* "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using <code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></code> (e.g. `future::plan(future::multisession, workers = 4)`) before running the `cartogram_ncont` function.
-* "auto" - Use all except available cores (identified with <code><a href="https://parallelly.futureverse.org/reference/availableCores.html" class="external-link">availableCores</a></code>) except 1, to keep the system responsive.
-* a `numeric` value - Use the specified number of cores. In this case `cartogram_ncont` will use set the specified number of cores internally with `future::plan(future::multisession, workers = n_cpu)` and revert that back by switching the plan back to whichever plan might have been set before by the user. If only 1 core is set, the function will not require `future` and `future.apply` and will run on a single core.</p></dd>
+<dd><p>Number of cores to use. Defaults to "respect_future_plan". Available options are:</p><ul><li><p>"respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using <code><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></code> (e.g. <code>future::plan(future::multisession, workers = 4)</code>) before running the <code>cartogram_ncont</code> function.</p></li>
+<li><p>"auto" - Use all except available cores (identified with <code><a href="https://parallelly.futureverse.org/reference/availableCores.html" class="external-link">availableCores</a></code>) except 1, to keep the system responsive.</p></li>
+<li><p>a <code>numeric</code> value - Use the specified number of cores. In this case <code>cartogram_ncont</code> will use set the specified number of cores internally with <code>future::plan(future::multisession, workers = n_cpu)</code> and revert that back by switching the plan back to whichever plan might have been set before by the user. If only 1 core is set, the function will not require <code>future</code> and <code>future.apply</code> and will run on a single core.</p></li>
+</ul></dd>
 
 
 <dt id="arg-show-progress">show_progress<a class="anchor" aria-label="anchor" href="#arg-show-progress"></a></dt>
-<dd><p>A `logical` value. If TRUE, show progress bar. Defaults to TRUE.</p></dd>
+<dd><p>A <code>logical</code> value. If TRUE, show progress bar. Defaults to TRUE.</p></dd>
 
 </dl></div>
     <div class="section level2">

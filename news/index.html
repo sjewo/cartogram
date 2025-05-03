@@ -34,19 +34,20 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="cartogram-040">cartogram 0.4.0<a class="anchor" aria-label="anchor" href="#cartogram-040"></a></h2>
-<ul><li>With the new <code>n_cpu</code> option in <code><a href="../reference/cartogram_cont.html">cartogram_cont()</a></code> and <code><a href="../reference/cartogram_ncont.html">cartogram_ncont()</a></code>, the distortion can be calculated on multiple CPU cores.</li>
-<li>The default value for the treshold option in cartogram_cont() will be automatically increased if the weighting variable contains a lot of zeros.</li>
-<li>New testthat tests</li>
+<ul><li>The new <code>n_cpu</code> option in <code><a href="../reference/cartogram_cont.html">cartogram_cont()</a></code> and <code><a href="../reference/cartogram_ncont.html">cartogram_ncont()</a></code> enables distortion calculation across multiple CPU cores (thanks to <a href="https://github.com/e-kotov" class="external-link">e-kotov</a>!)</li>
+<li>The default threshold value in <code><a href="../reference/cartogram_cont.html">cartogram_cont()</a></code> will now automatically increase if the weighting variable contains a significant number of zeros.</li>
+<li>Additional tests have been implemented.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="cartogram-030">cartogram 0.3.0<a class="anchor" aria-label="anchor" href="#cartogram-030"></a></h2><p class="text-muted">CRAN release: 2023-05-26</p>
-<ul><li>Remove sp, rgdal and maptools from examples and suggestions.</li>
+<ul><li>Remove <code>sp</code>, <code>rgdal</code> and <code>maptools</code> from examples and suggestions.</li>
 <li>
 <code><a href="../reference/cartogram_cont.html">cartogram_cont()</a></code> has a new parameter <code>verbose = FALSE</code> to hide print of size error on each iteration.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.2" id="cartogram-022">cartogram 0.2.2<a class="anchor" aria-label="anchor" href="#cartogram-022"></a></h2><p class="text-muted">CRAN release: 2020-08-26</p>
-<ul><li>Fix geometry replacement in cartogram_ncont</li>
+<ul><li>Fix geometry replacement in <code>cartogram_ncont</code>
+</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="cartogram-020">cartogram 0.2.0<a class="anchor" aria-label="anchor" href="#cartogram-020"></a></h2><p class="text-muted">CRAN release: 2019-12-07</p>

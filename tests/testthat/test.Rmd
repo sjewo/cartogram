@@ -4,7 +4,7 @@ output: html_document
 ---
 
 
-```{r parallel, fig.asp = 1.2}
+```{r parallel_cont, fig.asp = 1.2}
 library(cartogram)
 library(sf)
 library(tmap)
@@ -18,7 +18,20 @@ afr <- World[World$continent == "Africa", ]
 afr <- st_transform(afr, 3395)
 
 # Create cartogram using 2 CPU cores on local machine
-afr_cont <- cartogram_cont(afr, weight = "pop_est", itermax = 5)
+afr_cont <- cartogram_cont(afr, weight = "pop_est", itermax = 5, show_progress = TRUE, n_cpu = 2)
+
+# plot it
+tm_shape(afr_cont) +
+  tm_polygons("pop_est",
+            fill.scale = tm_scale_intervals(style = "jenks")) +
+  tm_layout(frame = FALSE,
+            legend.position = c("left", "bottom"))
+```
+
+
+```{r parallel_ncont, fig.asp = 1.2}
+# Create cartogram using 2 CPU cores on local machine
+afr_cont <- cartogram_ncont(afr, weight = "pop_est", show_progress = TRUE, n_cpu = 2)
 
 # plot it
 tm_shape(afr_cont) +

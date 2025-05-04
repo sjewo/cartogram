@@ -21,6 +21,7 @@ BugReports: https://github.com/sjewo/cartogram/issues
 Imports: 
     methods,
     packcircles,
+    pbapply,
     rlang,
     sf
 Suggests: 
@@ -35,4 +36,3 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
-

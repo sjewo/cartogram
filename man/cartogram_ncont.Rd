@@ -50,7 +50,7 @@ if FALSE multi-polygons are centered on their initial centroid}
 \item a \code{numeric} value - Use the specified number of cores. In this case \code{cartogram_ncont} will use set the specified number of cores internally with \code{future::plan(future::multisession, workers = n_cpu)} and revert that back by switching the plan back to whichever plan might have been set before by the user. If only 1 core is set, the function will not require \code{future} and \code{future.apply} and will run on a single core.
 }}
 
-\item{show_progress}{A \code{logical} value. If TRUE, show progress bar. Defaults to TRUE.}
+\item{show_progress}{A \code{logical} value. If TRUE, show progress bar. Defaults to TRUE. In non-interactive sessions and in RMarkdown or Quarto markdown documents progress bar rendering is always disabled despite the user's choice to prevent printing of the progress bar into the final document.}
 }
 \value{
 An object of the same class as x with resized polygon boundaries

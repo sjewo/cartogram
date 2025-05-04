@@ -28,7 +28,7 @@
 #' * "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}} (e.g. `future::plan(future::multisession, workers = 4)`) before running the `cartogram_ncont` function.
 #' * "auto" - Use all except available cores (identified with \code{\link[parallelly]{availableCores}}) except 1, to keep the system responsive.
 #' * a `numeric` value - Use the specified number of cores. In this case `cartogram_ncont` will use set the specified number of cores internally with `future::plan(future::multisession, workers = n_cpu)` and revert that back by switching the plan back to whichever plan might have been set before by the user. If only 1 core is set, the function will not require `future` and `future.apply` and will run on a single core.
-#' @param show_progress A `logical` value. If TRUE, show progress bar. Defaults to TRUE.
+#' @param show_progress A `logical` value. If TRUE, show progress bar. Defaults to TRUE. In non-interactive sessions and in RMarkdown or Quarto markdown documents progress bar rendering is always disabled despite the user's choice to prevent printing of the progress bar into the final document.
 #' @return An object of the same class as x with resized polygon boundaries
 #' @export
 #' @importFrom methods is slot as
@@ -156,43 +156,11 @@ cartogram_ncont.sf <- function(
   n_cpu = getOption("cartogram_n_cpu", "respect_future_plan"),
   show_progress = getOption("cartogram.show_progress", TRUE)
 ) {
-
   if (isTRUE(sf::st_is_longlat(x))) {
     stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = FALSE)
   }
 
   if (length(n_cpu) > 1) {
-    stop('Invalid value for `n_cpu`. Use "respect_future_plan", "auto", or a numeric value.', call. = FALSE)
-  }
-
-  if (is.numeric(n_cpu) && n_cpu == 1) {
-    multithreadded <- FALSE
-  } else if (is.numeric(n_cpu) && n_cpu > 1) {
-    cartogram_assert_package(c("future", "future.apply"))
-    with(future::plan(future::multisession, workers = n_cpu), local = TRUE)
-    multithreadded <- TRUE
-  } else if (n_cpu == "auto") {
-    cartogram_assert_package("parallelly")
-    n_cpu <- max(parallelly::availableCores() - 1, 1)
-    if (n_cpu == 1) {
-      multithreadded <- FALSE
-    } else if (n_cpu > 1) {
-      cartogram_assert_package(c("future", "future.apply"))
-      with(future::plan(future::multisession, workers = n_cpu), local = TRUE)
-      multithreadded <- TRUE
-    }
-  } else if (n_cpu == "respect_future_plan") {
-    if (rlang::is_installed("future")) {
-      if (is(future::plan(), "sequential")) {
-        multithreadded <- FALSE
-      } else {
-        multithreadded <- TRUE
-      }
-    } else {
-      # if future is not installed, there is definetly no multithreading plan active, so just fallback to single core code
-      multithreadded <- FALSE
-    }
-  } else if (n_cpu != "respect_future_plan") {
     stop('Invalid value for `n_cpu`. Use "respect_future_plan", "auto", or a numeric value.', call. = FALSE)
   }
 
@@ -209,62 +177,72 @@ cartogram_ncont.sf <- function(
   spdf$r[spdf$r == 0] <- 0.001 # don't shrink polygons to zero area
   crs <- st_crs(spdf) # save crs
 
-  if (multithreadded == TRUE) {
-    cartogram_assert_package("future.apply")
-    # handle show_progress
-    if (show_progress && interactive()) {
-      cartogram_assert_package("progressr")
-      old_handlers <- progressr::handlers("progress")
-      on.exit(progressr::handlers(old_handlers), add = TRUE)
-      global_handlers_status <- progressr::handlers(global = NA)
-      progressr::handlers(global = TRUE)
-      on.exit(progressr::handlers(global = global_handlers_status), add = FALSE)
-      p <- progressr::progressor(along = seq_len(nrow(spdf)))
-    } else {
-      p <- function(...) NULL # don't show progress
-    }
+  # initialize pbapply options
+  old_opts <- pbapply::pboptions()
+  if (show_progress) {
+    pbapply::pboptions(type = "timer", char = "=")
+  } else {
+    pbapply::pboptions(type = "none")
+  }
+  on.exit(pbapply::pboptions(old_opts), add = TRUE)
 
-    spdf_geometry_list <- future.apply::future_lapply(
-      X = seq_len(nrow(spdf)),
-      FUN = function(i) {
-        if (interactive() && show_progress) {
-          p(sprintf("Processing polygon %d", i))
-        }
-        rescalePoly.sf(
-          spdf[i, ],
-          r = spdf$r[i],
-          inplace = inplace
-        )
-      },
-      future.seed = TRUE
-    )
-  } else if (multithreadded == FALSE) {
-    if (interactive() && show_progress) {
-      pb <- utils::txtProgressBar(min = 0, max = nrow(spdf), style = 3)
-    }
-    spdf_geometry_list <- lapply(
-      X = seq_len(nrow(spdf)),
-      FUN = function(i) {
-        if (interactive() && show_progress) {
-          utils::setTxtProgressBar(pb, i)
-        }
-        rescalePoly.sf(
-          spdf[i, ],
-          r = spdf$r[i],
-          inplace = inplace
-        )
+  # NULL for lapply by default, will be set to "future" if needed with the ifs below
+  clArg <- NULL
+
+  if (identical(n_cpu, "respect_future_plan")) {
+    # honor whatever future plan the user already set
+    if (rlang::is_installed("future")) {
+      if (is(future::plan(), "sequential")) {
+        multithreadded <- FALSE
+        clArg <- NULL
+      } else {
+        multithreadded <- TRUE
+        clArg <- "future"
       }
-    )
-
-    if (interactive() && show_progress) {
-      close(pb)
+    }
+  } else if (identical(n_cpu, "auto")) {
+    cartogram_assert_package("parallelly")
+    cores <- max(parallelly::availableCores() - 1L, 1L)
+    if (cores > 1L) {
+      cartogram_assert_package(c("future", "future.apply"))
+      with(future::plan(future::multisession, workers = cores), local = TRUE)
+      clArg <- "future"
     }
   }
+  else if (is.numeric(n_cpu) && length(n_cpu) == 1L) {
+    if (n_cpu > 1L) {
+      cartogram_assert_package(c("future", "future.apply"))
+      with(future::plan(future::multisession, workers = n_cpu), local = TRUE)
+      clArg <- "future"
+    }
+  }
+  else {
+    stop('Invalid `n_cpu`. Use "respect_future_plan", "auto", or a numeric value.', call. = FALSE)
+  }
+
+  # execute with or without future plan
+  if (identical(clArg, "future")) {
+    spdf_geometry_list <- pbapply::pblapply(
+      seq_len(nrow(spdf)),
+      function(i) rescalePoly.sf(spdf[i, ], r = spdf$r[i], inplace = inplace),
+      cl = "future",
+      future.seed = TRUE
+    )
+  } else {
+    spdf_geometry_list <- pbapply::pblapply(
+      seq_len(nrow(spdf)),
+      function(i) rescalePoly.sf(spdf[i, ], r = spdf$r[i], inplace = inplace),
+      cl = clArg # clArg will be NULL here for lapply fallback
+    )
+  }
+
+  # assemble result
   spdf$geometry <- do.call(c, spdf_geometry_list)
   st_crs(spdf) <- crs # restore crs
   spdf$r <- NULL
   sf::st_buffer(spdf, 0)
 }
+
 
 #' @importFrom sf st_geometry st_centroid st_cast st_union
 #' @keywords internal

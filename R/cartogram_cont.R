@@ -32,7 +32,7 @@
 #' * "respect_future_plan" - By default, the function will run on a single core, unless the user specifies the number of cores using \code{\link[future]{plan}} (e.g. `future::plan(future::multisession, workers = 4)`) before running the `cartogram_cont` function.
 #' * "auto" - Use all except available cores (identified with \code{\link[parallelly]{availableCores}}) except 1, to keep the system responsive.
 #' * a `numeric` value - Use the specified number of cores. In this case `cartogram_cont` will use set the specified number of cores internally with `future::plan(future::multisession, workers = n_cpu)` and revert that back by switching the plan back to whichever plan might have been set before by the user. If only 1 core is set, the function will not require `future` and `future.apply` and will run on a single core.
-#' @param show_progress A `logical` value. If TRUE, show progress bar. Defaults to TRUE.
+#' @param show_progress A `logical` value. If TRUE, show progress bar. Defaults to TRUE. In non-interactive sessions and in RMarkdown or Quarto markdown documents progress bar rendering is always disabled despite the user's choice to prevent printing of the progress bar into the final document.
 #' @return An object of the same class as x
 #' @export
 #' @importFrom methods is slot
@@ -146,15 +146,20 @@ cartogram_cont.SpatialPolygonsDataFrame <- function(x, weight, itermax = 15, max
 #' @rdname cartogram_cont
 #' @importFrom sf st_area st_geometry st_geometry_type st_centroid st_crs st_coordinates st_buffer st_is_longlat
 #' @export
-cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
-                              prepare = "adjust", threshold = "auto", verbose = FALSE,
-                              n_cpu = getOption("cartogram_n_cpu", "respect_future_plan"),
-                              show_progress = getOption("cartogram.show_progress", TRUE)) {
-
+cartogram_cont.sf <- function(
+  x, weight,
+  itermax       = 15,
+  maxSizeError  = 1.0001,
+  prepare       = "adjust",
+  threshold     = "auto",
+  verbose       = FALSE,
+  n_cpu         = getOption("cartogram_n_cpu", "respect_future_plan"),
+  show_progress = getOption("cartogram.show_progress", TRUE)
+) {
   if (isTRUE(sf::st_is_longlat(x))) {
     stop('Using an unprojected map. This function does not give correct centroids and distances for longitude/latitude data:\nUse "st_transform()" to transform coordinates to another projection.', call. = FALSE)
   }
-
+  
   # Check n_cpu parameter and set up parallel processing
   if (length(n_cpu) > 1) {
     stop('Invalid value for `n_cpu`. Use "respect_future_plan", "auto", or a numeric value.', call. = FALSE)
@@ -163,41 +168,6 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
   # Check if weight variable exists
   if (!(weight %in% names(x))) {
     stop('There is no variable "', weight, '" in object "', deparse(substitute(x)), '".', call. = FALSE)
-  }
-
-  # Determine if we should use multithreading
-  if (is.numeric(n_cpu) && n_cpu == 1) {
-    multithreadded <- FALSE
-  } else if (is.numeric(n_cpu) && n_cpu > 1) {
-    cartogram_assert_package(c("future", "future.apply"))
-    with(future::plan(future::multisession, workers = n_cpu), local = TRUE)
-    multithreadded <- TRUE
-  } else if (n_cpu == "auto") {
-    cartogram_assert_package("parallelly")
-    n_cpu <- max(parallelly::availableCores() - 1, 1)
-    if (n_cpu == 1) {
-      multithreadded <- FALSE
-    } else if (n_cpu > 1) {
-      cartogram_assert_package(c("future", "future.apply"))
-      with(future::plan(future::multisession, workers = n_cpu), local = TRUE)
-      multithreadded <- TRUE
-
-      if (verbose) {
-        message("Using ", n_cpu, " cores for parallel processing.\n")
-      }
-    }
-  } else if (n_cpu == "respect_future_plan") {
-    if (rlang::is_installed("future")) {
-      if (is(future::plan(), "sequential")) {
-        multithreadded <- FALSE
-      } else {
-        multithreadded <- TRUE
-      }
-    } else {
-      multithreadded <- FALSE
-    }
-  } else {
-    stop('Invalid value for `n_cpu`. Use "respect_future_plan", "auto", or a numeric value.', call. = FALSE)
   }
 
   # prepare data
@@ -213,40 +183,86 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
   }
 
   switch(prepare,
-         # remove missing and values below threshold
-         "remove" = {
-           minValue <- quantile(value, probs = threshold, na.rm = TRUE)
-           x <- x[value > minValue | !is.na(value), ]
-           value <- value[value > minValue | !is.na(value)]
-         },
-         # Adjust ratio
-         "adjust" = {
-           if (any(is.na(value))) {
-             warning("NA not allowed in weight vector. Features will be removed from Shape.")
-             x <- x[!is.na(value), ]
-             value <- value[!is.na(value)]
-           }
+    # remove missing and values below threshold
+    "remove" = {
+      minValue <- quantile(value, probs = threshold, na.rm = TRUE)
+      x <- x[value > minValue | !is.na(value), ]
+      value <- value[value > minValue | !is.na(value)]
+    },
+    # Adjust ratio
+    "adjust" = {
+      if (any(is.na(value))) {
+        warning("NA not allowed in weight vector. Features will be removed from Shape.")
+        x <- x[!is.na(value), ]
+        value <- value[!is.na(value)]
+      }
 
-           # area for polygons and total area
-           area <- as.numeric(st_area(x))
-           areaTotal <- sum(area)
-           area[area < 0] <- 0
+      # area for polygons and total area
+      area <- as.numeric(st_area(x))
+      areaTotal <- sum(area)
+      area[area < 0] <- 0
 
-           # sum up total value
-           valueTotal <- sum(value, na.rm = TRUE)
+      # sum up total value
+      valueTotal <- sum(value, na.rm = TRUE)
 
-           # prepare force field calculations
-           desired <- areaTotal * value / valueTotal
-           ratio <- desired / area
-           maxRatio <- quantile(ratio, probs = (1 - threshold))
-           minRatio <- quantile(ratio, probs = threshold)
+      # prepare force field calculations
+      desired <- areaTotal * value / valueTotal
+      ratio <- desired / area
+      maxRatio <- quantile(ratio, probs = (1 - threshold))
+      minRatio <- quantile(ratio, probs = threshold)
 
-           # adjust values
-           value[ratio > maxRatio] <- (maxRatio * area[ratio > maxRatio] * valueTotal) / areaTotal
-           value[ratio < minRatio] <- (minRatio * area[ratio < minRatio] * valueTotal) / areaTotal
-         },
-         "none" = {
-         })
+      # adjust values
+      value[ratio > maxRatio] <- (maxRatio * area[ratio > maxRatio] * valueTotal) / areaTotal
+      value[ratio < minRatio] <- (minRatio * area[ratio < minRatio] * valueTotal) / areaTotal
+    },
+    "none" = {
+    })
+
+  
+  # NULL for lapply by default, will be set to "future" if needed with the ifs below
+  clArg <- NULL
+  
+  if (identical(n_cpu, "respect_future_plan")) {
+    # honor whatever future plan the user already set
+    if (rlang::is_installed("future")) {
+      if (is(future::plan(), "sequential")) {
+        multithreadded <- FALSE
+        clArg <- NULL
+      } else {
+        multithreadded <- TRUE
+        clArg <- "future"
+      }
+    }
+  } else if (identical(n_cpu, "auto")) {
+    cartogram_assert_package("parallelly")
+    cores <- max(parallelly::availableCores() - 1L, 1L)
+    if (cores > 1L) {
+      cartogram_assert_package(c("future", "future.apply"))
+      with(future::plan(future::multisession, workers = cores), local = TRUE)
+      clArg <- "future"
+    }
+  }
+  else if (is.numeric(n_cpu) && length(n_cpu) == 1L) {
+    if (n_cpu > 1L) {
+      cartogram_assert_package(c("future", "future.apply"))
+      with(future::plan(future::multisession, workers = n_cpu), local = TRUE)
+      clArg <- "future"
+    }
+  }
+  else {
+    stop('Invalid `n_cpu`. Use "respect_future_plan", "auto", or a numeric value.', call. = FALSE)
+  }
+
+  # initialize pbapply options
+  old_opts <- pbapply::pboptions()
+  if (show_progress) {
+    pbapply::pboptions(type = "timer", char = "=")
+  } else {
+    pbapply::pboptions(type = "none")
+  }
+  on.exit(pbapply::pboptions(old_opts), add = TRUE)
+
+  # iterative distortion
 
   # sum up total value
   valueTotal <- sum(value, na.rm = TRUE)
@@ -256,103 +272,77 @@ cartogram_cont.sf <- function(x, weight, itermax = 15, maxSizeError = 1.0001,
 
   x.iter <- x
 
-  # setup for single-threaded progress bar
-  if (show_progress && !multithreadded) {
-    step <- 0
-    bar_width <- 40
-  }
+  iter_seq <- seq_len(itermax)
 
-  # setup for multi-threaded progress bar
-  if (show_progress && multithreadded && interactive()) {
-    cartogram_assert_package("progressr")
-    old_handlers <- progressr::handlers("progress")
-    on.exit(progressr::handlers(old_handlers), add = TRUE)
-    global_handlers_status <- progressr::handlers(global = NA)
-    progressr::handlers(global = TRUE)
-    on.exit(progressr::handlers(global = global_handlers_status), add = FALSE)
-    p <- progressr::progressor(steps = itermax * nrow(x))
-  } else {
-    p <- function(...) NULL
-  }
+  final_geoms <- pbapply::pblapply(
+    iter_seq,
+    function(z) {
+      #— suppress inner bar
+      suppress_opts <- pbapply::pboptions(type="none")
+      on.exit(pbapply::pboptions(suppress_opts), add=TRUE)
 
-  # iterate until itermax is reached
-  for (z in 1:itermax) {
-    # break if mean Sizer Error is less than maxSizeError
-    if (meanSizeError < maxSizeError) break
+      #— stop early if converged
+      if (meanSizeError < meanSizeError) {
+        return(NULL)
+      }
 
-    # geometry
-    x.iter_geom <- sf::st_geometry(x.iter)
+      #— compute geometry, centroids, forces
+      geom       <- sf::st_geometry(x.iter)
+      cents_sf   <- sf::st_centroid(geom)
+      centroids  <- do.call(rbind, cents_sf)
+      area       <- as.numeric(sf::st_area(x.iter))
+      areaTotal  <- sum(pmax(area,0))
+      desired    <- areaTotal * value / valueTotal
+      desired[desired==0] <- 0.01
+      radius     <- sqrt(area/pi)
+      mass       <- sqrt(desired/pi) - radius
+      errs       <- pmax(area,desired)/pmin(area,desired)
+      meanSizeError <<- mean(errs,na.rm=TRUE)
+      factor     <- 1/(1+meanSizeError)
+      if (verbose) {
+        cat(sprintf("\rIter %d/%d: sizeErr=%.5f", z, itermax, meanSizeError))
+        flush.console()
+      }
 
-    # polygon centroids (centroids for multipart polygons)
-    centroids_sf <- sf::st_centroid(x.iter_geom)
-    st_crs(centroids_sf) <- sf::st_crs(NULL)
-    centroids <- do.call(rbind, centroids_sf)
-
-    # area for polygons and total area
-    area <- as.numeric(sf::st_area(x.iter))
-    areaTotal <- as.numeric(sum(area))
-    area[area < 0] <- 0
-
-    # prepare force field calculations
-    desired <- areaTotal * value / valueTotal
-    desired[desired == 0] <- 0.01 # set minimum size to prevent inf values size Error
-    radius <- sqrt(area / pi)
-    mass <- sqrt(desired / pi) - sqrt(area / pi)
-
-    sizeError <- apply(cbind(area, desired), 1, max) / apply(cbind(area, desired), 1, min)
-    meanSizeError <- mean(sizeError, na.rm = TRUE)
-    forceReductionFactor <- 1 / (1 + meanSizeError)
-
-    if (verbose) {
-      message(paste0("Mean size error for iteration ", z, ": ", round(meanSizeError, 5)))
-    }
-
-    # Process polygons either in parallel or sequentially
-    if (multithreadded) {
-        x.iter_geom <- future.apply::future_lapply(
+      # inner parallel/sequential polygon loop
+      if (identical(clArg, "future")) {
+        geoms_z <- pbapply::pblapply(
           seq_len(nrow(x.iter)),
           function(i) {
-            if (interactive() && show_progress) {
-              p(sprintf("[Iter.:%d/%d] Polygon %d", z, itermax, i))
-            }
-            process_polygon(x.iter_geom[[i]], centroids, mass, radius, forceReductionFactor)
+            process_polygon(
+              geom[[i]], centroids,
+              mass, radius, factor
+            )
           },
+          cl = clArg,
           future.seed = TRUE
         )
-        # in case we used the local in-fuction plan instead of externally future plan set by user, shutdown the workers
-        if (n_cpu != "respect_future_plan") {
-          future::plan(future::sequential)
-        }
-    } else {
-      x.iter_geom <- lapply(
-        seq_len(nrow(x.iter)),
-        function(i) {
-          if (interactive() && show_progress && !multithreadded) {
-            step <<- step + 1
-            # calculate progress
-            progress <- step / (itermax * nrow(x))
-            filled <- floor(progress * bar_width)
-            empty <- bar_width - filled
-            bar <- paste0("[Iter.:", z, "/", itermax, "] ",
-                          paste0(rep("=", filled), collapse = ""),
-                          paste0(rep(".", empty), collapse = ""),
-                          sprintf(" %3d%%", floor(progress * 100)))
-            cat("\r", bar)
-            utils::flush.console()
-          }
-          process_polygon(x.iter_geom[[i]], centroids, mass, radius, forceReductionFactor)
-        }
-      )
-    }
+      } else{ 
+        geoms_z <- pbapply::pblapply(
+          seq_len(nrow(x.iter)),
+          function(i) {
+            process_polygon(
+              geom[[i]], centroids,
+              mass, radius, factor
+            )
+          },
+          cl = clArg
+        )
+      }
 
-    sf::st_geometry(x.iter) <- do.call(sf::st_sfc, x.iter_geom)
-  }
+      #— update x.iter for next iteration
+      sf::st_geometry(x.iter) <<- do.call(sf::st_sfc, geoms_z)
+      geoms_z
+    },
+    cl = NULL
+  )
 
   # Restore CRS
   st_crs(x.iter) <- st_crs(x)
 
   return(sf::st_buffer(x.iter, 0))
 }
+
 
 #' @keywords internal
 process_polygon <- function(poly_geom, centroids, mass, radius, forceReductionFactor) {
